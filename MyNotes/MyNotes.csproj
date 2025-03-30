@@ -12,6 +12,9 @@
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Themes\Generic.xaml" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -44,6 +47,28 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.3" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250310001" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Common\Helpers\" />
+    <Folder Include="Common\Extensions\" />
+    <Folder Include="Common\Commands\" />
+    <Folder Include="Common\Comparers\" />
+    <Folder Include="Common\Converters\" />
+    <Folder Include="Common\Messages\" />
+    <Folder Include="Common\Collections\" />
+    <Folder Include="Core\Models\" />
+    <Folder Include="Core\Controls\" />
+    <Folder Include="Core\ViewModels\" />
+    <Folder Include="Contracts\" />
+    <Folder Include="Core\Views\" />
+    <Folder Include="Core\Services\" />
+    <Folder Include="Strings\ko-KR\" />
+    <Folder Include="Strings\en-US\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Themes\Generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <!--
