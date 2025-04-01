@@ -59,7 +59,7 @@
     <Folder Include="Common\Messages\" />
     <Folder Include="Common\Collections\" />
     <Folder Include="Core\Models\" />
-    <Folder Include="Core\Controls\" />
+    <Folder Include="Core\Views\Controls\" />
     <Folder Include="Core\ViewModels\" />
     <Folder Include="Contracts\" />
     <Folder Include="Core\Views\" />
