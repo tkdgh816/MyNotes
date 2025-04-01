@@ -1,4 +1,6 @@
-﻿using MyNotes.Views;
+﻿using Microsoft.Extensions.DependencyInjection;
+
+using MyNotes.Views;
 
 namespace MyNotes;
 
@@ -11,9 +13,22 @@ public partial class App : Application
 
   protected override void OnLaunched(LaunchActivatedEventArgs args)
   {
-    m_window = new MainWindow();
-    m_window.Activate();
+    new MainWindow().Activate();
   }
 
-  private Window? m_window;
+  public static new readonly App Current = (App)Application.Current;
+
+  #region Services
+  public ServiceProvider Services { get; } = ConfigureServices();
+  public static ServiceProvider ConfigureServices()
+  {
+    ServiceCollection services = new();
+    // Services
+
+    // ViewModels
+
+    return services.BuildServiceProvider();
+  }
+  public T GetService<T>() => (T)Services.GetRequiredService(typeof(T));
+  #endregion
 }
