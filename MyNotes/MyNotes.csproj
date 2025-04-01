@@ -54,10 +54,8 @@
     <Folder Include="Common\Helpers\" />
     <Folder Include="Common\Extensions\" />
     <Folder Include="Common\Commands\" />
-    <Folder Include="Common\Comparers\" />
     <Folder Include="Common\Converters\" />
     <Folder Include="Common\Messages\" />
-    <Folder Include="Common\Collections\" />
     <Folder Include="Core\Views\Controls\" />
     <Folder Include="Contracts\" />
     <Folder Include="Core\Views\" />
