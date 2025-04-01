@@ -58,12 +58,9 @@
     <Folder Include="Common\Converters\" />
     <Folder Include="Common\Messages\" />
     <Folder Include="Common\Collections\" />
-    <Folder Include="Core\Models\" />
     <Folder Include="Core\Views\Controls\" />
-    <Folder Include="Core\ViewModels\" />
     <Folder Include="Contracts\" />
     <Folder Include="Core\Views\" />
-    <Folder Include="Core\Services\" />
     <Folder Include="Strings\ko-KR\" />
     <Folder Include="Strings\en-US\" />
   </ItemGroup>

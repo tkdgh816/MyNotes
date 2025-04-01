@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
+using MyNotes.Core.Services;
+using MyNotes.Core.ViewModels;
 using MyNotes.Views;
 
 namespace MyNotes;
@@ -23,9 +25,12 @@ public partial class App : Application
   public static ServiceProvider ConfigureServices()
   {
     ServiceCollection services = new();
+
     // Services
+    services.AddSingleton<NavigationService>();
 
     // ViewModels
+    services.AddSingleton<MainViewModel>();
 
     return services.BuildServiceProvider();
   }

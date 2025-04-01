@@ -29,19 +29,31 @@
                     Grid.Row="1"
                     IsBackButtonVisible="Collapsed"
                     IsPaneToggleButtonVisible="False"
-                    IsSettingsVisible="False" >
+                    MenuItemsSource="{x:Bind ViewModel.MenuItems}">
       <NavigationView.AutoSuggestBox>
-        <AutoSuggestBox QueryIcon="Find">
+        <AutoSuggestBox QueryIcon="Find"
+                        QuerySubmitted="AutoSuggestBox_QuerySubmitted">
         </AutoSuggestBox>
       </NavigationView.AutoSuggestBox>
-      <NavigationView.PaneCustomContent>
-        <StackPanel>
-
-        </StackPanel>
-      </NavigationView.PaneCustomContent>
+      
+      <NavigationView.MenuItems>
+        <NavigationViewItem Content="Home"
+                            Icon="Home" />
+        <NavigationViewItem Content="Bookmarks"
+                            Icon="Favorite" />
+        <NavigationViewItem Content="Tags"
+                            Icon="Tag" />
+        <NavigationViewItemSeparator />
+      </NavigationView.MenuItems>
+      
       <NavigationView.Content>
         <Frame x:Name="VIEW_NavigationContent_RootFrame" />
       </NavigationView.Content>
+
+      <NavigationView.FooterMenuItems>
+        <NavigationViewItem Content="Trash"
+                            Icon="Delete" />
+      </NavigationView.FooterMenuItems>
     </NavigationView>
   </Grid>
 </Window>
