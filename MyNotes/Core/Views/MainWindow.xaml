@@ -1,13 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Window x:Class="MyNotes.Views.MainWindow"
+<Window x:Class="MyNotes.Core.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:MyNotes.Core.Views"
+        xmlns:models="using:MyNotes.Core.Models">
 
   <Window.SystemBackdrop>
     <MicaBackdrop />
   </Window.SystemBackdrop>
 
   <Grid x:Name="VIEW_RootGrid">
+    <Grid.Resources>
+      <views:MainNavigationViewMenuItemTemplateSelector x:Key="MainNavigationViewMenuItemTemplateSelector">
+        <views:MainNavigationViewMenuItemTemplateSelector.ItemTemplate>
+          <DataTemplate x:DataType="models:NavigationItem">
+            <NavigationViewItem Content="{x:Bind Name, Mode=OneWay}">
+              <NavigationViewItem.Icon>
+                <IconSourceElement IconSource="{x:Bind Icon, Mode=OneWay}" />
+              </NavigationViewItem.Icon>
+            </NavigationViewItem>
+          </DataTemplate>
+        </views:MainNavigationViewMenuItemTemplateSelector.ItemTemplate>
+
+        <views:MainNavigationViewMenuItemTemplateSelector.SeparatorTemplate>
+          <DataTemplate x:DataType="models:NavigationSeparator">
+            <NavigationViewItemSeparator />
+          </DataTemplate>
+        </views:MainNavigationViewMenuItemTemplateSelector.SeparatorTemplate>
+      </views:MainNavigationViewMenuItemTemplateSelector>
+    </Grid.Resources>
+      
     <Grid.RowDefinitions>
       <RowDefinition Height="48" />
       <RowDefinition />
@@ -16,12 +38,13 @@
     <TitleBar x:Name="VIEW_TitleBar"
               Grid.Row="0"
               IsBackButtonVisible="True"
-              IsBackButtonEnabled="False"
+              IsBackButtonEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}"
+              BackRequested="VIEW_TitleBar_BackRequested"
               IsPaneToggleButtonVisible="True"
               PaneToggleRequested="VIEW_TitleBar_PaneToggleRequested"
               Title="MyNotes">
       <TitleBar.IconSource>
-        <ImageIconSource ImageSource="/Assets/Icons/AppIcons/AppIcon_16.png" />
+        <ImageIconSource ImageSource="ms-appx:///Assets/Icons/AppIcons/AppIcon_16.png" />
       </TitleBar.IconSource>
     </TitleBar>
 
@@ -29,31 +52,20 @@
                     Grid.Row="1"
                     IsBackButtonVisible="Collapsed"
                     IsPaneToggleButtonVisible="False"
-                    MenuItemsSource="{x:Bind ViewModel.MenuItems}">
+                    IsSettingsVisible="False"
+                    MenuItemTemplateSelector="{StaticResource MainNavigationViewMenuItemTemplateSelector}"
+                    MenuItemsSource="{x:Bind ViewModel.MenuItems.View}"
+                    FooterMenuItemsSource="{x:Bind ViewModel.FooterMenuItems}"
+                    SelectionChanged="VIEW_NavigationView_SelectionChanged">
       <NavigationView.AutoSuggestBox>
         <AutoSuggestBox QueryIcon="Find"
                         QuerySubmitted="AutoSuggestBox_QuerySubmitted">
         </AutoSuggestBox>
       </NavigationView.AutoSuggestBox>
-      
-      <NavigationView.MenuItems>
-        <NavigationViewItem Content="Home"
-                            Icon="Home" />
-        <NavigationViewItem Content="Bookmarks"
-                            Icon="Favorite" />
-        <NavigationViewItem Content="Tags"
-                            Icon="Tag" />
-        <NavigationViewItemSeparator />
-      </NavigationView.MenuItems>
-      
+
       <NavigationView.Content>
         <Frame x:Name="VIEW_NavigationContent_RootFrame" />
       </NavigationView.Content>
-
-      <NavigationView.FooterMenuItems>
-        <NavigationViewItem Content="Trash"
-                            Icon="Delete" />
-      </NavigationView.FooterMenuItems>
     </NavigationView>
   </Grid>
 </Window>

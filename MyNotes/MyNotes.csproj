@@ -15,6 +15,7 @@
   <ItemGroup>
     <None Remove="Assets\Square44x44Logo.targetsize-16.png" />
     <None Remove="Assets\Square44x44Logo.targetsize-24_altform-lightunplated.png" />
+    <None Remove="Core\Views\TestPage.xaml" />
     <None Remove="Themes\Generic.xaml" />
   </ItemGroup>
 
@@ -58,9 +59,13 @@
     <Folder Include="Common\Messages\" />
     <Folder Include="Core\Views\Controls\" />
     <Folder Include="Contracts\" />
-    <Folder Include="Core\Views\" />
     <Folder Include="Strings\ko-KR\" />
     <Folder Include="Strings\en-US\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Core\Views\TestPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Themes\Generic.xaml">
@@ -83,5 +88,6 @@
     <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
     <PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
     <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 </Project>

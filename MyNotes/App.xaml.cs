@@ -2,7 +2,7 @@
 
 using MyNotes.Core.Services;
 using MyNotes.Core.ViewModels;
-using MyNotes.Views;
+using MyNotes.Core.Views;
 
 namespace MyNotes;
 
