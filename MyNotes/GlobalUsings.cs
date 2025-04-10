@@ -7,6 +7,7 @@ global using System.ComponentModel;
 global using System.Diagnostics;
 global using System.Linq;
 global using System.Reflection;
+global using System.IO;
 
 global using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -14,6 +15,9 @@ global using Microsoft.UI.Xaml;
 global using Microsoft.UI.Xaml.Controls;
 global using Microsoft.UI.Xaml.Data;
 global using Microsoft.UI.Xaml.Navigation;
+global using Microsoft.UI.Xaml.Controls.Primitives;
+global using Microsoft.UI.Xaml.Input;
 
 global using Windows.Foundation;
 global using Windows.Foundation.Collections;
+global using Windows.Storage;

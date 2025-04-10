@@ -31,7 +31,7 @@ public sealed partial class MainWindow : Window
 
   private void AutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
   {
-    VIEW_NavigationContent_RootFrame.Navigate(typeof(TestPage), "Search");
+    VIEW_NavigationContent_RootFrame.Navigate(typeof(SearchPage), "Search");
     if (ViewModel.CurrentNavigation is not null)
     {
       ViewModel.PreviousNavigations.Push(ViewModel.CurrentNavigation);
@@ -51,18 +51,25 @@ public sealed partial class MainWindow : Window
     ViewModel.CurrentNavigation = selected;
     ViewModel.IsBackEnabled = ViewModel.PreviousNavigations.Count > 0;
   }
+
+  private void NavigationViewItem_Tapped(object sender, TappedRoutedEventArgs e)
+  {
+    FlyoutBase.ShowAttachedFlyout(VIEW_NavigationViewFooter_NavigationViewItem);
+  }
 }
 
 public class MainNavigationViewMenuItemTemplateSelector : DataTemplateSelector
 {
-  public DataTemplate? ItemTemplate { get; set; }
+  public DataTemplate? GroupItemTemplate { get; set; }
+  public DataTemplate? MenuItemTemplate { get; set; }
   public DataTemplate? SeparatorTemplate { get; set; }
   protected override DataTemplate? SelectTemplateCore(object item, DependencyObject container)
   {
     Debug.WriteLine(item.GetType());
     return item switch
     {
-      NavigationItem => ItemTemplate,
+      NavigationGroupItem => GroupItemTemplate,
+      NavigationItem => MenuItemTemplate,
       NavigationSeparator => SeparatorTemplate,
       _ => null
     };

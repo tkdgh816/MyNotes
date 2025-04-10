@@ -12,7 +12,18 @@
   <Grid x:Name="VIEW_RootGrid">
     <Grid.Resources>
       <views:MainNavigationViewMenuItemTemplateSelector x:Key="MainNavigationViewMenuItemTemplateSelector">
-        <views:MainNavigationViewMenuItemTemplateSelector.ItemTemplate>
+        <views:MainNavigationViewMenuItemTemplateSelector.GroupItemTemplate>
+          <DataTemplate x:DataType="models:NavigationGroupItem">
+            <NavigationViewItem Content="{x:Bind Name, Mode=OneWay}"
+                                MenuItemsSource="{x:Bind Children}">
+              <NavigationViewItem.Icon>
+                <IconSourceElement IconSource="{x:Bind Icon, Mode=OneWay}" />
+              </NavigationViewItem.Icon>
+            </NavigationViewItem>
+          </DataTemplate>
+        </views:MainNavigationViewMenuItemTemplateSelector.GroupItemTemplate>
+
+        <views:MainNavigationViewMenuItemTemplateSelector.MenuItemTemplate>
           <DataTemplate x:DataType="models:NavigationItem">
             <NavigationViewItem Content="{x:Bind Name, Mode=OneWay}">
               <NavigationViewItem.Icon>
@@ -20,8 +31,8 @@
               </NavigationViewItem.Icon>
             </NavigationViewItem>
           </DataTemplate>
-        </views:MainNavigationViewMenuItemTemplateSelector.ItemTemplate>
-
+        </views:MainNavigationViewMenuItemTemplateSelector.MenuItemTemplate>
+        
         <views:MainNavigationViewMenuItemTemplateSelector.SeparatorTemplate>
           <DataTemplate x:DataType="models:NavigationSeparator">
             <NavigationViewItemSeparator />
@@ -29,7 +40,7 @@
         </views:MainNavigationViewMenuItemTemplateSelector.SeparatorTemplate>
       </views:MainNavigationViewMenuItemTemplateSelector>
     </Grid.Resources>
-      
+
     <Grid.RowDefinitions>
       <RowDefinition Height="48" />
       <RowDefinition />
@@ -37,8 +48,7 @@
 
     <TitleBar x:Name="VIEW_TitleBar"
               Grid.Row="0"
-              IsBackButtonVisible="True"
-              IsBackButtonEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}"
+              IsBackButtonVisible="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}"
               BackRequested="VIEW_TitleBar_BackRequested"
               IsPaneToggleButtonVisible="True"
               PaneToggleRequested="VIEW_TitleBar_PaneToggleRequested"
@@ -55,7 +65,7 @@
                     IsSettingsVisible="False"
                     MenuItemTemplateSelector="{StaticResource MainNavigationViewMenuItemTemplateSelector}"
                     MenuItemsSource="{x:Bind ViewModel.MenuItems.View}"
-                    FooterMenuItemsSource="{x:Bind ViewModel.FooterMenuItems}"
+                    FooterMenuItemsSource="{x:Bind ViewModel.FooterMenuItemsGroup}"
                     SelectionChanged="VIEW_NavigationView_SelectionChanged">
       <NavigationView.AutoSuggestBox>
         <AutoSuggestBox QueryIcon="Find"
@@ -66,6 +76,24 @@
       <NavigationView.Content>
         <Frame x:Name="VIEW_NavigationContent_RootFrame" />
       </NavigationView.Content>
+
+      <NavigationView.PaneFooter>
+        <StackPanel>
+          <NavigationViewItem x:Name="VIEW_NavigationViewFooter_NavigationViewItem"
+                              Content="Add"
+                              Icon="Add"
+                              Tapped="NavigationViewItem_Tapped">
+            <FlyoutBase.AttachedFlyout>
+              <MenuFlyout Placement="TopEdgeAlignedLeft">
+                <MenuFlyoutItem Text="Add Group"
+                                Icon="Add" />
+                <MenuFlyoutItem Text="Add List"
+                                Icon="Add" />
+              </MenuFlyout>
+            </FlyoutBase.AttachedFlyout>
+          </NavigationViewItem>
+        </StackPanel>
+      </NavigationView.PaneFooter>
     </NavigationView>
   </Grid>
 </Window>

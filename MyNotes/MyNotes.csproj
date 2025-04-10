@@ -15,7 +15,14 @@
   <ItemGroup>
     <None Remove="Assets\Square44x44Logo.targetsize-16.png" />
     <None Remove="Assets\Square44x44Logo.targetsize-24_altform-lightunplated.png" />
-    <None Remove="Core\Views\TestPage.xaml" />
+    <None Remove="Core\Views\Pages\BookmarksPage.xaml" />
+    <None Remove="Core\Views\Pages\HomePage.xaml" />
+    <None Remove="Core\Views\Pages\ListsGroupPage.xaml" />
+    <None Remove="Core\Views\Pages\NotesListPage.xaml" />
+    <None Remove="Core\Views\Pages\SearchPage.xaml" />
+    <None Remove="Core\Views\Pages\SettingsPage.xaml" />
+    <None Remove="Core\Views\Pages\TagsPage.xaml" />
+    <None Remove="Core\Views\Pages\TrashPage.xaml" />
     <None Remove="Themes\Generic.xaml" />
   </ItemGroup>
 
@@ -63,7 +70,42 @@
     <Folder Include="Strings\en-US\" />
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Core\Views\TestPage.xaml">
+    <Page Update="Core\Views\Pages\ListsGroupPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Core\Views\Pages\NotesListPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Core\Views\Pages\SearchPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Core\Views\Pages\SettingsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Core\Views\Pages\TrashPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Core\Views\Pages\TagsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Core\Views\Pages\BookmarksPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Core\Views\Pages\HomePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

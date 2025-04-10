@@ -27,6 +27,7 @@ public partial class App : Application
     ServiceCollection services = new();
 
     // Services
+    services.AddSingleton<DatabaseService>();
     services.AddSingleton<NavigationService>();
 
     // ViewModels
