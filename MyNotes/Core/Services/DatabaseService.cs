@@ -27,7 +27,7 @@ public class DatabaseService
           next_id     TEXT NULL,
           name        TEXT NOT NULL DEFAULT '',
           icon_type   INTEGER NOT NULL,
-          icon_number INTEGER NOT NULL
+          icon_value  INTEGER NOT NULL
         )";
   }
 }

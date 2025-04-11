@@ -45,7 +45,7 @@ public sealed partial class MainWindow : Window
     if (args.SelectedItem is not NavigationItem selected)
       return;
 
-    VIEW_NavigationContent_RootFrame.Navigate(selected.PageType, selected?.Name);
+    VIEW_NavigationContent_RootFrame.Navigate(selected.PageType, selected);
     if (ViewModel.CurrentNavigation is not null && !ViewModel.IsBackRequested)
       ViewModel.PreviousNavigations.Push(ViewModel.CurrentNavigation);
     ViewModel.CurrentNavigation = selected;

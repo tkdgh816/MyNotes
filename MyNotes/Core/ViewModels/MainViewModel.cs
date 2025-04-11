@@ -10,9 +10,9 @@ public class MainViewModel : ViewModelBase
     DatabaseService = databaseService;
     NavigationService = navigationService;
 
-    NavigationGroupItem group1 = new("group 1", new SymbolIconSource() { Symbol = Symbol.List }, new Guid());
-    group1.Children.Add(new NavigationListItem("list 1", new SymbolIconSource() { Symbol = Symbol.List }, new Guid()));
-    group1.Children.Add(new NavigationListItem("list 2", new SymbolIconSource() { Symbol = Symbol.List }, new Guid()));
+    NavigationGroupItem group1 = new("group 1", new BitmapIconSource() { UriSource = new Uri("ms-appx:///Assets/Emojis/Smileys&Emotion/0.png"), ShowAsMonochrome = false }, new Guid());
+    group1.Children.Add(new NavigationListItem("list 1", new BitmapIconSource() { UriSource = new Uri("ms-appx:///Assets/Emojis/Smileys&Emotion/0.png"), ShowAsMonochrome = false }, new Guid()));
+    group1.Children.Add(new NavigationListItem("list 2", new BitmapIconSource() { UriSource = new Uri("ms-appx:///Assets/Emojis/Smileys&Emotion/SE0.png"), ShowAsMonochrome = false }, new Guid()));
     group1.Children.Add(new NavigationListItem("list 3", new SymbolIconSource() { Symbol = Symbol.List }, new Guid()));
 
     NavigationGroupItem group2 = new("group 2", new SymbolIconSource() { Symbol = Symbol.List }, new Guid());
@@ -44,7 +44,7 @@ public class MainViewModel : ViewModelBase
     new NavigationSeparator(),
   ];
   public ObservableCollection<Navigation> ListMenuItemsGroup { get; } = new();
-  public List<Navigation> FooterMenuItemsGroup { get; } = 
+  public List<Navigation> FooterMenuItemsGroup { get; } =
   [
     new NavigationTrashItem(),
     new NavigationSettingsItem()
