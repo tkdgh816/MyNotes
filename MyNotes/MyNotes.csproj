@@ -15,6 +15,7 @@
   <ItemGroup>
     <None Remove="Assets\Square44x44Logo.targetsize-16.png" />
     <None Remove="Assets\Square44x44Logo.targetsize-24_altform-lightunplated.png" />
+    <None Remove="Core\Views\Controls\IconPicker.xaml" />
     <None Remove="Core\Views\Pages\BookmarksPage.xaml" />
     <None Remove="Core\Views\Pages\HomePage.xaml" />
     <None Remove="Core\Views\Pages\ListsGroupPage.xaml" />
@@ -64,10 +65,14 @@
     <Folder Include="Common\Commands\" />
     <Folder Include="Common\Converters\" />
     <Folder Include="Common\Messages\" />
-    <Folder Include="Core\Views\Controls\" />
     <Folder Include="Contracts\" />
     <Folder Include="Strings\ko-KR\" />
     <Folder Include="Strings\en-US\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Core\Views\Controls\IconPicker.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Core\Views\Pages\ListsGroupPage.xaml">
