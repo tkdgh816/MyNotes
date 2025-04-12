@@ -12,6 +12,6 @@ public sealed partial class ListsGroupPage : Page
   protected override void OnNavigatedTo(NavigationEventArgs e)
   {
     base.OnNavigatedTo(e);
-    Navigation = (NavigationItem)e.Parameter;
+    Navigation = (NavigationGroupItem)e.Parameter;
   }
 }
