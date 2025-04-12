@@ -44,7 +44,7 @@ public sealed partial class MainWindow : Window
 
   private void NavigationViewItem_Tapped(object sender, TappedRoutedEventArgs e)
   {
-    FlyoutBase.ShowAttachedFlyout(VIEW_NavigationViewFooter_NavigationViewItem);
+    FlyoutBase.ShowAttachedFlyout(VIEW_NavigationViewFooter_AddNavigationViewItem);
   }
 
   private void VIEW_NavigationContent_RootFrame_Navigated(object sender, NavigationEventArgs e)

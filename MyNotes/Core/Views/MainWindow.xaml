@@ -32,7 +32,7 @@
             </NavigationViewItem>
           </DataTemplate>
         </views:MainNavigationViewMenuItemTemplateSelector.MenuItemTemplate>
-        
+
         <views:MainNavigationViewMenuItemTemplateSelector.SeparatorTemplate>
           <DataTemplate x:DataType="models:NavigationSeparator">
             <NavigationViewItemSeparator />
@@ -75,12 +75,17 @@
 
       <NavigationView.Content>
         <Frame x:Name="VIEW_NavigationContent_RootFrame"
-               Navigated="VIEW_NavigationContent_RootFrame_Navigated"/>
+               Navigated="VIEW_NavigationContent_RootFrame_Navigated" />
       </NavigationView.Content>
 
       <NavigationView.PaneFooter>
-        <StackPanel>
-          <NavigationViewItem x:Name="VIEW_NavigationViewFooter_NavigationViewItem"
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+          </Grid.ColumnDefinitions>
+          <NavigationViewItem x:Name="VIEW_NavigationViewFooter_AddNavigationViewItem"
+                              Grid.Column="0"
                               Content="Add"
                               Icon="Add"
                               Tapped="NavigationViewItem_Tapped">
@@ -93,7 +98,10 @@
               </MenuFlyout>
             </FlyoutBase.AttachedFlyout>
           </NavigationViewItem>
-        </StackPanel>
+          <Button Grid.Column="1"
+                  Content="Edit"
+                  Style="{StaticResource AppBasicButtonStyle}" />
+        </Grid>
       </NavigationView.PaneFooter>
     </NavigationView>
   </Grid>

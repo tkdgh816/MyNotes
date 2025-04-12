@@ -12,7 +12,7 @@
         <DataTemplate x:DataType="Symbol">
           <Button Click="SymbolButton_Click"
                   DataContext="{x:Bind}"
-                  Style="{StaticResource AlternateCloseButtonStyle}">
+                  Style="{StaticResource AppIconButtonStyle}">
             <SymbolIcon Symbol="{x:Bind}" />
           </Button>
         </DataTemplate>
@@ -22,7 +22,7 @@
         <DataTemplate x:DataType="x:String">
           <Button Click="EmojiButton_Click"
                   DataContext="{x:Bind}"
-                  Style="{StaticResource AlternateCloseButtonStyle}">
+                  Style="{StaticResource AppIconButtonStyle}">
             <ImageIcon Source="{x:Bind}"
                        ToolTipService.ToolTip="{x:Bind}" />
           </Button>
