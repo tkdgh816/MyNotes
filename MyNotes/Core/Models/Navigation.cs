@@ -27,6 +27,11 @@ public abstract class NavigationItem(Type pageType, string name, IconSource icon
   }
 }
 
+public class NavigationSearchItem : NavigationItem
+{
+  public NavigationSearchItem(string searchText) : base(typeof(SearchPage), searchText, new SymbolIconSource() { Symbol = Symbol.Find }) { }
+}
+
 public class NavigationHomeItem : NavigationItem
 {
   public NavigationHomeItem() : base(typeof(HomePage), "Home", new SymbolIconSource() { Symbol = Symbol.Home }) { }
@@ -51,9 +56,6 @@ public class NavigationSettingsItem : NavigationItem
 {
   public NavigationSettingsItem() : base(typeof(SettingsPage), "Settings", new SymbolIconSource() { Symbol = Symbol.Setting }) { }
 }
-
-public class NavigationSearchItem
-{ }
 
 public class NavigationGroupItem : NavigationItem
 {

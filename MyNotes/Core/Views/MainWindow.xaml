@@ -48,7 +48,7 @@
 
     <TitleBar x:Name="VIEW_TitleBar"
               Grid.Row="0"
-              IsBackButtonVisible="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}"
+              IsBackButtonVisible="{x:Bind VIEW_NavigationContent_RootFrame.CanGoBack, Mode=OneWay}"
               BackRequested="VIEW_TitleBar_BackRequested"
               IsPaneToggleButtonVisible="True"
               PaneToggleRequested="VIEW_TitleBar_PaneToggleRequested"
@@ -74,7 +74,8 @@
       </NavigationView.AutoSuggestBox>
 
       <NavigationView.Content>
-        <Frame x:Name="VIEW_NavigationContent_RootFrame" />
+        <Frame x:Name="VIEW_NavigationContent_RootFrame"
+               Navigated="VIEW_NavigationContent_RootFrame_Navigated"/>
       </NavigationView.Content>
 
       <NavigationView.PaneFooter>

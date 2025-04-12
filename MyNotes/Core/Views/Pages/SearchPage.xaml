@@ -10,7 +10,7 @@
     </Grid.RowDefinitions>
 
     <Grid>
-      <TextBlock Text="Search"
+      <TextBlock x:Name="VIEW_TitleTextBlock"
                  Style="{StaticResource TitleTextBlockStyle}" />
     </Grid>
 

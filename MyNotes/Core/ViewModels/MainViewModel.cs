@@ -49,15 +49,4 @@ public class MainViewModel : ViewModelBase
     new NavigationTrashItem(),
     new NavigationSettingsItem()
   ];
-  public Stack<NavigationItem> PreviousNavigations { get; } = new();
-  public NavigationItem? CurrentNavigation { get; set; }
-
-  private bool _isBackEnabled = false;
-  public bool IsBackEnabled
-  {
-    get => _isBackEnabled;
-    set => SetProperty(ref _isBackEnabled, value);
-  }
-  public bool IsBackRequested = false;
-
 }

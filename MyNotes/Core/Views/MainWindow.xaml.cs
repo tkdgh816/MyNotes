@@ -17,44 +17,42 @@ public sealed partial class MainWindow : Window
   MainViewModel ViewModel { get; }
 
   private void VIEW_TitleBar_BackRequested(TitleBar sender, object args)
-  {
-    if (ViewModel.IsBackEnabled = ViewModel.PreviousNavigations.Count > 0)
-    {
-      ViewModel.IsBackRequested = true;
-      VIEW_NavigationView.SelectedItem = ViewModel.PreviousNavigations.Pop();
-      ViewModel.IsBackRequested = false;
-    }
-  }
+    => VIEW_NavigationContent_RootFrame.GoBack();
 
   private void VIEW_TitleBar_PaneToggleRequested(TitleBar sender, object args)
     => VIEW_NavigationView.IsPaneOpen = !VIEW_NavigationView.IsPaneOpen;
 
   private void AutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
   {
-    VIEW_NavigationContent_RootFrame.Navigate(typeof(SearchPage), "Search");
-    if (ViewModel.CurrentNavigation is not null)
-    {
-      ViewModel.PreviousNavigations.Push(ViewModel.CurrentNavigation);
-      ViewModel.CurrentNavigation = null;
-      VIEW_NavigationView.SelectedItem = null;
-    }
+    NavigationSearchItem searchItem = new(args.QueryText);
+    Navigate(searchItem);
   }
 
+  bool _isBackRequested = false;
   private void VIEW_NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
   {
     if (args.SelectedItem is not NavigationItem selected)
       return;
+    Navigate(selected);
+  }
 
-    VIEW_NavigationContent_RootFrame.Navigate(selected.PageType, selected);
-    if (ViewModel.CurrentNavigation is not null && !ViewModel.IsBackRequested)
-      ViewModel.PreviousNavigations.Push(ViewModel.CurrentNavigation);
-    ViewModel.CurrentNavigation = selected;
-    ViewModel.IsBackEnabled = ViewModel.PreviousNavigations.Count > 0;
+  private void Navigate(NavigationItem item)
+  {
+    if (!_isBackRequested)
+      VIEW_NavigationContent_RootFrame.Navigate(item.PageType, item);
   }
 
   private void NavigationViewItem_Tapped(object sender, TappedRoutedEventArgs e)
   {
     FlyoutBase.ShowAttachedFlyout(VIEW_NavigationViewFooter_NavigationViewItem);
+  }
+
+  private void VIEW_NavigationContent_RootFrame_Navigated(object sender, NavigationEventArgs e)
+  {
+    _isBackRequested = true;
+    NavigationItem navigation = (NavigationItem)e.Parameter;
+    VIEW_NavigationView.SelectedItem = (navigation is NavigationSearchItem) ? null : navigation;
+    _isBackRequested = false;
   }
 }
 
@@ -65,7 +63,6 @@ public class MainNavigationViewMenuItemTemplateSelector : DataTemplateSelector
   public DataTemplate? SeparatorTemplate { get; set; }
   protected override DataTemplate? SelectTemplateCore(object item, DependencyObject container)
   {
-    Debug.WriteLine(item.GetType());
     return item switch
     {
       NavigationGroupItem => GroupItemTemplate,

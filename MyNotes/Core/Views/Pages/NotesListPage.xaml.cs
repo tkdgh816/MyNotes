@@ -1,4 +1,3 @@
-
 using MyNotes.Core.Models;
 
 namespace MyNotes.Core.Views;
