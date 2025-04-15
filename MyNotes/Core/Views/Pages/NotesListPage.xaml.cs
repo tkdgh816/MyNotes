@@ -12,6 +12,6 @@ public sealed partial class NotesListPage : Page
   protected override void OnNavigatedTo(NavigationEventArgs e)
   {
     base.OnNavigatedTo(e);
-    Navigation = (NavigationListItem)e.Parameter;
+    Navigation = (NavigationBoardItem)e.Parameter;
   }
 }

@@ -14,13 +14,10 @@ public sealed partial class MainWindow : Window
     this.SetTitleBar(VIEW_TitleBar);
   }
 
-  MainViewModel ViewModel { get; }
+  public MainViewModel ViewModel { get; }
 
   private void VIEW_TitleBar_BackRequested(TitleBar sender, object args)
     => VIEW_NavigationContent_RootFrame.GoBack();
-
-  private void VIEW_TitleBar_PaneToggleRequested(TitleBar sender, object args)
-    => VIEW_NavigationView.IsPaneOpen = !VIEW_NavigationView.IsPaneOpen;
 
   private void AutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
   {
@@ -53,6 +50,17 @@ public sealed partial class MainWindow : Window
     NavigationItem navigation = (NavigationItem)e.Parameter;
     VIEW_NavigationView.SelectedItem = (navigation is NavigationSearchItem) ? null : navigation;
     _isBackRequested = false;
+  }
+
+  private void NavigationViewItem_DragEnter(object sender, DragEventArgs e)
+  {
+    Debug.WriteLine("Drag Enter");
+  }
+
+  private void VIEW_NavigationViewFooter_EditButton_Click(object sender, RoutedEventArgs e)
+  {
+    foreach(NavigationItem item in ViewModel.ListMenuItems)
+      ViewModel.Recursive(item, x => x.IsMovable = !x.IsMovable);
   }
 }
 

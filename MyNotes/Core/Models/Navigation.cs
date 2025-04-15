@@ -8,7 +8,7 @@ public abstract class Navigation : ObservableObject
 public class NavigationSeparator : Navigation
 { }
 
-public abstract class NavigationItem(Type pageType, string name, IconSource icon) : Navigation
+public abstract class NavigationItem(Type pageType, string name, IconSource icon, bool isMovable = false) : Navigation
 {
   public Type PageType { get; } = pageType;
 
@@ -24,6 +24,13 @@ public abstract class NavigationItem(Type pageType, string name, IconSource icon
   {
     get => _icon;
     set => SetProperty(ref _icon, value);
+  }
+
+  private bool _isMovable = isMovable;
+  public bool IsMovable
+  {
+    get => _isMovable;
+    set => SetProperty(ref _isMovable, value);
   }
 }
 
@@ -68,11 +75,11 @@ public class NavigationGroupItem : NavigationItem
   }
 }
 
-public class NavigationListItem : NavigationItem
+public class NavigationBoardItem : NavigationItem
 {
   public Guid Id { get; }
 
-  public NavigationListItem(string name, IconSource icon, Guid id) : base(typeof(NotesListPage), name, icon) 
+  public NavigationBoardItem(string name, IconSource icon, Guid id) : base(typeof(NotesListPage), name, icon) 
   {
     Id = id;
   }
