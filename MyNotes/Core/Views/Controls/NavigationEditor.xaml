@@ -10,18 +10,28 @@
       <views:NavigationEditorTreeViewItemTemplateSelector.GroupItemTemplate>
         <DataTemplate x:DataType="models:NavigationGroupItem">
           <TreeViewItem ItemsSource="{x:Bind Children}"
-                        IsExpanded="True">
-            <Grid ColumnSpacing="6">
+                        IsExpanded="True"
+                        Height="40">
+            <Grid ColumnSpacing="12">
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
               <IconSourceElement Grid.Column="0"
                                  Width="20"
                                  Height="20"
                                  IconSource="{x:Bind Icon, Mode=OneWay}" />
               <TextBlock Grid.Column="1"
-                         Text="{x:Bind Name, Mode=OneWay}" />
+                         Text="{x:Bind Name, Mode=OneWay}"
+                         VerticalAlignment="Center" />
+              <views:IconButton Grid.Column="2"
+                                Padding="4,2"
+                                Margin="0,0,4,0">
+                <views:IconButton.Icon>
+                  <FontIcon Glyph="&#xE711;" />
+                </views:IconButton.Icon>
+              </views:IconButton>
             </Grid>
           </TreeViewItem>
         </DataTemplate>
@@ -29,18 +39,27 @@
 
       <views:NavigationEditorTreeViewItemTemplateSelector.BoardItemTemplate>
         <DataTemplate x:DataType="models:NavigationBoardItem">
-          <TreeViewItem>
-            <Grid ColumnSpacing="6">
+          <TreeViewItem Height="40">
+            <Grid ColumnSpacing="12">
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
               <IconSourceElement Grid.Column="0"
                                  Width="20"
                                  Height="20"
                                  IconSource="{x:Bind Icon, Mode=OneWay}" />
               <TextBlock Grid.Column="1"
-                         Text="{x:Bind Name, Mode=OneWay}" />
+                         Text="{x:Bind Name, Mode=OneWay}"
+                         VerticalAlignment="Center" />
+              <views:IconButton Grid.Column="2"
+                                Padding="4,2"
+                                Margin="0,0,4,0">
+                <views:IconButton.Icon>
+                  <FontIcon Glyph="&#xE711;"/>
+                </views:IconButton.Icon>
+              </views:IconButton>
             </Grid>
           </TreeViewItem>
         </DataTemplate>
@@ -48,10 +67,15 @@
     </views:NavigationEditorTreeViewItemTemplateSelector>
   </UserControl.Resources>
 
-  <Grid>
-    <TreeView ItemsSource="{x:Bind ViewModel.ListMenuItems}"
-              ItemTemplateSelector="{StaticResource NavigationEditorTreeViewItemTemplateSelector}">
-
-    </TreeView>
+  <Grid RowSpacing="6">
+    <Grid.RowDefinitions>
+      <RowDefinition />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <ScrollViewer Grid.Row="0"
+                  Padding="0,0,12,0">
+      <TreeView ItemsSource="{x:Bind ViewModel.ListMenuItems}"
+                ItemTemplateSelector="{StaticResource NavigationEditorTreeViewItemTemplateSelector}"/>
+    </ScrollViewer>
   </Grid>
 </UserControl>

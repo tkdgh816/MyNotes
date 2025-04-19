@@ -1,6 +1,8 @@
 using MyNotes.Core.Models;
 using MyNotes.Core.ViewModels;
 
+using Windows.ApplicationModel.DataTransfer;
+
 namespace MyNotes.Core.Views;
 
 public sealed partial class NavigationEditor : UserControl
@@ -21,7 +23,6 @@ public class NavigationEditorTreeViewItemTemplateSelector : DataTemplateSelector
 
   protected override DataTemplate? SelectTemplateCore(object item)
   {
-    Debug.WriteLine(item.GetType());
     return item switch
     {
       NavigationGroupItem => GroupItemTemplate,

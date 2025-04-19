@@ -39,11 +39,6 @@ public sealed partial class MainWindow : Window
       VIEW_NavigationContent_RootFrame.Navigate(item.PageType, item);
   }
 
-  private void NavigationViewItem_Tapped(object sender, TappedRoutedEventArgs e)
-  {
-    FlyoutBase.ShowAttachedFlyout(VIEW_NavigationViewFooter_AddNavigationViewItem);
-  }
-
   private void VIEW_NavigationContent_RootFrame_Navigated(object sender, NavigationEventArgs e)
   {
     _isBackRequested = true;
@@ -52,15 +47,28 @@ public sealed partial class MainWindow : Window
     _isBackRequested = false;
   }
 
-  private void NavigationViewItem_DragEnter(object sender, DragEventArgs e)
+  private void VIEW_NavigationViewFooter_NewGroupButton_Click(object sender, RoutedEventArgs e)
   {
-    Debug.WriteLine("Drag Enter");
+    switch (VIEW_NavigationView.SelectedItem)
+    {
+      case NavigationGroupItem:
+        break;
+      case NavigationBoardItem:
+        break;
+      default:
+        ViewModel.ListMenuItems.Add(new NavigationGroupItem("New Group", new FontIconSource() { Glyph = "\uE82D" }, new Guid()));
+        break;
+    }
   }
 
-  private void VIEW_NavigationViewFooter_EditButton_Click(object sender, RoutedEventArgs e)
+  private void VIEW_NavigationViewFooter_NewBoardButton_Click(object sender, RoutedEventArgs e)
   {
-    foreach(NavigationItem item in ViewModel.ListMenuItems)
-      ViewModel.Recursive(item, x => x.IsMovable = !x.IsMovable);
+
+  }
+
+  private void VIEW_NavigationViewFooter_EditNavigationViewItem_Click(object sender, RoutedEventArgs e)
+  {
+    
   }
 }
 

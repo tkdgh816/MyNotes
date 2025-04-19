@@ -10,22 +10,23 @@ public class MainViewModel : ViewModelBase
     DatabaseService = databaseService;
     NavigationService = navigationService;
 
-    NavigationGroupItem group1 = new("group 1", new BitmapIconSource() { UriSource = new Uri("ms-appx:///Assets/icons/emojis/0.png"), ShowAsMonochrome = false }, new Guid());
-    group1.Children.Add(new NavigationBoardItem("Board 1", new BitmapIconSource() { UriSource = new Uri("ms-appx:///Assets/icons/emojis/0.png"), ShowAsMonochrome = false }, new Guid()));
-    group1.Children.Add(new NavigationBoardItem("Board 2", new BitmapIconSource() { UriSource = new Uri("ms-appx:///Assets/icons/emojis/0.png"), ShowAsMonochrome = false }, new Guid()));
-    group1.Children.Add(new NavigationBoardItem("Board 3", new FontIconSource() { Glyph = "\uE70B" }, new Guid()));
+    NavigationGroupItem root = new("Root", new FontIconSource() { Glyph = "\uE82D" }, new Guid());
+    NavigationGroupItem group1 = new("Group 1", new FontIconSource() { Glyph = "\uE82D" }, new Guid());
+    group1.Children.Add(new NavigationBoardItem("Board 1", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
+    group1.Children.Add(new NavigationBoardItem("Board 2", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
+    group1.Children.Add(new NavigationBoardItem("Board 3", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
 
-    NavigationGroupItem group2 = new("group 2", new FontIconSource() { Glyph = "\uED41" }, new Guid());
-    group2.Children.Add(new NavigationBoardItem("Board 1", new FontIconSource() { Glyph = "\uE70B" }, new Guid()));
-    group2.Children.Add(new NavigationBoardItem("Board 2", new FontIconSource() { Glyph = "\uE70B" }, new Guid()));
-    group2.Children.Add(new NavigationBoardItem("Board 3", new FontIconSource() { Glyph = "\uE70B" }, new Guid()));
+    NavigationGroupItem group2 = new("Group 2", new FontIconSource() { Glyph = "\uE82D" }, new Guid());
+    group2.Children.Add(new NavigationBoardItem("Board 1", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
+    group2.Children.Add(new NavigationBoardItem("Board 2", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
+    group2.Children.Add(new NavigationBoardItem("Board 3", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
 
-    NavigationGroupItem group3 = new("group 3", new FontIconSource() { Glyph = "\uED41" }, new Guid());
-    group3.Children.Add(new NavigationBoardItem("Board 1", new FontIconSource() { Glyph = "\uE70B" }, new Guid()));
-    group3.Children.Add(new NavigationBoardItem("Board 2", new FontIconSource() { Glyph = "\uE70B" }, new Guid()));
-    group3.Children.Add(new NavigationBoardItem("Board 3", new FontIconSource() { Glyph = "\uE70B" }, new Guid()));
+    NavigationGroupItem group3 = new("Group 3", new FontIconSource() { Glyph = "\uE82D" }, new Guid());
+    group3.Children.Add(new NavigationBoardItem("Board 1", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
+    group3.Children.Add(new NavigationBoardItem("Board 2", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
+    group3.Children.Add(new NavigationBoardItem("Board 3", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
     group1.Children.Add(group3);
-
+    
     ListMenuItems.Add(group1);
     ListMenuItems.Add(group2);
 

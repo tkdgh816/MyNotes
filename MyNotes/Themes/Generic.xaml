@@ -182,4 +182,185 @@
     <Setter Property="FontFamily"
             Value="{StaticResource SymbolThemeFontFamily}" />
   </Style>
+
+  <Style TargetType="views:IconButton">
+    <Setter Property="Background"
+            Value="{ThemeResource AppBasicButtonBackground}" />
+    <Setter Property="BackgroundSizing"
+            Value="InnerBorderEdge" />
+    <Setter Property="Foreground"
+            Value="{ThemeResource AppBasicButtonForeground}" />
+    <Setter Property="BorderBrush"
+            Value="{ThemeResource AppBasicButtonBorderBrush}" />
+    <Setter Property="BorderThickness"
+            Value="{ThemeResource ButtonBorderThemeThickness}" />
+    <Setter Property="Padding"
+            Value="{StaticResource ButtonPadding}" />
+    <Setter Property="HorizontalAlignment"
+            Value="Left" />
+    <Setter Property="VerticalAlignment"
+            Value="Center" />
+    <Setter Property="FontFamily"
+            Value="{ThemeResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontWeight"
+            Value="Normal" />
+    <Setter Property="FontSize"
+            Value="{ThemeResource ControlContentThemeFontSize}" />
+    <Setter Property="UseSystemFocusVisuals"
+            Value="{StaticResource UseSystemFocusVisuals}" />
+    <Setter Property="FocusVisualMargin"
+            Value="-3" />
+    <Setter Property="CornerRadius"
+            Value="{ThemeResource ControlCornerRadius}" />
+
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="views:IconButton">
+          <Grid x:Name="RootGrid"
+                Background="{TemplateBinding Background}"
+                BackgroundSizing="{TemplateBinding BackgroundSizing}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                ColumnSpacing="{TemplateBinding Spacing}"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                Padding="{TemplateBinding Padding}"
+                AutomationProperties.AccessibilityView="Raw">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <!--<Grid.BackgroundTransition>
+              <BrushTransition Duration="0:0:0.083" />
+            </Grid.BackgroundTransition>-->
+
+            <Viewbox Grid.Column="0"
+                     Height="16"
+                     Width="16"
+                     Margin="0,2,0,0"
+                     VerticalAlignment="Center"
+                     Visibility="{TemplateBinding IsIconVisible}">
+              <ContentPresenter x:Name="IconContentPresenter"
+                                Content="{TemplateBinding Icon}"
+                                Foreground="{TemplateBinding Foreground}" />
+            </Viewbox>
+
+            <ContentPresenter x:Name="LabelContentPresenter"
+                              Grid.Column="1"
+                              Foreground="{TemplateBinding Foreground}"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              ContentTransitions="{TemplateBinding ContentTransitions}"
+                              VerticalAlignment="Center"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" 
+                              Visibility="{TemplateBinding IsContentVisible}"/>
+
+            <VisualStateManager.VisualStateGroups>
+              <VisualStateGroup x:Name="CommonStates">
+                <VisualState x:Name="Normal" />
+
+                <VisualState x:Name="PointerOver">
+
+                  <Storyboard>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid"
+                                                   Storyboard.TargetProperty="Background">
+                      <DiscreteObjectKeyFrame KeyTime="0"
+                                              Value="{ThemeResource AppBasicButtonBackgroundPointerOver}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid"
+                                                   Storyboard.TargetProperty="BorderBrush">
+                      <DiscreteObjectKeyFrame KeyTime="0"
+                                              Value="{ThemeResource AppBasicButtonBorderBrushPointerOver}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="IconContentPresenter"
+                                                   Storyboard.TargetProperty="Foreground">
+                      <DiscreteObjectKeyFrame KeyTime="0"
+                                              Value="{ThemeResource AppBasicButtonForegroundPointerOver}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="LabelContentPresenter"
+                                                   Storyboard.TargetProperty="Foreground">
+                      <DiscreteObjectKeyFrame KeyTime="0"
+                                              Value="{ThemeResource AppBasicButtonForegroundPointerOver}" />
+                    </ObjectAnimationUsingKeyFrames>
+                  </Storyboard>
+                </VisualState>
+
+                <VisualState x:Name="Pressed">
+
+                  <Storyboard>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid"
+                                                   Storyboard.TargetProperty="Background">
+                      <DiscreteObjectKeyFrame KeyTime="0"
+                                              Value="{ThemeResource AppBasicButtonBackgroundPressed}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid"
+                                                   Storyboard.TargetProperty="BorderBrush">
+                      <DiscreteObjectKeyFrame KeyTime="0"
+                                              Value="{ThemeResource AppBasicButtonBorderBrushPressed}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="IconContentPresenter"
+                                                   Storyboard.TargetProperty="Foreground">
+                      <DiscreteObjectKeyFrame KeyTime="0"
+                                              Value="{ThemeResource AppBasicButtonForegroundPressed}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="LabelContentPresenter"
+                                                   Storyboard.TargetProperty="Foreground">
+                      <DiscreteObjectKeyFrame KeyTime="0"
+                                              Value="{ThemeResource AppBasicButtonForegroundPressed}" />
+                    </ObjectAnimationUsingKeyFrames>
+                  </Storyboard>
+                </VisualState>
+
+                <VisualState x:Name="Disabled">
+
+                  <Storyboard>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid"
+                                                   Storyboard.TargetProperty="Background">
+                      <DiscreteObjectKeyFrame KeyTime="0"
+                                              Value="{ThemeResource AppBasicButtonBackgroundDisabled}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid"
+                                                   Storyboard.TargetProperty="BorderBrush">
+                      <DiscreteObjectKeyFrame KeyTime="0"
+                                              Value="{ThemeResource AppBasicButtonBorderBrushDisabled}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="IconContentPresenter"
+                                                   Storyboard.TargetProperty="Foreground">
+                      <DiscreteObjectKeyFrame KeyTime="0"
+                                              Value="{ThemeResource AppBasicButtonForegroundDisabled}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="LabelContentPresenter"
+                                                   Storyboard.TargetProperty="Foreground">
+                      <DiscreteObjectKeyFrame KeyTime="0"
+                                              Value="{ThemeResource AppBasicButtonForegroundDisabled}" />
+                    </ObjectAnimationUsingKeyFrames>
+                  </Storyboard>
+                </VisualState>
+
+              </VisualStateGroup>
+
+            </VisualStateManager.VisualStateGroups>
+
+          </Grid>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="AppNavigationButtonStyle"
+         TargetType="views:IconButton">
+    <Setter Property="BorderThickness"
+            Value="0" />
+    <Setter Property="CornerRadius"
+            Value="5" />
+    <Setter Property="Height"
+            Value="36" />
+    <Setter Property="HorizontalAlignment"
+            Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment"
+            Value="Left" />
+    <Setter Property="Padding"
+            Value="11,5,14,6" />
+  </Style>
 </ResourceDictionary>

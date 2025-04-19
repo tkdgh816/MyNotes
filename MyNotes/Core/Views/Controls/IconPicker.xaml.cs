@@ -16,11 +16,6 @@ public sealed partial class IconPicker : UserControl
     set => SetValue(IconProperty, value);
   }
 
-  private void SymbolButton_Click(object sender, RoutedEventArgs e)
-  {
-    Icon = new SymbolIconSource() { Symbol = (Symbol)((FrameworkElement)sender).DataContext };
-  }
-
   private void FontButton_Click(object sender, RoutedEventArgs e)
   {
     Icon = new FontIconSource() { Glyph = ((Glyph)((FrameworkElement)sender).DataContext).Code };
@@ -28,7 +23,7 @@ public sealed partial class IconPicker : UserControl
 
   private void EmojiButton_Click(object sender, RoutedEventArgs e)
   {
-    Icon = new BitmapIconSource() { UriSource = new Uri((string)((FrameworkElement)sender).DataContext), ShowAsMonochrome = false };
+    Icon = new BitmapIconSource() { UriSource = new Uri(((Emoji)((FrameworkElement)sender).DataContext).Path), ShowAsMonochrome = false };
   }
 
   private void VIEW_PrimarySelectorBar_SelectionChanged(SelectorBar sender, SelectorBarSelectionChangedEventArgs args)
@@ -38,14 +33,14 @@ public sealed partial class IconPicker : UserControl
     {
       case "Basic":
         ControlSecondarySelectorBar(false);
-        VIEW_IconsItemsRepeater.ItemsSource = Models.Icon.FontPaths;
+        VIEW_IconsItemsRepeater.ItemsSource = Models.Icon.Glyphs;
         break;
       case "PeopleAndBody":
         ControlSecondarySelectorBar(true);
         break;
       default:
         ControlSecondarySelectorBar(false);
-        Models.Icon.EmojiPaths.TryGetValue(selectedTag, out var items);
+        Models.Icon.Emojis.TryGetValue(selectedTag, out var items);
         VIEW_IconsItemsRepeater.ItemsSource = items;
         break;
     }
@@ -72,14 +67,13 @@ public sealed partial class IconPicker : UserControl
       return;
 
     string selectedTag = (string)sender.SelectedItem.Tag;
-    Models.Icon.EmojiPaths.TryGetValue(selectedTag, out var items);
+    Models.Icon.Emojis.TryGetValue(selectedTag, out var items);
     VIEW_IconsItemsRepeater.ItemsSource = items;
   }
 }
 
 public class IconPickerViewItemTemplateSelector : DataTemplateSelector
 {
-  public DataTemplate? SymbolItemTemplate { get; set; }
   public DataTemplate? FontItemTemplate { get; set; }
   public DataTemplate? EmojiItemTemplate { get; set; }
 
@@ -87,9 +81,8 @@ public class IconPickerViewItemTemplateSelector : DataTemplateSelector
   {
     return item switch
     {
-      Symbol => SymbolItemTemplate,
       Glyph => FontItemTemplate,
-      string => EmojiItemTemplate,
+      Emoji => EmojiItemTemplate,
       _ => null
     };
   }

@@ -9,16 +9,6 @@
 
   <UserControl.Resources>
     <views:IconPickerViewItemTemplateSelector x:Key="IconPickerViewItemTemplateSelector">
-      <views:IconPickerViewItemTemplateSelector.SymbolItemTemplate>
-        <DataTemplate x:DataType="Symbol">
-          <Button Click="SymbolButton_Click"
-                  DataContext="{x:Bind}"
-                  Style="{StaticResource AppIconButtonStyle}">
-            <SymbolIcon Symbol="{x:Bind}" />
-          </Button>
-        </DataTemplate>
-      </views:IconPickerViewItemTemplateSelector.SymbolItemTemplate>
-
       <views:IconPickerViewItemTemplateSelector.FontItemTemplate>
         <DataTemplate x:DataType="models:Glyph">
           <Button Click="FontButton_Click"
@@ -31,12 +21,12 @@
       </views:IconPickerViewItemTemplateSelector.FontItemTemplate>
       
       <views:IconPickerViewItemTemplateSelector.EmojiItemTemplate>
-        <DataTemplate x:DataType="x:String">
+        <DataTemplate x:DataType="models:Emoji">
           <Button Click="EmojiButton_Click"
                   DataContext="{x:Bind}"
                   Style="{StaticResource AppIconButtonStyle}">
-            <ImageIcon Source="{x:Bind}"
-                       ToolTipService.ToolTip="{x:Bind}" />
+            <ImageIcon Source="{x:Bind Path}"
+                       ToolTipService.ToolTip="{x:Bind Description}" />
           </Button>
         </DataTemplate>
       </views:IconPickerViewItemTemplateSelector.EmojiItemTemplate>

@@ -23,9 +23,7 @@
       <views:MainNavigationViewMenuItemTemplateSelector x:Key="MainNavigationViewMenuItemTemplateSelector">
         <views:MainNavigationViewMenuItemTemplateSelector.GroupItemTemplate>
           <DataTemplate x:DataType="models:NavigationGroupItem">
-            <NavigationViewItem MenuItemsSource="{x:Bind Children}"
-                                AllowDrop="True"
-                                DragEnter="NavigationViewItem_DragEnter">
+            <NavigationViewItem MenuItemsSource="{x:Bind Children}">
               <NavigationViewItem.Content>
                 <Grid>
                   <Grid.ColumnDefinitions>
@@ -33,15 +31,10 @@
                     <ColumnDefinition Width="Auto" />
                   </Grid.ColumnDefinitions>
                   <TextBlock Text="{x:Bind Name, Mode=OneWay}" />
-                  <FontIcon Grid.Column="1"
-                            Glyph="&#xE7C2;"
-                            FontSize="14"
-                            CanDrag="True"
-                            Visibility="{x:Bind converters:BoolToVisibilityConverter.Convert(IsMovable), Mode=OneWay}" />
                 </Grid>
               </NavigationViewItem.Content>
               <NavigationViewItem.Icon>
-                <IconSourceElement IconSource="{x:Bind Icon, Mode=OneWay}"/>
+                <IconSourceElement IconSource="{x:Bind Icon, Mode=OneWay}" />
               </NavigationViewItem.Icon>
             </NavigationViewItem>
           </DataTemplate>
@@ -57,11 +50,6 @@
                     <ColumnDefinition Width="Auto" />
                   </Grid.ColumnDefinitions>
                   <TextBlock Text="{x:Bind Name, Mode=OneWay}" />
-                  <FontIcon Grid.Column="1"
-                            Glyph="&#xE7C2;"
-                            FontSize="14"
-                            CanDrag="True"
-                            Visibility="{x:Bind converters:BoolToVisibilityConverter.Convert(IsMovable), Mode=OneWay}" />
                 </Grid>
               </NavigationViewItem.Content>
               <NavigationViewItem.Icon>
@@ -121,36 +109,60 @@
       </NavigationView.Content>
 
       <NavigationView.PaneFooter>
-        <Grid>
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition />
-          </Grid.ColumnDefinitions>
-          <NavigationViewItem x:Name="VIEW_NavigationViewFooter_AddNavigationViewItem"
+        <StackPanel Spacing="4">
+          <Grid Padding="4,0">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition />
+              <ColumnDefinition />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <views:IconButton x:Name="VIEW_NavigationViewFooter_NewGroupButton"
                               Grid.Column="0"
-                              Content="Add"
-                              Icon="Add"
-                              Tapped="NavigationViewItem_Tapped">
-            <FlyoutBase.AttachedFlyout>
-              <MenuFlyout Placement="TopEdgeAlignedLeft">
-                <MenuFlyoutItem Text="Add Group"
-                                Icon="Add" />
-                <MenuFlyoutItem Text="Add List"
-                                Icon="Add" />
-              </MenuFlyout>
-            </FlyoutBase.AttachedFlyout>
-          </NavigationViewItem>
-          <Button x:Name="VIEW_NavigationViewFooter_EditButton"
-                  Grid.Column="1"
-                  Content="Edit"
-                  Style="{StaticResource AppBasicButtonStyle}">
-            <Button.Flyout>
-              <Flyout Placement="RightEdgeAlignedBottom">
-                <views:NavigationEditor />
-              </Flyout>
-            </Button.Flyout>
-          </Button>
-        </Grid>
+                              Content="New group"
+                              Style="{StaticResource AppNavigationButtonStyle}"
+                              Click="VIEW_NavigationViewFooter_NewGroupButton_Click">
+              <views:IconButton.Icon>
+                <FontIcon Glyph="&#xE82E;" />
+              </views:IconButton.Icon>
+            </views:IconButton>
+            <views:IconButton x:Name="VIEW_NavigationViewFooter_NewBoardButton"
+                              Grid.Column="1"
+                              Content="New board"
+                              Style="{StaticResource AppNavigationButtonStyle}"
+                              Click="VIEW_NavigationViewFooter_NewBoardButton_Click">
+              <views:IconButton.Icon>
+                <FontIcon Glyph="&#xED0E;" />
+              </views:IconButton.Icon>
+            </views:IconButton>
+            <views:IconButton x:Name="VIEW_NavigationViewFooter_EditNavigationViewItem"
+                              Grid.Column="2"
+                              Style="{StaticResource AppNavigationButtonStyle}"
+                              ToolTipService.ToolTip="Edit"
+                              Click="VIEW_NavigationViewFooter_EditNavigationViewItem_Click">
+              <views:IconButton.Icon>
+                <FontIcon Glyph="&#xE932;" />
+              </views:IconButton.Icon>
+              <!--<Button.Flyout>
+                <Flyout Placement="TopEdgeAlignedRight"
+                        ShouldConstrainToRootBounds="True"
+                        LightDismissOverlayMode="On">
+                  <Flyout.FlyoutPresenterStyle>
+                    <Style TargetType="FlyoutPresenter"
+                           BasedOn="{StaticResource DefaultFlyoutPresenterStyle}">
+                      <Setter Property="Padding"
+                              Value="8,8,0,8" />
+                      <Setter Property="MinWidth"
+                              Value="320" />
+                    </Style>
+                  </Flyout.FlyoutPresenterStyle>
+                  <views:NavigationEditor Height="500" />
+                </Flyout>
+              </Button.Flyout>-->
+            </views:IconButton>
+          </Grid>
+
+          <NavigationViewItemSeparator />
+        </StackPanel>
       </NavigationView.PaneFooter>
     </NavigationView>
   </Grid>
