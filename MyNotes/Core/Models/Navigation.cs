@@ -10,7 +10,7 @@ public class NavigationSeparator : Navigation
 
 public abstract class NavigationItem(Type pageType, string name, IconSource icon) : Navigation
 {
-  public Type PageType { get; } = pageType;
+  public Type PageType { get; protected set; } = pageType;
 
   private string _name = name;
   public string Name
@@ -57,23 +57,65 @@ public class NavigationSettingsItem : NavigationItem
   public NavigationSettingsItem() : base(typeof(SettingsPage), "Settings", new SymbolIconSource() { Symbol = Symbol.Setting }) { }
 }
 
-public class NavigationGroupItem : NavigationItem
-{
-  public Guid Id { get; }
-  public ObservableCollection<NavigationItem> Children { get; } = new();
-
-  public NavigationGroupItem(string name, IconSource icon, Guid id) : base(typeof(ListsGroupPage), name, icon) 
-  {
-    Id = id;
-  }
-}
-
 public class NavigationBoardItem : NavigationItem
 {
   public Guid Id { get; }
+  public NavigationBoardGroupItem Parent { get; set; } = null!;
 
   public NavigationBoardItem(string name, IconSource icon, Guid id) : base(typeof(NotesListPage), name, icon) 
   {
     Id = id;
   }
+
+  private bool _isEditMode = false;
+  public bool IsEditMode
+  {
+    get => _isEditMode;
+    set => SetProperty(ref _isEditMode, value);
+  }
+}
+
+public class NavigationBoardGroupItem : NavigationBoardItem
+{
+  private readonly ObservableCollection<NavigationBoardItem> _children = new();
+  public ReadOnlyObservableCollection<NavigationBoardItem> Children { get; }
+
+  public NavigationBoardGroupItem(string name, IconSource icon, Guid id) : base(name, icon, id)
+  {
+    PageType = typeof(ListsGroupPage);
+    Children = new(_children);
+  }
+
+  public void Add(params NavigationBoardItem[] items)
+  {
+    foreach (NavigationBoardItem item in items)
+    {
+      item.Parent?.Remove(item);
+      item.Parent = this;
+      _children.Add(item);
+    }
+  }
+
+  public void Insert(int index, NavigationBoardItem item)
+  {
+    if (item.Parent == this)
+    {
+      int oldIndex = _children.IndexOf(item);
+      if (oldIndex != index)
+      {
+        _children.RemoveAt(oldIndex);
+        _children.Insert((oldIndex > index) ? index : index - 1, item);
+      }
+    }
+    else
+    {
+      item.Parent?.Remove(item);
+      item.Parent = this;
+      _children.Insert(index, item);
+    }
+  }
+
+  public bool Remove(NavigationBoardItem item) => _children.Contains(item) && _children.Remove(item);
+
+  public void RemoveAt(int index) => _children.RemoveAt(index);
 }

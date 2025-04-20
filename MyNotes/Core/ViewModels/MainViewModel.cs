@@ -10,25 +10,24 @@ public class MainViewModel : ViewModelBase
     DatabaseService = databaseService;
     NavigationService = navigationService;
 
-    NavigationGroupItem root = new("Root", new FontIconSource() { Glyph = "\uE82D" }, new Guid());
-    NavigationGroupItem group1 = new("Group 1", new FontIconSource() { Glyph = "\uE82D" }, new Guid());
-    group1.Children.Add(new NavigationBoardItem("Board 1", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
-    group1.Children.Add(new NavigationBoardItem("Board 2", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
-    group1.Children.Add(new NavigationBoardItem("Board 3", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
+    NavigationBoardGroupItem group1 = new("Group 1", new FontIconSource() { Glyph = "\uE82D" }, new Guid());
+    group1.Add(new NavigationBoardItem("Board 1", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
+    group1.Add(new NavigationBoardItem("Board 2", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
+    group1.Add(new NavigationBoardItem("Board 3", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
 
-    NavigationGroupItem group2 = new("Group 2", new FontIconSource() { Glyph = "\uE82D" }, new Guid());
-    group2.Children.Add(new NavigationBoardItem("Board 1", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
-    group2.Children.Add(new NavigationBoardItem("Board 2", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
-    group2.Children.Add(new NavigationBoardItem("Board 3", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
+    NavigationBoardGroupItem group2 = new("Group 2", new FontIconSource() { Glyph = "\uE82D" }, new Guid());
+    group2.Add(new NavigationBoardItem("Board 1", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
+    group2.Add(new NavigationBoardItem("Board 2", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
+    group2.Add(new NavigationBoardItem("Board 3", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
 
-    NavigationGroupItem group3 = new("Group 3", new FontIconSource() { Glyph = "\uE82D" }, new Guid());
-    group3.Children.Add(new NavigationBoardItem("Board 1", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
-    group3.Children.Add(new NavigationBoardItem("Board 2", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
-    group3.Children.Add(new NavigationBoardItem("Board 3", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
-    group1.Children.Add(group3);
-    
-    ListMenuItems.Add(group1);
-    ListMenuItems.Add(group2);
+    NavigationBoardGroupItem group3 = new("Group 3", new FontIconSource() { Glyph = "\uE82D" }, new Guid());
+    group3.Add(new NavigationBoardItem("Board 1", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
+    group3.Add(new NavigationBoardItem("Board 2", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
+    group3.Add(new NavigationBoardItem("Board 3", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
+    group1.Add(group3);
+
+    ListMenuRootItem.Add(group1, group2);
+    ListMenuItems = ListMenuRootItem.Children;
 
     MenuItems.Source = new List<IList>() { CoreMenuItems, ListMenuItems };
   }
@@ -44,18 +43,37 @@ public class MainViewModel : ViewModelBase
     new NavigationTagsItem(),
     new NavigationSeparator(),
   ];
-  public ObservableCollection<NavigationItem> ListMenuItems { get; } = new();
+
+  public NavigationBoardGroupItem ListMenuRootItem { get; } = new("Root", new FontIconSource() { Glyph = "\uE82D" }, new Guid());
+  public ReadOnlyObservableCollection<NavigationBoardItem> ListMenuItems { get; }
   public List<Navigation> FooterMenuItems { get; } =
   [
     new NavigationTrashItem(),
     new NavigationSettingsItem()
   ];
 
-  public void Recursive(NavigationItem item, Action<NavigationItem> action)
+  public void Recursive(NavigationBoardItem item, Action<NavigationBoardItem> action)
   {
-    if (item is NavigationGroupItem group)
-      foreach (NavigationItem child in group.Children)
+    if (item is NavigationBoardGroupItem group)
+      foreach (NavigationBoardItem child in group.Children)
         Recursive(child, action);
     action.Invoke(item);
   }
+
+  public void MoveNavigationBoardItem(NavigationBoardItem source, NavigationBoardItem target, NavigationBoardItemPosition position)
+  {
+    NavigationBoardGroupItem? sourceGroup = source.Parent;
+    NavigationBoardGroupItem? targetGroup = target.Parent;
+    switch (position)
+    {
+      case NavigationBoardItemPosition.Before:
+        targetGroup?.Insert(targetGroup.Children.IndexOf(target), source);
+        break;
+      case NavigationBoardItemPosition.After:
+        targetGroup?.Insert(targetGroup.Children.IndexOf(target) + 1, source);
+        break;
+    }
+  }
 }
+
+public enum NavigationBoardItemPosition { Before, After }

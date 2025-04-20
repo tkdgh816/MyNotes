@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page x:Class="MyNotes.Core.Views.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:models="using:MyNotes.Core.Models"
+      xmlns:views="using:MyNotes.Core.Views">
+
+  <Page.Resources>
+    <SolidColorBrush x:Key="NavigationViewContentBackground"
+                     Color="Transparent" />
+    <Thickness x:Key="NavigationViewContentGridBorderThickness">0</Thickness>
+    <Thickness x:Key="NavigationViewMinimalContentGridBorderThickness">0</Thickness>
+    <SolidColorBrush x:Key="TitleBarBackButtonBackgroundDisabled"
+                     Color="{ThemeResource SubtleFillColorDisabled}" />
+    <x:Double x:Key="TitleBarCompactHeight">40</x:Double>
+
+    <views:MainNavigationViewMenuItemTemplateSelector x:Key="MainNavigationViewMenuItemTemplateSelector">
+      <views:MainNavigationViewMenuItemTemplateSelector.MenuItemTemplate>
+        <DataTemplate x:DataType="models:NavigationItem">
+          <NavigationViewItem Content="{x:Bind Name}">
+            <NavigationViewItem.Icon>
+              <IconSourceElement IconSource="{x:Bind Icon}" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+        </DataTemplate>
+      </views:MainNavigationViewMenuItemTemplateSelector.MenuItemTemplate>
+      
+      <views:MainNavigationViewMenuItemTemplateSelector.SeparatorTemplate>
+        <DataTemplate x:DataType="models:NavigationSeparator">
+          <NavigationViewItemSeparator />
+        </DataTemplate>
+      </views:MainNavigationViewMenuItemTemplateSelector.SeparatorTemplate>
+      
+      <views:MainNavigationViewMenuItemTemplateSelector.BoardGroupMenuItemTemplate>
+        <DataTemplate x:DataType="models:NavigationBoardGroupItem">
+          <NavigationViewItem DataContext="{x:Bind}"
+                              MenuItemsSource="{x:Bind Children}"
+                              IsExpanded="True"
+                              Style="{StaticResource AppNavigationViewItemStyle}"
+                              AllowDrop="{x:Bind IsEditMode, Mode=OneWay}"
+                              DragOver="GroupNavigationViewItem_DragOver"
+                              DragLeave="NavigationViewItem_DragLeave"
+                              Drop="NavigationViewItem_DragLeave"
+                              SelectsOnInvoked="{x:Bind IsEditMode, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
+            <NavigationViewItem.Content>
+              <Grid CanDrag="{x:Bind IsEditMode, Mode=OneWay}"
+                    DragStarting="Grid_DragStarting"
+                    DropCompleted="Grid_DropCompleted">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{x:Bind Name, Mode=OneWay}"
+                           VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis" />
+                <Button Grid.Column="1"
+                        Style="{StaticResource AppFontIconButtonStyle}"
+                        Content="&#xE712;"
+                        Width="24"
+                        Height="24"
+                        Visibility="{x:Bind IsEditMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+              </Grid>
+            </NavigationViewItem.Content>
+            <NavigationViewItem.Icon>
+              <IconSourceElement IconSource="{x:Bind Icon, Mode=OneWay}" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+        </DataTemplate>
+      </views:MainNavigationViewMenuItemTemplateSelector.BoardGroupMenuItemTemplate>
+
+      <views:MainNavigationViewMenuItemTemplateSelector.BoardMenuItemTemplate>
+        <DataTemplate x:DataType="models:NavigationBoardItem">
+          <NavigationViewItem DataContext="{x:Bind}"
+                              Style="{StaticResource AppNavigationViewItemStyle}"
+                              AllowDrop="{x:Bind IsEditMode, Mode=OneWay}"
+                              DragOver="ItemNavigationViewItem_DragOver"
+                              DragLeave="NavigationViewItem_DragLeave"
+                              SelectsOnInvoked="{x:Bind IsEditMode, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
+            <NavigationViewItem.Content>
+              <Grid CanDrag="{x:Bind IsEditMode, Mode=OneWay}"
+                    DragStarting="Grid_DragStarting"
+                    DropCompleted="Grid_DropCompleted">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{x:Bind Name, Mode=OneWay}"
+                           VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis" />
+                <Button Grid.Column="1"
+                        Style="{StaticResource AppFontIconButtonStyle}"
+                        Content="&#xE712;"
+                        Width="24"
+                        Height="24"
+                        Visibility="{x:Bind IsEditMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                        Margin="0,0,26,0" />
+              </Grid>
+            </NavigationViewItem.Content>
+            <NavigationViewItem.Icon>
+              <IconSourceElement IconSource="{x:Bind Icon, Mode=OneWay}" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+        </DataTemplate>
+      </views:MainNavigationViewMenuItemTemplateSelector.BoardMenuItemTemplate>
+    </views:MainNavigationViewMenuItemTemplateSelector>
+  </Page.Resources>
+
+  <Grid x:Name="VIEW_RootGrid">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="48" />
+      <RowDefinition />
+    </Grid.RowDefinitions>
+
+    <TitleBar x:Name="VIEW_TitleBar"
+              Grid.Row="0"
+              IsBackButtonEnabled="{x:Bind VIEW_NavigationContent_RootFrame.CanGoBack, Mode=OneWay}"
+              IsBackButtonVisible="True"
+              BackRequested="VIEW_TitleBar_BackRequested"
+              IsPaneToggleButtonVisible="False"
+              Margin="2,0,0,0"
+              Title="MyNotes">
+      <TitleBar.IconSource>
+        <ImageIconSource ImageSource="ms-appx:///Assets/icons/app/AppIcon_16.png" />
+      </TitleBar.IconSource>
+    </TitleBar>
+
+    <NavigationView x:Name="VIEW_NavigationView"
+                    Grid.Row="1"
+                    IsBackButtonVisible="Collapsed"
+                    IsPaneToggleButtonVisible="True"
+                    IsSettingsVisible="False"
+                    MenuItemTemplateSelector="{StaticResource MainNavigationViewMenuItemTemplateSelector}"
+                    MenuItemsSource="{x:Bind ViewModel.MenuItems.View}"
+                    FooterMenuItemsSource="{x:Bind ViewModel.FooterMenuItems}"
+                    SelectionChanged="VIEW_NavigationView_SelectionChanged"
+                    PaneTitle="MyNotes">
+      <NavigationView.AutoSuggestBox>
+        <AutoSuggestBox PlaceholderText="Search notes"
+                        QueryIcon="Find"
+                        QuerySubmitted="AutoSuggestBox_QuerySubmitted">
+        </AutoSuggestBox>
+      </NavigationView.AutoSuggestBox>
+
+      <NavigationView.Content>
+        <Frame x:Name="VIEW_NavigationContent_RootFrame"
+               Padding="0,0,0,0"
+               Navigated="VIEW_NavigationContent_RootFrame_Navigated" />
+      </NavigationView.Content>
+
+      <NavigationView.PaneFooter>
+        <StackPanel Spacing="4">
+          <Grid Padding="4,0">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition />
+              <ColumnDefinition />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <views:IconButton x:Name="VIEW_NavigationViewFooter_NewGroupButton"
+                              Grid.Column="0"
+                              Content="New group"
+                              Style="{StaticResource AppNavigationButtonStyle}"
+                              Click="VIEW_NavigationViewFooter_NewGroupButton_Click">
+              <views:IconButton.Icon>
+                <FontIcon Glyph="&#xE82E;" />
+              </views:IconButton.Icon>
+            </views:IconButton>
+            <views:IconButton x:Name="VIEW_NavigationViewFooter_NewBoardButton"
+                              Grid.Column="1"
+                              Content="New board"
+                              Style="{StaticResource AppNavigationButtonStyle}"
+                              Click="VIEW_NavigationViewFooter_NewBoardButton_Click">
+              <views:IconButton.Icon>
+                <FontIcon Glyph="&#xED0E;" />
+              </views:IconButton.Icon>
+            </views:IconButton>
+            <views:IconButton x:Name="VIEW_NavigationViewFooter_EditNavigationViewItem"
+                              Grid.Column="2"
+                              Style="{StaticResource AppNavigationButtonStyle}"
+                              ToolTipService.ToolTip="Edit"
+                              Click="VIEW_NavigationViewFooter_EditNavigationViewItem_Click">
+              <views:IconButton.Icon>
+                <FontIcon Glyph="&#xE932;" />
+              </views:IconButton.Icon>
+            </views:IconButton>
+          </Grid>
+          <NavigationViewItemSeparator />
+        </StackPanel>
+      </NavigationView.PaneFooter>
+    </NavigationView>
+  </Grid>
+</Page>
