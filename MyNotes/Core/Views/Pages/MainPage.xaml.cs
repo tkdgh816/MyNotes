@@ -14,13 +14,7 @@ public sealed partial class MainPage : Page
   {
     this.InitializeComponent();
     ViewModel = App.Current.GetService<MainViewModel>();
-
-    _timer.Tick += (s, e) =>
-    {
-      _timer.Stop();
-      if (_hoveredGroupNavigationViewItem != null)
-        _hoveredGroupNavigationViewItem.IsExpanded = _hoverGroupNavigationViewItemIsExpanded;
-    };
+    SetTimer();
   }
 
   public MainViewModel ViewModel { get; }
@@ -52,7 +46,8 @@ public sealed partial class MainPage : Page
   {
     _isBackRequested = true;
     NavigationItem navigation = (NavigationItem)e.Parameter;
-    VIEW_NavigationView.SelectedItem = (navigation is NavigationSearchItem) ? null : navigation;
+    _currentNavigation = (navigation is NavigationSearchItem) ? null : navigation;
+    VIEW_NavigationView.SelectedItem = _currentNavigation;
     _isBackRequested = false;
   }
 
@@ -78,109 +73,149 @@ public sealed partial class MainPage : Page
     group.Add(new NavigationBoardItem("New Board", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
   }
 
+  private bool _isInEditMode = false;
+  private NavigationItem? _currentNavigation;
   private void VIEW_NavigationViewFooter_EditNavigationViewItem_Click(object sender, RoutedEventArgs e)
   {
-    VIEW_NavigationViewFooter_NewGroupButton.IsEnabled = !VIEW_NavigationViewFooter_NewGroupButton.IsEnabled;
-    VIEW_NavigationViewFooter_NewBoardButton.IsEnabled = !VIEW_NavigationViewFooter_NewBoardButton.IsEnabled;
+    _isBackRequested = true;
+    _isInEditMode = !_isInEditMode;
+
+    VIEW_NavigationViewFooter_NewGroupButton.IsEnabled = !_isInEditMode;
+    VIEW_NavigationViewFooter_NewBoardButton.IsEnabled = !_isInEditMode;
     foreach (NavigationBoardItem item in ViewModel.ListMenuItems)
-      ViewModel.Recursive(item, x => x.IsEditMode = !x.IsEditMode);
+      ViewModel.Recursive(item, x => x.IsEditable = _isInEditMode);
+    VIEW_NavigationView.SelectedItem = _isInEditMode ? null : _currentNavigation;
+
+    _isBackRequested = false;
   }
 
-  private NavigationBoardItem? _sourceItem;
-  private bool _isExpandedState;
+  #region NavigationView MenuItems >> Drag and Drop 
+  private NavigationBoardItem? _draggingSource;
+  private NavigationViewItem? _draggingItem;
+  private bool _isDraggingItemExpanded;
+
+  private NavigationViewItem? _hoveredGroup;
+  bool _isInsertingIntoHoveredGroup;
+
+  private const double HoveredItemUpperPosition = 10.0;
+  private const double HoveredItemLowerPostion = 25.0;
+
+  private readonly DispatcherTimer _timer = new();
+  private const int TimerIntervalMilliseconds = 200;
+
   private async void Grid_DragStarting(UIElement sender, DragStartingEventArgs args)
   {
     Grid item = (Grid)sender;
-    NavigationViewItem parentItem = (NavigationViewItem)item.Parent;
-    _isExpandedState = parentItem.IsExpanded;
-    _sourceItem = (NavigationBoardItem)parentItem.DataContext;
-    parentItem.IsExpanded = false;
+    _draggingItem = (NavigationViewItem)item.Parent;
+    _isDraggingItemExpanded = _draggingItem.IsExpanded;
+    _draggingSource = (NavigationBoardItem)_draggingItem.DataContext;
+    _draggingItem.IsExpanded = false;
+    _draggingItem.IsEnabled = false;
 
-    var defferal = args.GetDeferral();
-    var renderTargetBitmap = new RenderTargetBitmap();
-    await renderTargetBitmap.RenderAsync(parentItem);
+    DragOperationDeferral defferal = args.GetDeferral();
+    RenderTargetBitmap renderTargetBitmap = new();
+    await renderTargetBitmap.RenderAsync(_draggingItem);
 
     var pixels = await renderTargetBitmap.GetPixelsAsync();
 
-    var softwareBitmap = new SoftwareBitmap(BitmapPixelFormat.Bgra8, renderTargetBitmap.PixelWidth, renderTargetBitmap.PixelHeight, BitmapAlphaMode.Premultiplied);
+    SoftwareBitmap softwareBitmap = new(BitmapPixelFormat.Bgra8, renderTargetBitmap.PixelWidth, renderTargetBitmap.PixelHeight, BitmapAlphaMode.Premultiplied);
     softwareBitmap.CopyFromBuffer(pixels);
-    Point position = item.TransformToVisual(parentItem).TransformPoint(new Point(0, 0));
+    Point position = item.TransformToVisual(_draggingItem).TransformPoint(new Point(0, 0));
     args.DragUI.SetContentFromSoftwareBitmap(softwareBitmap, position);
     defferal.Complete();
-
-    parentItem.IsEnabled = false;
-    //parentItem.Foreground = (SolidColorBrush)((App)Application.Current).Resources["TextFillColorDisabledBrush"];
   }
 
   private void Grid_DropCompleted(UIElement sender, DropCompletedEventArgs args)
   {
-    Grid item = (Grid)sender;
-    NavigationViewItem parentItem = (NavigationViewItem)item.Parent;
-    if (parentItem is not null)
+    if (_hoveredGroup is not null && _isInsertingIntoHoveredGroup && !_hoveredGroup.IsExpanded)
     {
-      parentItem.IsExpanded = _isExpandedState;
-      parentItem.IsEnabled = true;
+      _hoveredGroup.LayoutUpdated += hoveredGroup_LayoutUpdated;
+      _hoveredGroup.IsExpanded = true;
     }
-    //parentItem.Foreground = (SolidColorBrush)((App)Application.Current).Resources["TextFillColorPrimaryBrush"];
+    else
+    {
+      RevertDraggedNavigationViewItemUI();
+      _hoveredGroup = null;
+    }
   }
 
-  private const double ItemUpperPosition = 10.0;
-  private const double ItemLowerPostion = 25.0;
+  private void hoveredGroup_LayoutUpdated(object? sender, object e)
+  {
+    RevertDraggedNavigationViewItemUI();
+    _hoveredGroup!.LayoutUpdated -= hoveredGroup_LayoutUpdated;
+    _hoveredGroup = null;
+  }
 
-  private DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(100) };
-  private NavigationViewItem? _hoveredGroupNavigationViewItem;
-  bool _hoverGroupNavigationViewItemIsExpanded;
+  private void RevertDraggedNavigationViewItemUI()
+  {
+    if (_draggingItem is not null)
+    {
+      _draggingItem.IsExpanded = _isDraggingItemExpanded;
+      _draggingItem.IsEnabled = true;
+      _draggingItem = null;
+    }
+  }
+
   private void GroupNavigationViewItem_DragOver(object sender, DragEventArgs e)
   {
     NavigationViewItem item = (NavigationViewItem)sender;
-    NavigationBoardGroupItem targetItem = (NavigationBoardGroupItem)item.DataContext;
+    NavigationBoardGroupItem hoveredTarget = (NavigationBoardGroupItem)item.DataContext;
     e.AcceptedOperation = DataPackageOperation.Move;
 
-
     double height = e.GetPosition(item).Y;
-    _hoveredGroupNavigationViewItem = item;
-    if (height <= ItemUpperPosition)
+    _hoveredGroup = item;
+    if (height <= HoveredItemUpperPosition)
     {
       StartTimer(false);
-      ViewModel.MoveNavigationBoardItem(_sourceItem!, targetItem, NavigationBoardItemPosition.Before);
+      ViewModel.MoveNavigationBoardItem(_draggingSource!, hoveredTarget, NavigationBoardItemPosition.Before);
     }
-    else if (height >= ItemLowerPostion)
+    else if (height >= HoveredItemLowerPostion)
     {
-      if (_sourceItem != targetItem)
+      if (_draggingSource != hoveredTarget)
         StartTimer(false);
-      ViewModel.MoveNavigationBoardItem(_sourceItem!, targetItem, NavigationBoardItemPosition.After);
+      ViewModel.MoveNavigationBoardItem(_draggingSource!, hoveredTarget, NavigationBoardItemPosition.After);
     }
-    else if (_sourceItem != targetItem)
+    else if (_draggingSource != hoveredTarget)
     {
       StartTimer(true);
-      if (targetItem.Children.Count == 0)
-        targetItem.Insert(0, _sourceItem!);
+      hoveredTarget.Insert(0, _draggingSource!);
     }
 
     e.Handled = true;
   }
 
+  private void SetTimer()
+  {
+    _timer.Interval = TimeSpan.FromMilliseconds(TimerIntervalMilliseconds);
+    _timer.Tick += (s, e) =>
+    {
+      _timer.Stop();
+      if (_hoveredGroup != null)
+        _hoveredGroup.IsExpanded = _isInsertingIntoHoveredGroup;
+    };
+  }
+
   private void StartTimer(bool isExpanded)
   {
-    _hoverGroupNavigationViewItemIsExpanded = isExpanded;
+    _isInsertingIntoHoveredGroup = isExpanded;
     _timer.Start();
   }
 
   private void ItemNavigationViewItem_DragOver(object sender, DragEventArgs e)
   {
     NavigationViewItem item = (NavigationViewItem)sender;
-    NavigationBoardItem targetItem = (NavigationBoardItem)item.DataContext;
+    NavigationBoardItem hoveredTarget = (NavigationBoardItem)item.DataContext;
     e.AcceptedOperation = DataPackageOperation.Move;
 
-    if (_sourceItem != targetItem)
+    if (_draggingSource != hoveredTarget)
     {
       double height = e.GetPosition(item).Y;
-      if (height <= ItemUpperPosition)
-        ViewModel.MoveNavigationBoardItem(_sourceItem!, targetItem, NavigationBoardItemPosition.Before);
-      else if (height >= ItemLowerPostion && targetItem.Parent!.Children.IndexOf(targetItem) >= targetItem.Parent.Children.Count - 2)
-        ViewModel.MoveNavigationBoardItem(_sourceItem!, targetItem.Parent, NavigationBoardItemPosition.After);
+      if (height <= HoveredItemUpperPosition)
+        ViewModel.MoveNavigationBoardItem(_draggingSource!, hoveredTarget, NavigationBoardItemPosition.Before);
+      else if (height >= HoveredItemLowerPostion && hoveredTarget.Parent!.Children.IndexOf(hoveredTarget) >= hoveredTarget.Parent.Children.Count - 2)
+        ViewModel.MoveNavigationBoardItem(_draggingSource!, hoveredTarget.Parent, NavigationBoardItemPosition.After);
       else
-        ViewModel.MoveNavigationBoardItem(_sourceItem!, targetItem, NavigationBoardItemPosition.After);
+        ViewModel.MoveNavigationBoardItem(_draggingSource!, hoveredTarget, NavigationBoardItemPosition.After);
     }
 
     e.Handled = true;
@@ -188,9 +223,9 @@ public sealed partial class MainPage : Page
 
   private void NavigationViewItem_DragLeave(object sender, DragEventArgs e)
   {
-    NavigationViewItem item = (NavigationViewItem)sender;
     _timer.Stop();
   }
+  #endregion
 }
 
 public class MainNavigationViewMenuItemTemplateSelector : DataTemplateSelector

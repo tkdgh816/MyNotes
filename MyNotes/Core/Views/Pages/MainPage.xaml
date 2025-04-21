@@ -37,13 +37,13 @@
                               MenuItemsSource="{x:Bind Children}"
                               IsExpanded="True"
                               Style="{StaticResource AppNavigationViewItemStyle}"
-                              AllowDrop="{x:Bind IsEditMode, Mode=OneWay}"
+                              AllowDrop="{x:Bind IsEditable, Mode=OneWay}"
                               DragOver="GroupNavigationViewItem_DragOver"
                               DragLeave="NavigationViewItem_DragLeave"
                               Drop="NavigationViewItem_DragLeave"
-                              SelectsOnInvoked="{x:Bind IsEditMode, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
+                              SelectsOnInvoked="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
             <NavigationViewItem.Content>
-              <Grid CanDrag="{x:Bind IsEditMode, Mode=OneWay}"
+              <Grid CanDrag="{x:Bind IsEditable, Mode=OneWay}"
                     DragStarting="Grid_DragStarting"
                     DropCompleted="Grid_DropCompleted">
                 <Grid.ColumnDefinitions>
@@ -58,7 +58,7 @@
                         Content="&#xE712;"
                         Width="24"
                         Height="24"
-                        Visibility="{x:Bind IsEditMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        Visibility="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
               </Grid>
             </NavigationViewItem.Content>
             <NavigationViewItem.Icon>
@@ -72,12 +72,12 @@
         <DataTemplate x:DataType="models:NavigationBoardItem">
           <NavigationViewItem DataContext="{x:Bind}"
                               Style="{StaticResource AppNavigationViewItemStyle}"
-                              AllowDrop="{x:Bind IsEditMode, Mode=OneWay}"
+                              AllowDrop="{x:Bind IsEditable, Mode=OneWay}"
                               DragOver="ItemNavigationViewItem_DragOver"
                               DragLeave="NavigationViewItem_DragLeave"
-                              SelectsOnInvoked="{x:Bind IsEditMode, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
+                              SelectsOnInvoked="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
             <NavigationViewItem.Content>
-              <Grid CanDrag="{x:Bind IsEditMode, Mode=OneWay}"
+              <Grid CanDrag="{x:Bind IsEditable, Mode=OneWay}"
                     DragStarting="Grid_DragStarting"
                     DropCompleted="Grid_DropCompleted">
                 <Grid.ColumnDefinitions>
@@ -92,8 +92,7 @@
                         Content="&#xE712;"
                         Width="24"
                         Height="24"
-                        Visibility="{x:Bind IsEditMode, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                        Margin="0,0,26,0" />
+                        Visibility="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
               </Grid>
             </NavigationViewItem.Content>
             <NavigationViewItem.Icon>

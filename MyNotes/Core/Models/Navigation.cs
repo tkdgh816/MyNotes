@@ -67,11 +67,11 @@ public class NavigationBoardItem : NavigationItem
     Id = id;
   }
 
-  private bool _isEditMode = false;
-  public bool IsEditMode
+  private bool _isEditable = false;
+  public bool IsEditable
   {
-    get => _isEditMode;
-    set => SetProperty(ref _isEditMode, value);
+    get => _isEditable;
+    set => SetProperty(ref _isEditable, value);
   }
 }
 

@@ -76,4 +76,4 @@ public class MainViewModel : ViewModelBase
   }
 }
 
-public enum NavigationBoardItemPosition { Before, After }
+public enum NavigationBoardItemPosition { Before, After, Inside }
