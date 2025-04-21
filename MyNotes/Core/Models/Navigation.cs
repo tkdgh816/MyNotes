@@ -3,7 +3,14 @@
 namespace MyNotes.Core.Models;
 
 public abstract class Navigation : ObservableObject
-{ }
+{
+  private bool _isEditable = false;
+  public bool IsEditable
+  {
+    get => _isEditable;
+    set => SetProperty(ref _isEditable, value);
+  }
+}
 
 public class NavigationSeparator : Navigation
 { }
@@ -65,13 +72,6 @@ public class NavigationBoardItem : NavigationItem
   public NavigationBoardItem(string name, IconSource icon, Guid id) : base(typeof(NotesListPage), name, icon) 
   {
     Id = id;
-  }
-
-  private bool _isEditable = false;
-  public bool IsEditable
-  {
-    get => _isEditable;
-    set => SetProperty(ref _isEditable, value);
   }
 }
 

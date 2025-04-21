@@ -82,11 +82,29 @@ public sealed partial class MainPage : Page
 
     VIEW_NavigationViewFooter_NewGroupButton.IsEnabled = !_isInEditMode;
     VIEW_NavigationViewFooter_NewBoardButton.IsEnabled = !_isInEditMode;
+
+    VIEW_TitleBar.IsBackButtonVisible = !_isInEditMode;
+    VIEW_NavigationVIew_AutoSuggestBox.IsEnabled = !_isInEditMode;
+    foreach (Navigation item in ViewModel.CoreMenuItems)
+      item.IsEditable = _isInEditMode;
+    foreach (Navigation item in ViewModel.FooterMenuItems)
+      item.IsEditable = _isInEditMode;
     foreach (NavigationBoardItem item in ViewModel.ListMenuItems)
       ViewModel.Recursive(item, x => x.IsEditable = _isInEditMode);
     VIEW_NavigationView.SelectedItem = _isInEditMode ? null : _currentNavigation;
 
     _isBackRequested = false;
+  }
+
+  private void VIEW_NavigationView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
+  {
+    if (args.InvokedItemContainer is NavigationViewItem item && item.DataContext is not NavigationBoardGroupItem && !item.SelectsOnInvoked)
+      VIEW_EditTeachingTip.IsOpen = true;
+  }
+
+  private void VIEW_NavigationView_Loaded(object sender, RoutedEventArgs e)
+  {
+    VIEW_NavigationView.SelectedItem = ViewModel.CoreMenuItems[0];
   }
 
   #region NavigationView MenuItems >> Drag and Drop 

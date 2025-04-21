@@ -17,7 +17,8 @@
     <views:MainNavigationViewMenuItemTemplateSelector x:Key="MainNavigationViewMenuItemTemplateSelector">
       <views:MainNavigationViewMenuItemTemplateSelector.MenuItemTemplate>
         <DataTemplate x:DataType="models:NavigationItem">
-          <NavigationViewItem Content="{x:Bind Name}">
+          <NavigationViewItem Content="{x:Bind Name}"
+                              IsEnabled="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
             <NavigationViewItem.Icon>
               <IconSourceElement IconSource="{x:Bind Icon}" />
             </NavigationViewItem.Icon>
@@ -132,9 +133,12 @@
                     MenuItemsSource="{x:Bind ViewModel.MenuItems.View}"
                     FooterMenuItemsSource="{x:Bind ViewModel.FooterMenuItems}"
                     SelectionChanged="VIEW_NavigationView_SelectionChanged"
-                    PaneTitle="MyNotes">
+                    PaneTitle="MyNotes"
+                    ItemInvoked="VIEW_NavigationView_ItemInvoked"
+                    Loaded="VIEW_NavigationView_Loaded">
       <NavigationView.AutoSuggestBox>
-        <AutoSuggestBox PlaceholderText="Search notes"
+        <AutoSuggestBox x:Name="VIEW_NavigationVIew_AutoSuggestBox"
+                        PlaceholderText="Search notes"
                         QueryIcon="Find"
                         QuerySubmitted="AutoSuggestBox_QuerySubmitted">
         </AutoSuggestBox>
@@ -186,5 +190,10 @@
         </StackPanel>
       </NavigationView.PaneFooter>
     </NavigationView>
+
+    <TeachingTip x:Name="VIEW_EditTeachingTip"
+                 Target="{x:Bind VIEW_NavigationViewFooter_EditNavigationViewItem}"
+                 Title="Turn off edit mode to select item."
+                 IsLightDismissEnabled="True" />
   </Grid>
 </Page>
