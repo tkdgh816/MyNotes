@@ -8,7 +8,7 @@ public sealed partial class NotesListPage : Page
     this.InitializeComponent();
   }
 
-  public NavigationItem? Navigation { get; private set; }
+  public NavigationBoardItem? Navigation { get; private set; }
   protected override void OnNavigatedTo(NavigationEventArgs e)
   {
     base.OnNavigatedTo(e);

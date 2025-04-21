@@ -68,10 +68,16 @@ public class NavigationBoardItem : NavigationItem
 {
   public Guid Id { get; }
   public NavigationBoardGroupItem Parent { get; set; } = null!;
+  public ObservableCollection<Note> Notes { get; } = new();
 
   public NavigationBoardItem(string name, IconSource icon, Guid id) : base(typeof(NotesListPage), name, icon) 
   {
     Id = id;
+    // TEST
+    Notes.Add(new("Note 1"));
+    Notes.Add(new("Note 2"));
+    Notes.Add(new("Note 3"));
+    Notes.Add(new("Note 4"));
   }
 }
 

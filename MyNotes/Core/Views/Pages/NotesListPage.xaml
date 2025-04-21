@@ -2,6 +2,7 @@
 <Page x:Class="MyNotes.Core.Views.NotesListPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:models="using:MyNotes.Core.Models"
       xmlns:views="using:MyNotes.Core.Views">
   
   <Grid>
@@ -26,7 +27,13 @@
     </StackPanel>
 
     <ScrollViewer Grid.Row="1">
-
+      <GridView ItemsSource="{x:Bind Navigation.Notes}">
+        <GridView.ItemTemplate>
+          <DataTemplate x:DataType="models:Note">
+            <TextBlock Text="{x:Bind Title, Mode=OneWay}" />
+          </DataTemplate>
+        </GridView.ItemTemplate>
+      </GridView>
     </ScrollViewer>
   </Grid>
 </Page>
