@@ -4,7 +4,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:models="using:MyNotes.Core.Models"
       xmlns:views="using:MyNotes.Core.Views">
-  
+
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
@@ -27,10 +27,37 @@
     </StackPanel>
 
     <ScrollViewer Grid.Row="1">
-      <GridView ItemsSource="{x:Bind Navigation.Notes}">
+      <GridView ItemsSource="{x:Bind Navigation.Notes}"
+                SelectionMode="Multiple"
+                ItemContainerStyle="{StaticResource AppGridViewItemContainerStyle}"
+                ItemsPanel="{StaticResource AppItemPanelTemplate}">
         <GridView.ItemTemplate>
           <DataTemplate x:DataType="models:Note">
-            <TextBlock Text="{x:Bind Title, Mode=OneWay}" />
+            <Grid Margin="6"
+                  Background="LightYellow"
+                  CornerRadius="8"
+                  BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
+                  BorderThickness="1"
+                  Translation="0,0,12">
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+              </Grid.RowDefinitions>
+              <Grid Grid.Row="0"
+                    Padding="6"
+                    Background="{StaticResource SubtleFillColorSecondary}"
+                    BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="0,0,0,1">
+                <TextBlock Text="{x:Bind Title, Mode=OneWay}"
+                           Style="{StaticResource BodyStrongTextBlockStyle}" />
+              </Grid>
+              <TextBlock Grid.Row="1"
+                         Text="Body" />
+
+              <Grid.Shadow>
+                <ThemeShadow />
+              </Grid.Shadow>
+            </Grid>
           </DataTemplate>
         </GridView.ItemTemplate>
       </GridView>

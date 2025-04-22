@@ -3,7 +3,8 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:primitives="using:Microsoft.UI.Xaml.Controls.Primitives"
                     xmlns:converters="using:MyNotes.Common.Converters"
-                    xmlns:views="using:MyNotes.Core.Views">
+                    xmlns:views="using:MyNotes.Core.Views"
+                    xmlns:controls="using:CommunityToolkit.WinUI.Controls">
 
   <ResourceDictionary.ThemeDictionaries>
   </ResourceDictionary.ThemeDictionaries>
@@ -367,8 +368,7 @@
   </Style>
 
   <!--#region NavigationViewItem Style -->
-  <Style x:Key="AppNavigationViewItemStyle"
-         TargetType="NavigationViewItem">
+  <Style TargetType="views:AppNavigationViewItem">
     <Setter Property="Foreground"
             Value="{ThemeResource NavigationViewItemForeground}" />
     <Setter Property="Background"
@@ -526,4 +526,26 @@
     </Setter>
   </Style>
   <!--#endregion-->
+
+  <Style x:Key="AppGridViewItemContainerStyle"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource DefaultGridViewItemStyle}">
+    <Setter Property="HorizontalContentAlignment"
+            Value="Stretch" />
+    <Setter Property="VerticalContentAlignment"
+            Value="Stretch" />
+    <Setter Property="Width"
+            Value="200" />
+    <Setter Property="Height"
+            Value="200" />
+    <Setter Property="MinWidth"
+            Value="0" />
+    <Setter Property="MinHeight"
+            Value="0" />
+  </Style>
+
+  <ItemsPanelTemplate x:Key="AppItemPanelTemplate">
+    <controls:WrapPanel HorizontalSpacing="-4"
+                        VerticalSpacing="-4" />
+  </ItemsPanelTemplate>
 </ResourceDictionary>

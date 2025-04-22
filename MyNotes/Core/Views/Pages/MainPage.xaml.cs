@@ -22,6 +22,9 @@ public sealed partial class MainPage : Page
   private void VIEW_TitleBar_BackRequested(TitleBar sender, object args)
     => VIEW_NavigationContent_RootFrame.GoBack();
 
+  private void VIEW_TitleBar_PaneToggleRequested(TitleBar sender, object args)
+    => VIEW_NavigationView.IsPaneOpen = !VIEW_NavigationView.IsPaneOpen;
+
   private void AutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
   {
     NavigationSearchItem searchItem = new(args.QueryText);
@@ -121,10 +124,9 @@ public sealed partial class MainPage : Page
   private readonly DispatcherTimer _timer = new();
   private const int TimerIntervalMilliseconds = 200;
 
-  private async void Grid_DragStarting(UIElement sender, DragStartingEventArgs args)
+  private async void NavigationViewItem_DragStarting(UIElement sender, DragStartingEventArgs args)
   {
-    Grid item = (Grid)sender;
-    _draggingItem = (NavigationViewItem)item.Parent;
+    _draggingItem = (NavigationViewItem)sender;
     _isDraggingItemExpanded = _draggingItem.IsExpanded;
     _draggingSource = (NavigationBoardItem)_draggingItem.DataContext;
     _draggingItem.IsExpanded = false;
@@ -138,12 +140,11 @@ public sealed partial class MainPage : Page
 
     SoftwareBitmap softwareBitmap = new(BitmapPixelFormat.Bgra8, renderTargetBitmap.PixelWidth, renderTargetBitmap.PixelHeight, BitmapAlphaMode.Premultiplied);
     softwareBitmap.CopyFromBuffer(pixels);
-    Point position = item.TransformToVisual(_draggingItem).TransformPoint(new Point(0, 0));
-    args.DragUI.SetContentFromSoftwareBitmap(softwareBitmap, position);
+    args.DragUI.SetContentFromSoftwareBitmap(softwareBitmap, new Point(0, 0));
     defferal.Complete();
   }
 
-  private void Grid_DropCompleted(UIElement sender, DropCompletedEventArgs args)
+  private void NavigationViewItem_DropCompleted(UIElement sender, DropCompletedEventArgs args)
   {
     if (_hoveredGroup is not null && _isInsertingIntoHoveredGroup && !_hoveredGroup.IsExpanded)
     {

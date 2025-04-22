@@ -25,28 +25,29 @@
           </NavigationViewItem>
         </DataTemplate>
       </views:MainNavigationViewMenuItemTemplateSelector.MenuItemTemplate>
-      
+
       <views:MainNavigationViewMenuItemTemplateSelector.SeparatorTemplate>
         <DataTemplate x:DataType="models:NavigationSeparator">
           <NavigationViewItemSeparator />
         </DataTemplate>
       </views:MainNavigationViewMenuItemTemplateSelector.SeparatorTemplate>
-      
+
       <views:MainNavigationViewMenuItemTemplateSelector.BoardGroupMenuItemTemplate>
         <DataTemplate x:DataType="models:NavigationBoardGroupItem">
-          <NavigationViewItem DataContext="{x:Bind}"
-                              MenuItemsSource="{x:Bind Children}"
-                              IsExpanded="True"
-                              Style="{StaticResource AppNavigationViewItemStyle}"
-                              AllowDrop="{x:Bind IsEditable, Mode=OneWay}"
-                              DragOver="GroupNavigationViewItem_DragOver"
-                              DragLeave="NavigationViewItem_DragLeave"
-                              Drop="NavigationViewItem_DragLeave"
-                              SelectsOnInvoked="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
-            <NavigationViewItem.Content>
-              <Grid CanDrag="{x:Bind IsEditable, Mode=OneWay}"
-                    DragStarting="Grid_DragStarting"
-                    DropCompleted="Grid_DropCompleted">
+          <views:AppNavigationViewItem DataContext="{x:Bind}"
+                                       MenuItemsSource="{x:Bind Children}"
+                                       IsExpanded="True"
+                                       Style="{StaticResource AppNavigationViewItemStyle}"
+                                       CanDrag="{x:Bind IsEditable, Mode=OneWay}"
+                                       PresenterDragStarting="NavigationViewItem_DragStarting"
+                                       PresenterDropCompleted="NavigationViewItem_DropCompleted"
+                                       AllowDrop="{x:Bind IsEditable, Mode=OneWay}"
+                                       DragOver="GroupNavigationViewItem_DragOver"
+                                       DragLeave="NavigationViewItem_DragLeave"
+                                       Drop="NavigationViewItem_DragLeave"
+                                       SelectsOnInvoked="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
+            <views:AppNavigationViewItem.Content>
+              <Grid>
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition />
                   <ColumnDefinition Width="Auto" />
@@ -61,26 +62,27 @@
                         Height="24"
                         Visibility="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
               </Grid>
-            </NavigationViewItem.Content>
-            <NavigationViewItem.Icon>
+            </views:AppNavigationViewItem.Content>
+            <views:AppNavigationViewItem.Icon>
               <IconSourceElement IconSource="{x:Bind Icon, Mode=OneWay}" />
-            </NavigationViewItem.Icon>
-          </NavigationViewItem>
+            </views:AppNavigationViewItem.Icon>
+          </views:AppNavigationViewItem>
         </DataTemplate>
       </views:MainNavigationViewMenuItemTemplateSelector.BoardGroupMenuItemTemplate>
 
       <views:MainNavigationViewMenuItemTemplateSelector.BoardMenuItemTemplate>
         <DataTemplate x:DataType="models:NavigationBoardItem">
-          <NavigationViewItem DataContext="{x:Bind}"
-                              Style="{StaticResource AppNavigationViewItemStyle}"
-                              AllowDrop="{x:Bind IsEditable, Mode=OneWay}"
-                              DragOver="ItemNavigationViewItem_DragOver"
-                              DragLeave="NavigationViewItem_DragLeave"
-                              SelectsOnInvoked="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
-            <NavigationViewItem.Content>
-              <Grid CanDrag="{x:Bind IsEditable, Mode=OneWay}"
-                    DragStarting="Grid_DragStarting"
-                    DropCompleted="Grid_DropCompleted">
+          <views:AppNavigationViewItem DataContext="{x:Bind}"
+                                       Style="{StaticResource AppNavigationViewItemStyle}"
+                                       CanDrag="{x:Bind IsEditable, Mode=OneWay}"
+                                       PresenterDragStarting="NavigationViewItem_DragStarting"
+                                       PresenterDropCompleted="NavigationViewItem_DropCompleted"
+                                       AllowDrop="{x:Bind IsEditable, Mode=OneWay}"
+                                       DragOver="ItemNavigationViewItem_DragOver"
+                                       DragLeave="NavigationViewItem_DragLeave"
+                                       SelectsOnInvoked="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
+            <views:AppNavigationViewItem.Content>
+              <Grid>
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition />
                   <ColumnDefinition Width="Auto" />
@@ -93,13 +95,13 @@
                         Content="&#xE712;"
                         Width="24"
                         Height="24"
-                        Visibility="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                        Visibility="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
               </Grid>
-            </NavigationViewItem.Content>
-            <NavigationViewItem.Icon>
+            </views:AppNavigationViewItem.Content>
+            <views:AppNavigationViewItem.Icon>
               <IconSourceElement IconSource="{x:Bind Icon, Mode=OneWay}" />
-            </NavigationViewItem.Icon>
-          </NavigationViewItem>
+            </views:AppNavigationViewItem.Icon>
+          </views:AppNavigationViewItem>
         </DataTemplate>
       </views:MainNavigationViewMenuItemTemplateSelector.BoardMenuItemTemplate>
     </views:MainNavigationViewMenuItemTemplateSelector>
@@ -116,7 +118,8 @@
               IsBackButtonEnabled="{x:Bind VIEW_NavigationContent_RootFrame.CanGoBack, Mode=OneWay}"
               IsBackButtonVisible="True"
               BackRequested="VIEW_TitleBar_BackRequested"
-              IsPaneToggleButtonVisible="False"
+              IsPaneToggleButtonVisible="True"
+              PaneToggleRequested="VIEW_TitleBar_PaneToggleRequested"
               Margin="2,0,0,0"
               Title="MyNotes">
       <TitleBar.IconSource>
@@ -127,13 +130,12 @@
     <NavigationView x:Name="VIEW_NavigationView"
                     Grid.Row="1"
                     IsBackButtonVisible="Collapsed"
-                    IsPaneToggleButtonVisible="True"
+                    IsPaneToggleButtonVisible="False"
                     IsSettingsVisible="False"
                     MenuItemTemplateSelector="{StaticResource MainNavigationViewMenuItemTemplateSelector}"
                     MenuItemsSource="{x:Bind ViewModel.MenuItems.View}"
                     FooterMenuItemsSource="{x:Bind ViewModel.FooterMenuItems}"
                     SelectionChanged="VIEW_NavigationView_SelectionChanged"
-                    PaneTitle="MyNotes"
                     ItemInvoked="VIEW_NavigationView_ItemInvoked"
                     Loaded="VIEW_NavigationView_Loaded">
       <NavigationView.AutoSuggestBox>
