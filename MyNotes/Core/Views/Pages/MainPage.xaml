@@ -37,7 +37,6 @@
           <views:AppNavigationViewItem DataContext="{x:Bind}"
                                        MenuItemsSource="{x:Bind Children}"
                                        IsExpanded="True"
-                                       Style="{StaticResource AppNavigationViewItemStyle}"
                                        CanDrag="{x:Bind IsEditable, Mode=OneWay}"
                                        PresenterDragStarting="NavigationViewItem_DragStarting"
                                        PresenterDropCompleted="NavigationViewItem_DropCompleted"
@@ -73,7 +72,6 @@
       <views:MainNavigationViewMenuItemTemplateSelector.BoardMenuItemTemplate>
         <DataTemplate x:DataType="models:NavigationBoardItem">
           <views:AppNavigationViewItem DataContext="{x:Bind}"
-                                       Style="{StaticResource AppNavigationViewItemStyle}"
                                        CanDrag="{x:Bind IsEditable, Mode=OneWay}"
                                        PresenterDragStarting="NavigationViewItem_DragStarting"
                                        PresenterDropCompleted="NavigationViewItem_DropCompleted"
