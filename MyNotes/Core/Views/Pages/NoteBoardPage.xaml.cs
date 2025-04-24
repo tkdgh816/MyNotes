@@ -1,3 +1,5 @@
+using Microsoft.UI.Dispatching;
+
 using MyNotes.Core.Models;
 
 namespace MyNotes.Core.Views;
@@ -90,5 +92,21 @@ public sealed partial class NoteBoard : Page
   private void Button_Click(object sender, RoutedEventArgs e)
   {
     Debug.WriteLine("Button Clicked " + num++);
+  }
+
+  private void VIEW_SearchAutoSuggestBox_LostFocus(object sender, RoutedEventArgs e)
+  {
+    VisualStateManager.GoToState(this, "SearchBoxNormal", false);
+  }
+
+  private void VIEW_SearchButton_Click(object sender, RoutedEventArgs e)
+  {
+    VisualStateManager.GoToState(this, "SearchBoxSearching", false);
+  }
+
+  private void VIEW_SearchAutoSuggestBox_LayoutUpdated(object sender, object e)
+  {
+    if (VIEW_SearchAutoSuggestBox.Visibility is Visibility.Visible)
+      VIEW_SearchAutoSuggestBox.Focus(FocusState.Programmatic);
   }
 }

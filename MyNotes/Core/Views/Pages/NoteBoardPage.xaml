@@ -189,8 +189,14 @@
       <RowDefinition />
     </Grid.RowDefinitions>
 
-    <StackPanel Orientation="Horizontal"
-                Spacing="8">
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+
       <Button Style="{StaticResource AppIconButtonStyle}">
         <IconSourceElement IconSource="{x:Bind Navigation.Icon, Mode=OneWay}" />
         <Button.Flyout>
@@ -200,12 +206,41 @@
           </Flyout>
         </Button.Flyout>
       </Button>
-      <TextBlock Text="{x:Bind Navigation.Name, Mode=OneWay}"
-                 Style="{StaticResource TitleTextBlockStyle}" />
+      <TextBlock Grid.Column="1"
+                 Text="{x:Bind Navigation.Name, Mode=OneWay}"
+                 Style="{StaticResource TitleTextBlockStyle}"
+                 TextWrapping="NoWrap"
+                 Margin="8,0" />
 
-      <Button Content="Style">
+      <Grid Grid.Column="2">
+        <Button x:Name="VIEW_SearchButton"
+                HorizontalAlignment="Right"
+                Style="{StaticResource AppFontIconButtonStyle}"
+                Content="&#xE721;"
+                Click="VIEW_SearchButton_Click">
+        </Button>
+        <AutoSuggestBox x:Name="VIEW_SearchAutoSuggestBox"
+                        Visibility="Collapsed"
+                        PlaceholderText="Search within this page."
+                        QueryIcon="Find"
+                        VerticalAlignment="Center"
+                        Width="250"
+                        LostFocus="VIEW_SearchAutoSuggestBox_LostFocus"
+                        LayoutUpdated="VIEW_SearchAutoSuggestBox_LayoutUpdated">
+          <AutoSuggestBox.RenderTransform>
+            <TranslateTransform x:Name="VIEW_SearchAutoSuggestBox_TranslateTransform" />
+          </AutoSuggestBox.RenderTransform>
+        </AutoSuggestBox>
+        <Grid.Clip>
+          <RectangleGeometry Rect="0,0,250,64" />
+        </Grid.Clip>
+      </Grid>
+
+      <Button Grid.Column="3"
+              Style="{StaticResource AppFontIconButtonStyle}"
+              Content="&#xE712;">
         <Button.Flyout>
-          <Flyout Placement="RightEdgeAlignedTop">
+          <Flyout Placement="BottomEdgeAlignedRight">
             <StackPanel Spacing="12">
               <RadioButtons Header="View"
                             HeaderTemplate="{StaticResource AppBoldTextHeaderTemplate}"
@@ -281,7 +316,7 @@
           </Flyout>
         </Button.Flyout>
       </Button>
-    </StackPanel>
+    </Grid>
 
     <ScrollViewer Grid.Row="1">
       <GridView x:Name="VIEW_NotesGridView"
@@ -380,5 +415,85 @@
         </GridView.ItemTemplate>-->
       </GridView>
     </ScrollViewer>
+
+    <VisualStateManager.VisualStateGroups>
+      <VisualStateGroup x:Name="SearchBoxStates">
+        <VisualState x:Name="SearchBoxSearching">
+          <Storyboard>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="VIEW_SearchButton"
+                                           Storyboard.TargetProperty="Visibility">
+              <DiscreteObjectKeyFrame KeyTime="0"
+                                      Value="Collapsed" />
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="VIEW_SearchButton"
+                                           Storyboard.TargetProperty="Opacity">
+              <DiscreteObjectKeyFrame KeyTime="0"
+                                      Value="0" />
+            </ObjectAnimationUsingKeyFrames>
+
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="VIEW_SearchAutoSuggestBox"
+                                           Storyboard.TargetProperty="Visibility">
+              <DiscreteObjectKeyFrame KeyTime="0"
+                                      Value="Visible" />
+            </ObjectAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="VIEW_SearchAutoSuggestBox"
+                                           Storyboard.TargetProperty="Opacity">
+              <DiscreteDoubleKeyFrame KeyTime="0"
+                                      Value="0" />
+              <SplineDoubleKeyFrame KeyTime="0:0:0.25"
+                                    KeySpline="0.2,0 0,1"
+                                    Value="1" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="VIEW_SearchAutoSuggestBox_TranslateTransform"
+                                           Storyboard.TargetProperty="X">
+              <DiscreteDoubleKeyFrame KeyTime="0"
+                                      Value="40" />
+              <SplineDoubleKeyFrame KeyTime="0:0:0.25"
+                                    KeySpline="0.2,0 0,1"
+                                    Value="0" />
+            </DoubleAnimationUsingKeyFrames>
+          </Storyboard>
+        </VisualState>
+        <VisualState x:Name="SearchBoxNormal">
+          <Storyboard>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="VIEW_SearchButton"
+                                           Storyboard.TargetProperty="Visibility">
+              <DiscreteObjectKeyFrame KeyTime="0:0:0.125"
+                                      Value="Visible" />
+            </ObjectAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="VIEW_SearchButton"
+                                           Storyboard.TargetProperty="Opacity"
+                                           BeginTime="0:0:0.125">
+              <DiscreteDoubleKeyFrame KeyTime="0"
+                                      Value="0" />
+              <LinearDoubleKeyFrame KeyTime="0:0:0.25"
+                                    Value="1" />
+            </DoubleAnimationUsingKeyFrames>
+
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="VIEW_SearchAutoSuggestBox"
+                                           Storyboard.TargetProperty="Visibility">
+              <DiscreteObjectKeyFrame KeyTime="0:0:0.25"
+                                      Value="Collapsed" />
+            </ObjectAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="VIEW_SearchAutoSuggestBox"
+                                           Storyboard.TargetProperty="Opacity">
+              <DiscreteDoubleKeyFrame KeyTime="0"
+                                      Value="1" />
+              <SplineDoubleKeyFrame KeyTime="0:0:0.25"
+                                    KeySpline="0.1,0.9 0.2,1.0"
+                                    Value="0" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="VIEW_SearchAutoSuggestBox_TranslateTransform"
+                                           Storyboard.TargetProperty="X">
+              <DiscreteDoubleKeyFrame KeyTime="0"
+                                      Value="0" />
+              <SplineDoubleKeyFrame KeyTime="0:0:0.25"
+                                    KeySpline="0.1,0.9 0.2,1.0"
+                                    Value="40" />
+            </DoubleAnimationUsingKeyFrames>
+          </Storyboard>
+        </VisualState>
+      </VisualStateGroup>
+    </VisualStateManager.VisualStateGroups>
   </Grid>
 </Page>

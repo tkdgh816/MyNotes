@@ -74,16 +74,16 @@ public class NavigationBoardItem : NavigationItem
   {
     Id = id;
     // TEST
-    Notes.Add(new("Note 1"));
-    Notes.Add(new("Note 2"));
-    Notes.Add(new("Note 3"));
-    Notes.Add(new("Note 4"));
-    Notes.Add(new("Note 5"));
-    Notes.Add(new("Note 6"));
-    Notes.Add(new("Note 7"));
-    Notes.Add(new("Note 8"));
-    Notes.Add(new("Note 9"));
-    Notes.Add(new("Note 10"));
+    Notes.Add(new("Note 1 Title"));
+    Notes.Add(new("Note 2 Title"));
+    Notes.Add(new("Note 3 Title"));
+    Notes.Add(new("Note 4 Title"));
+    Notes.Add(new("Note 5 Title"));
+    Notes.Add(new("Note 6 Title"));
+    Notes.Add(new("Note 7 Title"));
+    Notes.Add(new("Note 8 Title"));
+    Notes.Add(new("Note 9 Title"));
+    Notes.Add(new("Note 10 Title"));
   }
 }
 
