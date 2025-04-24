@@ -246,7 +246,7 @@
                 Padding="{TemplateBinding Padding}"
                 AutomationProperties.AccessibilityView="Raw">
             <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition Width="Auto" />
               <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
@@ -273,8 +273,8 @@
                               ContentTransitions="{TemplateBinding ContentTransitions}"
                               VerticalAlignment="Center"
                               HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" 
-                              Visibility="{TemplateBinding IsContentVisible}"/>
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                              Visibility="{TemplateBinding IsContentVisible}" />
 
             <VisualStateManager.VisualStateGroups>
               <VisualStateGroup x:Name="CommonStates">
@@ -633,8 +633,13 @@
   <ItemsPanelTemplate x:Key="AppItemPanelTemplate1">
     <ItemsWrapGrid Orientation="Horizontal" />
   </ItemsPanelTemplate>
-  
+
   <ItemsPanelTemplate x:Key="AppItemPanelTemplate2">
     <ItemsStackPanel />
   </ItemsPanelTemplate>
+
+  <DataTemplate x:Key="AppBoldTextHeaderTemplate">
+    <TextBlock Text="{Binding}"
+               Style="{StaticResource BaseTextBlockStyle}" />
+  </DataTemplate>
 </ResourceDictionary>

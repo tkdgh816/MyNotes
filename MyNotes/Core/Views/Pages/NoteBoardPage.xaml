@@ -208,6 +208,7 @@
           <Flyout Placement="RightEdgeAlignedTop">
             <StackPanel Spacing="12">
               <RadioButtons Header="View"
+                            HeaderTemplate="{StaticResource AppBoldTextHeaderTemplate}"
                             MaxColumns="2">
                 <RadioButtons.Resources>
                   <SolidColorBrush x:Key="ToggleButtonBackground"
@@ -243,7 +244,7 @@
               </RadioButtons>
 
               <MenuFlyoutSeparator />
-              
+
               <Grid>
                 <Grid.RowDefinitions>
                   <RowDefinition Height="Auto" />
@@ -263,6 +264,7 @@
                 <Slider x:Name="VIEW_StyleChangeSlider"
                         Grid.Row="0"
                         Header="Size"
+                        HeaderTemplate="{StaticResource AppBoldTextHeaderTemplate}"
                         Orientation="Horizontal"
                         TickFrequency="30"
                         TickPlacement="Outside"
