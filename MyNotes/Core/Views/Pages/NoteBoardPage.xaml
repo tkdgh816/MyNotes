@@ -183,6 +183,8 @@
       </UserControl>
     </DataTemplate>
   </Page.Resources>
+
+  <!--#region Navigation Header -->
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
@@ -197,6 +199,7 @@
         <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
 
+      <!--#region Icon -->
       <Button Style="{StaticResource AppIconButtonStyle}">
         <IconSourceElement IconSource="{x:Bind Navigation.Icon, Mode=OneWay}" />
         <Button.Flyout>
@@ -206,12 +209,17 @@
           </Flyout>
         </Button.Flyout>
       </Button>
+      <!--#endregion-->
+
+      <!--#region Title -->
       <TextBlock Grid.Column="1"
                  Text="{x:Bind Navigation.Name, Mode=OneWay}"
                  Style="{StaticResource TitleTextBlockStyle}"
                  TextWrapping="NoWrap"
                  Margin="8,0" />
+      <!--#endregion -->
 
+      <!--#region Search Button -->
       <Grid Grid.Column="2">
         <Button x:Name="VIEW_SearchButton"
                 HorizontalAlignment="Right"
@@ -235,7 +243,9 @@
           <RectangleGeometry Rect="0,0,250,64" />
         </Grid.Clip>
       </Grid>
+      <!--#endregion -->
 
+      <!--#region More Button -->
       <Button Grid.Column="3"
               Style="{StaticResource AppFontIconButtonStyle}"
               Content="&#xE712;">
@@ -316,8 +326,11 @@
           </Flyout>
         </Button.Flyout>
       </Button>
+      <!--#endregion-->
     </Grid>
+    <!--#endregion-->
 
+    <!--#region Notes List GridView -->
     <ScrollViewer Grid.Row="1">
       <GridView x:Name="VIEW_NotesGridView"
                 ItemsSource="{x:Bind Navigation.Notes}"
@@ -325,97 +338,11 @@
                 ItemContainerStyle="{StaticResource AppGridViewItemContainerStyle210}"
                 ItemTemplate="{StaticResource GridViewItemTemplate1}"
                 ChoosingItemContainer="GridView_ChoosingItemContainer"
-                ContainerContentChanging="GridView_ContainerContentChanging">
-        <!--<GridView.ItemTemplate>
-          <DataTemplate x:DataType="models:Note">
-            <UserControl Margin="6"
-                         PointerEntered="Grid_PointerEntered"
-                         PointerExited="Grid_PointerExited">
-              <Grid Background="LightYellow"
-                    CornerRadius="8"
-                    BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    Translation="0,0,12">
-                <Grid.RowDefinitions>
-                  <RowDefinition Height="Auto" />
-                  <RowDefinition />
-                </Grid.RowDefinitions>
-                <Grid Grid.Row="0"
-                      Background="{StaticResource SubtleFillColorSecondary}"
-                      BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
-                      BorderThickness="0,0,0,1">
-                  <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="Auto" />
-                  </Grid.ColumnDefinitions>
-                  <TextBlock Grid.Column="0"
-                             Padding="6,0"
-                             VerticalAlignment="Center"
-                             Text="{x:Bind Title, Mode=OneWay}"
-                             Style="{StaticResource BodyStrongTextBlockStyle}" />
-                  <Button Grid.Column="1"
-                          Style="{StaticResource AppFontIconNormalButtonStyle}"
-                          Content="&#xE734;"
-                          CornerRadius="4,8,0,4" />
-                </Grid>
-                <TextBlock Grid.Row="1"
-                           Margin="6"
-                           Text="{x:Bind Body, Mode=OneWay}" />
-                <Grid x:Name="VIEW_CommandBarGrid"
-                      Grid.Row="1"
-                      Visibility="Collapsed"
-                      VerticalAlignment="Bottom"
-                      Background="{StaticResource SubtleFillColorSecondary}"
-                      BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
-                      BorderThickness="0,1,0,0">
-                  <StackPanel Orientation="Horizontal"
-                              HorizontalAlignment="Right">
-                    <Button Style="{StaticResource AppFontIconNormalButtonStyle}"
-                            Content="&#xE734;"
-                            CornerRadius="4" />
-                    <Button Style="{StaticResource AppFontIconNormalButtonStyle}"
-                            Content="&#xE734;"
-                            CornerRadius="4,0,8,4" />
-                  </StackPanel>
-                  <Grid.RenderTransform>
-                    <TranslateTransform x:Name="VIEW_CommandBarGrid_TranslateTransform" />
-                  </Grid.RenderTransform>
-                </Grid>
-                <Grid.Shadow>
-                  <ThemeShadow />
-                </Grid.Shadow>
-
-                <VisualStateManager.VisualStateGroups>
-                  <VisualStateGroup x:Name="HoverStates">
-                    <VisualState x:Name="HoverStateNormal" />
-                    <VisualState x:Name="HoverStateHovering">
-                      <Storyboard>
-                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="VIEW_CommandBarGrid"
-                                                       Storyboard.TargetProperty="Visibility">
-                          <DiscreteObjectKeyFrame KeyTime="0"
-                                                  Value="Visible" />
-                        </ObjectAnimationUsingKeyFrames>
-                        <DoubleAnimation Storyboard.TargetName="VIEW_CommandBarGrid"
-                                         Storyboard.TargetProperty="Opacity"
-                                         Duration="0:0:0.125"
-                                         From="0"
-                                         To="1" />
-                        <DoubleAnimation Storyboard.TargetName="VIEW_CommandBarGrid_TranslateTransform"
-                                         Storyboard.TargetProperty="Y"
-                                         Duration="0:0:0.25"
-                                         From="32"
-                                         To="0" />
-                      </Storyboard>
-                    </VisualState>
-                  </VisualStateGroup>
-                </VisualStateManager.VisualStateGroups>
-              </Grid>
-            </UserControl>
-          </DataTemplate>
-        </GridView.ItemTemplate>-->
-      </GridView>
+                ContainerContentChanging="GridView_ContainerContentChanging" />
     </ScrollViewer>
+    <!--#endregion-->
 
+    <!--#region VisualStateManager -->
     <VisualStateManager.VisualStateGroups>
       <VisualStateGroup x:Name="SearchBoxStates">
         <VisualState x:Name="SearchBoxSearching">
@@ -495,5 +422,6 @@
         </VisualState>
       </VisualStateGroup>
     </VisualStateManager.VisualStateGroups>
+    <!--#endregion-->
   </Grid>
 </Page>
