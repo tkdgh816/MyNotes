@@ -70,7 +70,7 @@ public class NavigationBoardItem : NavigationItem
   public NavigationBoardGroupItem Parent { get; set; } = null!;
   public ObservableCollection<Note> Notes { get; } = new();
 
-  public NavigationBoardItem(string name, IconSource icon, Guid id) : base(typeof(NotesListPage), name, icon) 
+  public NavigationBoardItem(string name, IconSource icon, Guid id) : base(typeof(NoteBoard), name, icon) 
   {
     Id = id;
     // TEST
@@ -78,6 +78,12 @@ public class NavigationBoardItem : NavigationItem
     Notes.Add(new("Note 2"));
     Notes.Add(new("Note 3"));
     Notes.Add(new("Note 4"));
+    Notes.Add(new("Note 5"));
+    Notes.Add(new("Note 6"));
+    Notes.Add(new("Note 7"));
+    Notes.Add(new("Note 8"));
+    Notes.Add(new("Note 9"));
+    Notes.Add(new("Note 10"));
   }
 }
 

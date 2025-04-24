@@ -22,7 +22,6 @@
     <None Remove="Core\Views\Pages\ListsGroupPage.xaml" />
     <None Remove="Core\Views\Pages\MainPage.xaml" />
     <None Remove="Core\Views\Pages\NotePage.xaml" />
-    <None Remove="Core\Views\Pages\NotesListPage.xaml" />
     <None Remove="Core\Views\Pages\SearchPage.xaml" />
     <None Remove="Core\Views\Pages\SettingsPage.xaml" />
     <None Remove="Core\Views\Pages\TagsPage.xaml" />
@@ -97,7 +96,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Core\Views\Pages\NotesListPage.xaml">
+    <Page Update="Core\Views\Pages\NoteBoardPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
