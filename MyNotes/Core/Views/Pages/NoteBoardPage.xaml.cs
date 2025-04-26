@@ -1,6 +1,5 @@
-using Microsoft.UI.Dispatching;
-
 using MyNotes.Core.Models;
+using MyNotes.Core.ViewModels;
 
 namespace MyNotes.Core.Views;
 public sealed partial class NoteBoard : Page
@@ -8,7 +7,10 @@ public sealed partial class NoteBoard : Page
   public NoteBoard()
   {
     this.InitializeComponent();
+    ViewModel = App.Current.GetService<NoteBoardViewModel>();
   }
+
+  public NoteBoardViewModel ViewModel { get; }
 
   public NavigationBoardItem? Navigation { get; private set; }
   protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -108,5 +110,10 @@ public sealed partial class NoteBoard : Page
   {
     if (VIEW_SearchAutoSuggestBox.Visibility is Visibility.Visible)
       VIEW_SearchAutoSuggestBox.Focus(FocusState.Programmatic);
+  }
+
+  private void UserControl_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+  {
+    ViewModel.CreateNoteWindow((Note)((FrameworkElement)sender).DataContext);
   }
 }

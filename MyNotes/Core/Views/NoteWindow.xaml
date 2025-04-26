@@ -4,5 +4,32 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:views="using:MyNotes.Core.Views">
 
-  <views:NotePage />
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition />
+    </Grid.RowDefinitions>
+
+    <Grid x:Name="VIEW_TitleBarGrid"
+          Grid.Row="0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+
+      <TextBlock Grid.Column="2"
+                 Text="{x:Bind ViewModel.Note.Title, Mode=OneWay}" />
+      <Button x:Name="VIEW_CloseButton"
+              Grid.Column="4"
+              Content="&#xE711;"
+              Style="{StaticResource AppFontIconNormalButtonStyle}"
+              Click="VIEW_CloseButton_Click" />
+    </Grid>
+
+    <TextBlock Grid.Row="1"
+               Text="{x:Bind ViewModel.Note.Body, Mode=OneWay}" />
+  </Grid>
 </Window>

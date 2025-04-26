@@ -21,7 +21,6 @@
     <None Remove="Core\Views\Pages\HomePage.xaml" />
     <None Remove="Core\Views\Pages\ListsGroupPage.xaml" />
     <None Remove="Core\Views\Pages\MainPage.xaml" />
-    <None Remove="Core\Views\Pages\NotePage.xaml" />
     <None Remove="Core\Views\Pages\SearchPage.xaml" />
     <None Remove="Core\Views\Pages\SettingsPage.xaml" />
     <None Remove="Core\Views\Pages\TagsPage.xaml" />
@@ -69,11 +68,6 @@
     <Folder Include="Contracts\" />
     <Folder Include="Strings\ko-KR\" />
     <Folder Include="Strings\en-US\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Core\Views\Pages\NotePage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Core\Views\NoteWindow.xaml">

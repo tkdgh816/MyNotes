@@ -22,16 +22,18 @@ public partial class App : Application
 
   #region Services
   public ServiceProvider Services { get; } = ConfigureServices();
-  public static ServiceProvider ConfigureServices()
+  private static ServiceProvider ConfigureServices()
   {
     ServiceCollection services = new();
 
     // Services
+    services.AddSingleton<WindowService>();
     services.AddSingleton<DatabaseService>();
     services.AddSingleton<NavigationService>();
 
     // ViewModels
     services.AddSingleton<MainViewModel>();
+    services.AddTransient<NoteBoardViewModel>();
     services.AddTransient<NoteViewModel>();
 
     return services.BuildServiceProvider();

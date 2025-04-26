@@ -10,7 +10,8 @@
                   x:DataType="models:Note">
       <UserControl Margin="6"
                    PointerEntered="Grid_PointerEntered"
-                   PointerExited="Grid_PointerExited">
+                   PointerExited="Grid_PointerExited"
+                   DoubleTapped="UserControl_DoubleTapped">
         <Grid Background="LightYellow"
               CornerRadius="8"
               BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
@@ -97,7 +98,8 @@
                   x:DataType="models:Note">
       <UserControl Margin="6"
                    PointerEntered="Grid_PointerEntered"
-                   PointerExited="Grid_PointerExited">
+                   PointerExited="Grid_PointerExited"
+                   DoubleTapped="UserControl_DoubleTapped">
         <Grid Background="LightGoldenrodYellow"
               CornerRadius="8"
               BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
@@ -338,7 +340,8 @@
                 ItemContainerStyle="{StaticResource AppGridViewItemContainerStyle210}"
                 ItemTemplate="{StaticResource GridViewItemTemplate1}"
                 ChoosingItemContainer="GridView_ChoosingItemContainer"
-                ContainerContentChanging="GridView_ContainerContentChanging" />
+                ContainerContentChanging="GridView_ContainerContentChanging" 
+                AllowFocusOnInteraction="False"/>
     </ScrollViewer>
     <!--#endregion-->
 
