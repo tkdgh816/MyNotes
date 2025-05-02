@@ -14,5 +14,6 @@ public class NoteViewModel : ViewModelBase
   public WindowService WindowService { get; }
   public Note Note { get; }
 
+  public void GetMainWindow() => WindowService.GetMainWindow().Activate();
   public bool CloseWindow() => WindowService.CloseNoteWindow(Note);
 }

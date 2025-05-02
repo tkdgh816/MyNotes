@@ -22,7 +22,7 @@
             <RowDefinition />
           </Grid.RowDefinitions>
           <Grid Grid.Row="0"
-                Background="{StaticResource SubtleFillColorSecondary}"
+                Background="{StaticResource AcrylicBackgroundFillColorBaseBrush}"
                 BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
                 BorderThickness="0,0,0,1">
             <Grid.ColumnDefinitions>
@@ -33,11 +33,13 @@
                        Padding="6,0"
                        VerticalAlignment="Center"
                        Text="{x:Bind Title, Mode=OneWay}"
+                       TextTrimming="CharacterEllipsis"
+                       TextWrapping="NoWrap"
                        Style="{StaticResource BodyStrongTextBlockStyle}" />
             <Button Grid.Column="1"
                     Style="{StaticResource AppFontIconNormalButtonStyle}"
                     Content="&#xE734;"
-                    CornerRadius="4,8,0,4"
+                    CornerRadius="4,8,4,4"
                     Click="Button_Click" />
           </Grid>
           <TextBlock Grid.Row="1"
@@ -57,11 +59,8 @@
                       CornerRadius="4" />
               <Button Style="{StaticResource AppFontIconNormalButtonStyle}"
                       Content="&#xE734;"
-                      CornerRadius="4,0,8,4" />
+                      CornerRadius="4,4,8,4" />
             </StackPanel>
-            <Grid.RenderTransform>
-              <TranslateTransform x:Name="VIEW_CommandBarGrid_TranslateTransform" />
-            </Grid.RenderTransform>
           </Grid>
           <Grid.Shadow>
             <ThemeShadow />
@@ -77,16 +76,6 @@
                     <DiscreteObjectKeyFrame KeyTime="0"
                                             Value="Visible" />
                   </ObjectAnimationUsingKeyFrames>
-                  <DoubleAnimation Storyboard.TargetName="VIEW_CommandBarGrid"
-                                   Storyboard.TargetProperty="Opacity"
-                                   Duration="0:0:0.25"
-                                   From="0"
-                                   To="1" />
-                  <DoubleAnimation Storyboard.TargetName="VIEW_CommandBarGrid_TranslateTransform"
-                                   Storyboard.TargetProperty="Y"
-                                   Duration="0:0:0.25"
-                                   From="32"
-                                   To="0" />
                 </Storyboard>
               </VisualState>
             </VisualStateGroup>
@@ -111,7 +100,7 @@
             <ColumnDefinition Width="5*" />
           </Grid.ColumnDefinitions>
           <Grid Grid.Column="0"
-                Background="{StaticResource SubtleFillColorSecondary}"
+                Background="{StaticResource AcrylicBackgroundFillColorBaseBrush}"
                 BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
                 BorderThickness="0,0,1,0">
             <Grid.ColumnDefinitions>
@@ -127,7 +116,6 @@
             <Button Grid.Column="1"
                     Style="{StaticResource AppFontIconNormalButtonStyle}"
                     Content="&#xE734;"
-                    CornerRadius="4,0,0,4"
                     Click="Button_Click" />
           </Grid>
           <TextBlock Grid.Column="1"
@@ -137,21 +125,17 @@
                 Grid.Column="1"
                 Visibility="Collapsed"
                 HorizontalAlignment="Right"
+                Width="100"
                 Background="{StaticResource AcrylicBackgroundFillColorBaseBrush}"
                 BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
                 BorderThickness="1,0,0,0">
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Right">
               <Button Style="{StaticResource AppFontIconNormalButtonStyle}"
-                      Content="&#xE734;"
-                      CornerRadius="0,4,4,0" />
+                      Content="&#xE734;" />
               <Button Style="{StaticResource AppFontIconNormalButtonStyle}"
-                      Content="&#xE734;"
-                      CornerRadius="4,8,8,4" />
+                      Content="&#xE734;" />
             </StackPanel>
-            <Grid.RenderTransform>
-              <TranslateTransform x:Name="VIEW_CommandBarGrid_TranslateTransform" />
-            </Grid.RenderTransform>
           </Grid>
           <Grid.Shadow>
             <ThemeShadow />
@@ -167,16 +151,6 @@
                     <DiscreteObjectKeyFrame KeyTime="0"
                                             Value="Visible" />
                   </ObjectAnimationUsingKeyFrames>
-                  <DoubleAnimation Storyboard.TargetName="VIEW_CommandBarGrid"
-                                   Storyboard.TargetProperty="Opacity"
-                                   Duration="0:0:0.25"
-                                   From="0"
-                                   To="1" />
-                  <DoubleAnimation Storyboard.TargetName="VIEW_CommandBarGrid_TranslateTransform"
-                                   Storyboard.TargetProperty="X"
-                                   Duration="0:0:0.25"
-                                   From="32"
-                                   To="0" />
                 </Storyboard>
               </VisualState>
             </VisualStateGroup>
@@ -202,7 +176,7 @@
       </Grid.ColumnDefinitions>
 
       <!--#region Icon -->
-      <Button Style="{StaticResource AppIconButtonStyle}">
+      <Button Style="{StaticResource AppIconMediumButtonStyle}">
         <IconSourceElement IconSource="{x:Bind Navigation.Icon, Mode=OneWay}" />
         <Button.Flyout>
           <Flyout Placement="BottomEdgeAlignedLeft">
@@ -225,7 +199,7 @@
       <Grid Grid.Column="2">
         <Button x:Name="VIEW_SearchButton"
                 HorizontalAlignment="Right"
-                Style="{StaticResource AppFontIconButtonStyle}"
+                Style="{StaticResource AppFontIconMediumButtonStyle}"
                 Content="&#xE721;"
                 Click="VIEW_SearchButton_Click">
         </Button>
@@ -249,7 +223,7 @@
 
       <!--#region More Button -->
       <Button Grid.Column="3"
-              Style="{StaticResource AppFontIconButtonStyle}"
+              Style="{StaticResource AppFontIconMediumButtonStyle}"
               Content="&#xE712;">
         <Button.Flyout>
           <Flyout Placement="BottomEdgeAlignedRight">
@@ -340,8 +314,8 @@
                 ItemContainerStyle="{StaticResource AppGridViewItemContainerStyle210}"
                 ItemTemplate="{StaticResource GridViewItemTemplate1}"
                 ChoosingItemContainer="GridView_ChoosingItemContainer"
-                ContainerContentChanging="GridView_ContainerContentChanging" 
-                AllowFocusOnInteraction="False"/>
+                ContainerContentChanging="GridView_ContainerContentChanging"
+                AllowFocusOnInteraction="False" />
     </ScrollViewer>
     <!--#endregion-->
 

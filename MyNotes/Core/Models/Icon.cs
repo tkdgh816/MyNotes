@@ -5309,10 +5309,17 @@ public class Icon
   };
 }
 
-public readonly struct Glyph(string code, string description)
+public readonly struct Glyph
 {
-  public string Code { get; } = code;
-  public string Description { get; } = description;
+  public string Code { get; }
+  public string Description { get; }
+  //public string Description { get; } = description;
+
+  public Glyph(string code, string description)
+  {
+    Code = code;
+    Description = $"{description}, &#x{code.Select(c => char.ConvertToUtf32(code, code.IndexOf(c))).First():X};";
+  }
 }
 
 public readonly struct Emoji(string code, string description, string path)

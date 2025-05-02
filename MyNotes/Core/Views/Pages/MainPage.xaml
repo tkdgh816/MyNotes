@@ -55,7 +55,7 @@
                            VerticalAlignment="Center"
                            TextTrimming="CharacterEllipsis" />
                 <Button Grid.Column="1"
-                        Style="{StaticResource AppFontIconButtonStyle}"
+                        Style="{StaticResource AppFontIconMediumButtonStyle}"
                         Content="&#xE712;"
                         Width="24"
                         Height="24"
@@ -89,7 +89,7 @@
                            VerticalAlignment="Center"
                            TextTrimming="CharacterEllipsis" />
                 <Button Grid.Column="1"
-                        Style="{StaticResource AppFontIconButtonStyle}"
+                        Style="{StaticResource AppFontIconMediumButtonStyle}"
                         Content="&#xE712;"
                         Width="24"
                         Height="24"
@@ -158,33 +158,33 @@
               <ColumnDefinition />
               <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <views:IconButton x:Name="VIEW_NavigationViewFooter_NewGroupButton"
+            <views:AppExtendedButton x:Name="VIEW_NavigationViewFooter_NewGroupButton"
                               Grid.Column="0"
                               Content="New group"
                               Style="{StaticResource AppNavigationButtonStyle}"
                               Click="VIEW_NavigationViewFooter_NewGroupButton_Click">
-              <views:IconButton.Icon>
+              <views:AppExtendedButton.Icon>
                 <FontIcon Glyph="&#xE82E;" />
-              </views:IconButton.Icon>
-            </views:IconButton>
-            <views:IconButton x:Name="VIEW_NavigationViewFooter_NewBoardButton"
+              </views:AppExtendedButton.Icon>
+            </views:AppExtendedButton>
+            <views:AppExtendedButton x:Name="VIEW_NavigationViewFooter_NewBoardButton"
                               Grid.Column="1"
                               Content="New board"
                               Style="{StaticResource AppNavigationButtonStyle}"
                               Click="VIEW_NavigationViewFooter_NewBoardButton_Click">
-              <views:IconButton.Icon>
+              <views:AppExtendedButton.Icon>
                 <FontIcon Glyph="&#xED0E;" />
-              </views:IconButton.Icon>
-            </views:IconButton>
-            <views:IconButton x:Name="VIEW_NavigationViewFooter_EditNavigationViewItem"
+              </views:AppExtendedButton.Icon>
+            </views:AppExtendedButton>
+            <views:AppExtendedButton x:Name="VIEW_NavigationViewFooter_EditNavigationViewItem"
                               Grid.Column="2"
                               Style="{StaticResource AppNavigationButtonStyle}"
                               ToolTipService.ToolTip="Edit"
                               Click="VIEW_NavigationViewFooter_EditNavigationViewItem_Click">
-              <views:IconButton.Icon>
+              <views:AppExtendedButton.Icon>
                 <FontIcon Glyph="&#xE932;" />
-              </views:IconButton.Icon>
-            </views:IconButton>
+              </views:AppExtendedButton.Icon>
+            </views:AppExtendedButton>
           </Grid>
           <NavigationViewItemSeparator />
         </StackPanel>

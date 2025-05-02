@@ -2,7 +2,6 @@
 
 using MyNotes.Core.Services;
 using MyNotes.Core.ViewModels;
-using MyNotes.Core.Views;
 
 namespace MyNotes;
 
@@ -15,7 +14,7 @@ public partial class App : Application
 
   protected override void OnLaunched(LaunchActivatedEventArgs args)
   {
-    new MainWindow().Activate();
+    GetService<WindowService>().MainWindow?.Activate();
   }
 
   public static new readonly App Current = (App)Application.Current;
@@ -38,6 +37,7 @@ public partial class App : Application
 
     return services.BuildServiceProvider();
   }
+
   public T GetService<T>() => (T)Services.GetRequiredService(typeof(T));
   #endregion
 }

@@ -13,7 +13,7 @@
         <DataTemplate x:DataType="models:Glyph">
           <Button Click="FontButton_Click"
                   DataContext="{x:Bind}"
-                  Style="{StaticResource AppFontIconButtonStyle}">
+                  Style="{StaticResource AppFontIconMediumButtonStyle}">
             <FontIcon Glyph="{x:Bind Code}"
                       ToolTipService.ToolTip="{x:Bind Description}" />
           </Button>
@@ -24,7 +24,7 @@
         <DataTemplate x:DataType="models:Emoji">
           <Button Click="EmojiButton_Click"
                   DataContext="{x:Bind}"
-                  Style="{StaticResource AppIconButtonStyle}">
+                  Style="{StaticResource AppIconMediumButtonStyle}">
             <ImageIcon Source="{x:Bind Path}"
                        ToolTipService.ToolTip="{x:Bind Description}" />
           </Button>

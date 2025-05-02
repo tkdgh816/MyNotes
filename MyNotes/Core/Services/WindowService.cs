@@ -5,6 +5,7 @@ namespace MyNotes.Core.Services;
 
 public class WindowService
 {
+  public MainWindow? MainWindow { get; private set; } = new();
   public Dictionary<Note, NoteWindow> NoteWindows { get; } = new();
   public Note? CurrentNote { get; private set; }
 
@@ -12,6 +13,9 @@ public class WindowService
   {
 
   }
+
+  public MainWindow GetMainWindow() => MainWindow ??= new MainWindow();
+  public void DestroyMainWindow() => MainWindow = null;
 
   public NoteWindow CreateNoteWindow(Note note)
   {
