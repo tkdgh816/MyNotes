@@ -67,6 +67,7 @@
     <Folder Include="Common\Commands\" />
     <Folder Include="Common\Messages\" />
     <Folder Include="Contracts\" />
+    <Folder Include="Core\Views\Windows\" />
     <Folder Include="Strings\ko-KR\" />
     <Folder Include="Strings\en-US\" />
   </ItemGroup>
