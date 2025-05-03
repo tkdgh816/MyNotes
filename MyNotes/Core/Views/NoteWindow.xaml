@@ -5,7 +5,8 @@
         xmlns:views="using:MyNotes.Core.Views">
 
   <UserControl x:Name="VIEW_RootUserControl">
-    <Grid Background="#fff6cb">
+    <Grid x:Name="VIEW_RootGrid"
+          Background="#fff6cb">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto" />
         <RowDefinition />
@@ -15,7 +16,7 @@
       <!--#region Title Bar -->
       <Grid x:Name="VIEW_TitleBarGrid"
             Grid.Row="0"
-            Background="{StaticResource AcrylicBackgroundFillColorBaseBrush}"
+            Background="{StaticResource SubtleFillColorTertiaryBrush}"
             BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
             BorderThickness="0,0,0,1">
         <Grid.ColumnDefinitions>
@@ -88,9 +89,13 @@
                   <MenuFlyoutSubItem.Icon>
                     <FontIcon Glyph="&#xE890;" />
                   </MenuFlyoutSubItem.Icon>
-                  <RadioMenuFlyoutItem Text="Edit mode"
-                                       IsChecked="True" />
-                  <RadioMenuFlyoutItem Text="Read mode" />
+                  <RadioMenuFlyoutItem x:Name="VIEW_ViewModeEditRadioMenuFlyoutItem"
+                                       Text="Edit"
+                                       IsChecked="True"
+                                       Click="VIEW_ViewModeEditRadioMenuFlyoutItem_Click" />
+                  <RadioMenuFlyoutItem x:Name="VIEW_ViewModeReadRadioMenuFlyoutItem"
+                                       Text="Read"
+                                       Click="VIEW_ViewModeReadRadioMenuFlyoutItem_Click" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <MenuFlyoutSubItem Text="Save as">
@@ -107,13 +112,17 @@
                   </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem Text="About">
+                <MenuFlyoutItem x:Name="VIEW_AboutMenuFlyoutItem"
+                                Text="About"
+                                Click="VIEW_AboutMenuFlyoutItem_Click">
                   <MenuFlyoutItem.Icon>
                     <FontIcon Glyph="&#xE946;" />
                   </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem Text="Remove">
+                <MenuFlyoutItem x:Name="VIEW_RemoveMenuFlyoutItem"
+                                Text="Remove"
+                                Click="VIEW_RemoveMenuFlyoutItem_Click">
                   <MenuFlyoutItem.Icon>
                     <FontIcon Glyph="&#xE74D;" />
                   </MenuFlyoutItem.Icon>
@@ -187,7 +196,7 @@
                              HorizontalScrollMode="Enabled"
                              VerticalScrollMode="Disabled"
                              ScrollInterval="100"
-                             Background="{StaticResource AcrylicBackgroundFillColorBaseBrush}"
+                             Background="{StaticResource SubtleFillColorTertiaryBrush}"
                              BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
                              BorderThickness="0,1,0,0">
         <StackPanel Orientation="Horizontal"
@@ -195,31 +204,26 @@
 
           <ToggleButton x:Name="VIEW_BoldButton"
                         Content="&#xE8DD;"
-                        AllowFocusOnInteraction="False"
                         Style="{StaticResource AppFontIconLargeTopToggleButtonStyle}"
                         Click="VIEW_BoldButton_Click" />
           <ToggleButton x:Name="VIEW_ItalicButton"
                         Content="&#xE8DB;"
-                        AllowFocusOnInteraction="False"
                         Style="{StaticResource AppFontIconLargeTopToggleButtonStyle}"
                         Click="VIEW_ItalicButton_Click" />
           <ToggleButton x:Name="VIEW_UnderlineButton"
                         Content="&#xE8DC;"
-                        AllowFocusOnInteraction="False"
                         Style="{StaticResource AppFontIconLargeTopToggleButtonStyle}"
                         Click="VIEW_UnderlineButton_Click" />
           <ToggleButton x:Name="VIEW_StrikethroughButton"
                         Content="&#xEDE0;"
-                        AllowFocusOnInteraction="False"
                         Style="{StaticResource AppFontIconLargeTopToggleButtonStyle}"
                         Click="VIEW_StrikethroughButton_Click" />
           <views:AppSplitButton x:Name="VIEW_MarkerButton"
                                 Content="&#xF2C7;"
-                                AllowFocusOnInteraction="False"
                                 Style="{StaticResource AppFontIconLargeSplitButtonStyle}"
                                 Click="VIEW_MarkerButton_Click">
             <views:AppSplitButton.SecondaryButtonFlyout>
-              <Flyout Placement="Top"
+              <Flyout Placement="Bottom"
                       ShouldConstrainToRootBounds="False">
                 <GridView x:Name="VIEW_MarkerFlyoutGridView"
                           Header="Marker"
@@ -250,11 +254,10 @@
           <AppBarSeparator Foreground="{StaticResource ControlStrokeColorSecondary}" />
           <Button x:Name="VIEW_FontSizeButton"
                   Content="&#xE8E9;"
-                  AllowFocusOnInteraction="False"
                   Style="{StaticResource AppFontIconLargeButtonStyle}">
             <Button.Flyout>
               <Flyout x:Name="VIEW_FontSizeButtonFlyout"
-                      Placement="Top"
+                      Placement="Bottom"
                       ShouldConstrainToRootBounds="False"
                       Opened="VIEW_FontSizeButtonFlyout_Opened">
                 <StackPanel Spacing="8">
@@ -268,7 +271,6 @@
                             Click="VIEW_FontSizeDownButton_Click" />
                     <ComboBox x:Name="VIEW_FontSizeComboBox"
                               Width="80"
-                              AllowFocusOnInteraction="True"
                               SelectionChanged="VIEW_FontSizeComboBox_SelectionChanged">
                       <x:String>8</x:String>
                       <x:String>9</x:String>
@@ -295,11 +297,12 @@
           </Button>
 
           <views:AppSplitButton x:Name="VIEW_FontColorButton"
-                                AllowFocusOnInteraction="False"
-                                Style="{StaticResource AppFontIconLargeSplitButtonStyle}">
+                                Style="{StaticResource AppFontIconLargeSplitButtonStyle}"
+                                Click="VIEW_FontColorButton_Click">
             <Grid>
-              <FontIcon Glyph="&#xE73B;"
-                        Foreground="LightCyan"
+              <FontIcon x:Name="VIEW_FontColorButtonFillFontIcon"
+                        Glyph="&#xE73B;"
+                        Foreground="Black"
                         RenderTransformOrigin="0.5,0.97">
                 <FontIcon.RenderTransform>
                   <ScaleTransform ScaleX="0.9"
@@ -310,35 +313,43 @@
 
             </Grid>
             <views:AppSplitButton.SecondaryButtonFlyout>
-              <Flyout Placement="Top"
+              <Flyout x:Name="VIEW_FontColorButtonFlyout"
+                      Placement="Bottom"
                       ShouldConstrainToRootBounds="False">
                 <StackPanel Spacing="8">
                   <TextBlock Text="Font color"
                              Style="{StaticResource BodyStrongTextBlockStyle}" />
-                  <ColorPicker ColorSpectrumShape="Ring"
-                               IsMoreButtonVisible="True" />
+                  <ColorPicker x:Name="VIEW_FontColorPicker"
+                               Color="Black"
+                               ColorSpectrumShape="Ring"
+                               IsMoreButtonVisible="True"
+                               ColorChanged="VIEW_FontColorPicker_ColorChanged" />
                 </StackPanel>
               </Flyout>
             </views:AppSplitButton.SecondaryButtonFlyout>
           </views:AppSplitButton>
 
           <views:AppSplitButton x:Name="VIEW_HighlightButton"
-                                AllowFocusOnInteraction="False"
-                                Style="{StaticResource AppFontIconLargeSplitButtonStyle}">
+                                Style="{StaticResource AppFontIconLargeSplitButtonStyle}"
+                                Click="VIEW_HighlightButton_Click">
             <Grid>
-              <FontIcon Glyph="&#xE891;"
-                        Foreground="LightGreen" />
+              <FontIcon x:Name="VIEW_HighlightButtonFillFontIcon"
+                        Glyph="&#xE891;"
+                        Foreground="LightSeaGreen" />
               <FontIcon Glyph="&#xE7E6;" />
             </Grid>
             <views:AppSplitButton.SecondaryButtonFlyout>
-              <Flyout Placement="Top"
+              <Flyout x:Name="VIEW_HighlightButtonFlyout"
+                      Placement="Bottom"
                       ShouldConstrainToRootBounds="False">
                 <StackPanel Spacing="8">
                   <TextBlock Text="Highlight color"
                              Style="{StaticResource BodyStrongTextBlockStyle}" />
-                  <ColorPicker ColorSpectrumShape="Ring"
+                  <ColorPicker x:Name="VIEW_HighlightColorPicker"
+                               Color="LightSeaGreen"
+                               ColorSpectrumShape="Ring"
                                IsMoreButtonVisible="True"
-                               IsAlphaEnabled="True" />
+                               ColorChanged="VIEW_HighlightColorPicker_ColorChanged" />
                 </StackPanel>
               </Flyout>
             </views:AppSplitButton.SecondaryButtonFlyout>
@@ -348,28 +359,31 @@
 
           <Button x:Name="VIEW_BackgroundColorButton"
                   Content="&#xE790;"
-                  AllowFocusOnInteraction="False"
                   Style="{StaticResource AppFontIconLargeButtonStyle}">
             <Button.Flyout>
-              <Flyout Placement="Top"
+              <Flyout Placement="Bottom"
                       ShouldConstrainToRootBounds="False">
                 <StackPanel Spacing="8">
-                  <RadioButtons Header="Backdrop type"
+                  <RadioButtons x:Name="VIEW_BackdropRadioButtons"
+                                Header="Backdrop type"
                                 HeaderTemplate="{StaticResource AppBoldTextHeaderTemplate}"
-                                MaxColumns="2">
+                                MaxColumns="2"
+                                SelectionChanged="VIEW_BackdropRadioButtons_SelectionChanged">
                     <RadioButton Content="None"
                                  IsChecked="True" />
                     <RadioButton Content="Acrylic" />
                     <RadioButton Content="Mica" />
                   </RadioButtons>
-                  
+
                   <MenuFlyoutSeparator />
-                  
+
                   <TextBlock Text="Background color"
                              Style="{StaticResource BodyStrongTextBlockStyle}" />
-                  <ColorPicker ColorSpectrumShape="Ring"
+                  <ColorPicker x:Name="VIEW_BackgroundColorPicker"
+                               ColorSpectrumShape="Ring"
                                IsMoreButtonVisible="True"
-                               IsAlphaEnabled="True" />
+                               IsAlphaEnabled="True"
+                               ColorChanged="VIEW_BackgroundColorPicker_ColorChanged" />
                 </StackPanel>
               </Flyout>
             </Button.Flyout>
@@ -377,7 +391,6 @@
 
           <Button x:Name="VIEW_ImageButton"
                   Content="&#xE91B;"
-                  AllowFocusOnInteraction="False"
                   Style="{StaticResource AppFontIconLargeButtonStyle}" />
         </StackPanel>
         <views:AppScrollViewer.RenderTransform>
@@ -385,6 +398,20 @@
         </views:AppScrollViewer.RenderTransform>
       </views:AppScrollViewer>
       <!--#endregion-->
+
+      <ContentDialog x:Name="VIEW_RemoveNoteContentDialog"
+                     Title="Remove note"
+                     PrimaryButtonText="Yes"
+                     CloseButtonText="Cancel"
+                     DefaultButton="Close">
+        <ContentDialog.Content>Remove this note?</ContentDialog.Content>
+      </ContentDialog>
+      <ContentDialog x:Name="VIEW_NoteInfoContentDialog"
+                     Title="About"
+                     CloseButtonText="Close"
+                     DefaultButton="Close">
+        <views:NoteInfoTable Note="{x:Bind ViewModel.Note}" />
+      </ContentDialog>
 
       <VisualStateManager.VisualStateGroups>
         <VisualStateGroup x:Name="WindowActivationStates">
@@ -482,6 +509,37 @@
                                         Value="-32" />
               </ObjectAnimationUsingKeyFrames>
             </Storyboard>
+          </VisualState>
+        </VisualStateGroup>
+
+        <VisualStateGroup x:Name="TextEditorSelectionStates">
+
+          <VisualState x:Name="TextEditorSelectionNormal" />
+          <VisualState x:Name="TextEditorSelectionChangingColor">
+            <VisualState.Setters>
+              <Setter Target="VIEW_TextEditorRichEditBox.SelectionHighlightColorWhenNotFocused"
+                      Value="{x:Null}" />
+            </VisualState.Setters>
+          </VisualState>
+        </VisualStateGroup>
+
+        <VisualStateGroup x:Name="BackgroundColorStates">
+          <VisualState x:Name="BackgroundColorLight">
+            <VisualState.Setters>
+              <Setter Target="VIEW_TitleBarGrid.Background"
+                      Value="#08000000" />
+              <Setter Target="VIEW_CommandBarScrollViewer.Background"
+                      Value="#08000000" />
+            </VisualState.Setters>
+          </VisualState>
+
+          <VisualState x:Name="BackgroundColorDark">
+            <VisualState.Setters>
+              <Setter Target="VIEW_TitleBarGrid.Background"
+                      Value="#55FFFFFF" />
+              <Setter Target="VIEW_CommandBarScrollViewer.Background"
+                      Value="#55FFFFFF" />
+            </VisualState.Setters>
           </VisualState>
         </VisualStateGroup>
       </VisualStateManager.VisualStateGroups>

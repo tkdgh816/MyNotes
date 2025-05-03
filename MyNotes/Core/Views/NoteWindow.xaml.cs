@@ -1,3 +1,6 @@
+using CommunityToolkit.WinUI.Helpers;
+
+using Microsoft.UI;
 using Microsoft.UI.Text;
 
 using MyNotes.Core.ViewModels;
@@ -17,7 +20,7 @@ public sealed partial class NoteWindow : Window
 
     _presenter = (OverlappedPresenter)AppWindow.Presenter;
     _presenter.SetBorderAndTitleBar(true, false);
-    _presenter.PreferredMinimumWidth = (int)(250 * _dpi);
+    _presenter.PreferredMinimumWidth = (int)(350 * _dpi);
     _presenter.PreferredMinimumHeight = (int)(250 * _dpi);
 
     AppWindow.Resize(new((int)(400 * _dpi), (int)(400 * _dpi)));
@@ -208,5 +211,82 @@ public sealed partial class NoteWindow : Window
     VIEW_FontSizeDownButton.IsEnabled = VIEW_FontSizeComboBox.SelectedIndex != 0;
     VIEW_FontSizeUpButton.IsEnabled = VIEW_FontSizeComboBox.SelectedIndex != FontSizeComboBoxItemsCount;
 
+  }
+
+  private void VIEW_FontColorPicker_ColorChanged(ColorPicker sender, ColorChangedEventArgs args)
+  {
+    VIEW_FontColorButtonFillFontIcon.Foreground = new SolidColorBrush(args.NewColor);
+  }
+
+  private void VIEW_FontColorButton_Click(object sender, RoutedEventArgs e)
+  {
+    var selectedText = VIEW_TextEditorRichEditBox.Document.Selection;
+    if (selectedText is not null)
+    {
+      selectedText.CharacterFormat.ForegroundColor = VIEW_FontColorPicker.Color;
+    }
+  }
+
+  private void VIEW_HighlightColorPicker_ColorChanged(ColorPicker sender, ColorChangedEventArgs args)
+  {
+    VIEW_HighlightButtonFillFontIcon.Foreground = new SolidColorBrush(args.NewColor);
+  }
+
+
+  private void VIEW_HighlightButton_Click(object sender, RoutedEventArgs e)
+  {
+    var selectedText = VIEW_TextEditorRichEditBox.Document.Selection;
+    if (selectedText is not null)
+    {
+      selectedText.CharacterFormat.BackgroundColor = VIEW_HighlightColorPicker.Color;
+    }
+  }
+
+  private void VIEW_BackdropRadioButtons_SelectionChanged(object sender, SelectionChangedEventArgs e)
+  {
+    SystemBackdrop = VIEW_BackdropRadioButtons.SelectedIndex switch
+    {
+      1 => new DesktopAcrylicBackdrop(),
+      2 => new MicaBackdrop(),
+      0 or _ => null,
+    };
+  }
+
+  private void VIEW_BackgroundColorPicker_ColorChanged(ColorPicker sender, ColorChangedEventArgs args)
+  {
+    VIEW_RootGrid.Background = new SolidColorBrush(args.NewColor);
+    if (args.NewColor.ToHsv().V > 0.5)
+      VisualStateManager.GoToState(VIEW_RootUserControl, "BackgroundColorLight", false);
+    else
+      VisualStateManager.GoToState(VIEW_RootUserControl, "BackgroundColorDark", false);
+  }
+
+  private void VIEW_ViewModeEditRadioMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+    => ChangeViewMode(true);
+
+  private void VIEW_ViewModeReadRadioMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+    => ChangeViewMode(false);
+
+  public void ChangeViewMode(bool isEditMode)
+  {
+    VIEW_TextEditorRichEditBox.IsReadOnly = !isEditMode;
+    VIEW_BoldButton.IsEnabled = isEditMode;
+    VIEW_ItalicButton.IsEnabled = isEditMode;
+    VIEW_UnderlineButton.IsEnabled = isEditMode;
+    VIEW_StrikethroughButton.IsEnabled = isEditMode;
+    VIEW_MarkerButton.IsEnabled = isEditMode;
+    VIEW_FontSizeButton.IsEnabled = isEditMode;
+    VIEW_FontColorButton.IsEnabled = isEditMode;
+    VIEW_HighlightButton.IsEnabled = isEditMode;
+  }
+
+  private async void VIEW_RemoveMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+  {
+    await VIEW_RemoveNoteContentDialog.ShowAsync();
+  }
+
+  private async void VIEW_AboutMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+  {
+    await VIEW_NoteInfoContentDialog.ShowAsync();
   }
 }

@@ -20,6 +20,7 @@ global using Microsoft.UI.Xaml.Data;
 global using Microsoft.UI.Xaml.Input;
 global using Microsoft.UI.Xaml.Markup;
 global using Microsoft.UI.Xaml.Navigation;
+global using Microsoft.UI.Xaml.Media;
 
 global using Windows.Foundation;
 global using Windows.Foundation.Collections;
