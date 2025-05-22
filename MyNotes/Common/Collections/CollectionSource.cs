@@ -3,7 +3,7 @@
 namespace MyNotes.Common.Collections;
 
 #region CollectionSource: ICollectionViewFactory
-public class CollectionSource<T> : ObservableCollection<T>, ICollectionViewFactory where T : notnull
+public class CollectionSource<T> : ObservableCollection<T>, ICollectionViewFactory
 {
   public bool IsReadOnly { get; set; } = false;
 
@@ -355,7 +355,7 @@ public class CollectionSource<T> : ObservableCollection<T>, ICollectionViewFacto
         if (groupDescription.SortDescription is not null)
         {
           int groupSortIndex = ~groups.ToList().BinarySearch(group, groupDescription.SortDescription.Comparer);
-          Debug.WriteLine($"Group Sort Index: {groupSortIndex}, GroupKey: {groupKey}");
+          //Debug.WriteLine($"Group Sort Index: {groupSortIndex}, GroupKey: {groupKey}");
           _collectionGroups.Insert(groupSortIndex, group);
         }
         else

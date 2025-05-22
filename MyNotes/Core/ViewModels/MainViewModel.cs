@@ -10,27 +10,9 @@ public class MainViewModel : ViewModelBase
     DatabaseService = databaseService;
     NavigationService = navigationService;
 
-    // TEST
-    NavigationBoardGroupItem group1 = new("Group 1", new FontIconSource() { Glyph = "\uE82D" }, new Guid());
-    group1.Add(new NavigationBoardItem("Group 1 Board 1", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
-    group1.Add(new NavigationBoardItem("Group 1 Board 2", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
-    group1.Add(new NavigationBoardItem("Group 1 Board 3", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
-
-    NavigationBoardGroupItem group2 = new("Group 2", new FontIconSource() { Glyph = "\uE82D" }, new Guid());
-    group2.Add(new NavigationBoardItem("Group 2 Board 1", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
-    group2.Add(new NavigationBoardItem("Group 2 Board 2", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
-    group2.Add(new NavigationBoardItem("Group 2 Board 3", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
-
-    NavigationBoardGroupItem group3 = new("Group 3", new FontIconSource() { Glyph = "\uE82D" }, new Guid());
-    group3.Add(new NavigationBoardItem("Group 3 Board 1", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
-    group3.Add(new NavigationBoardItem("Group 3 Board 2", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
-    group3.Add(new NavigationBoardItem("Group 3 Board 3", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
-    group1.Add(group3);
-
-    ListMenuRootItem.Add(group1, group2);
-    ListMenuItems = ListMenuRootItem.Children;
-
-    MenuItems.Source = new List<IList>() { CoreMenuItems, ListMenuItems };
+    InitializeNavigationsFromDatabase();
+    BoardMenuItems = BoardMenuRootItem.Children;
+    MenuItems.Source = new List<IList>() { CoreMenuItems, BoardMenuItems };
   }
 
   public DatabaseService DatabaseService { get; }
@@ -45,13 +27,18 @@ public class MainViewModel : ViewModelBase
     new NavigationSeparator(),
   ];
 
-  public NavigationBoardGroupItem ListMenuRootItem { get; } = new("Root", new FontIconSource() { Glyph = "\uE82D" }, new Guid());
-  public ReadOnlyObservableCollection<NavigationBoardItem> ListMenuItems { get; }
+  public NavigationBoardGroupRootItem BoardMenuRootItem { get; } = new();
+  public ReadOnlyObservableCollection<NavigationBoardItem> BoardMenuItems { get; }
   public List<Navigation> FooterMenuItems { get; } =
   [
     new NavigationTrashItem(),
     new NavigationSettingsItem()
   ];
+
+  private void InitializeNavigationsFromDatabase()
+  {
+    DatabaseService.GetNavigationGroup(BoardMenuRootItem);
+  }
 
   public void Recursive(NavigationBoardItem item, Action<NavigationBoardItem> action)
   {
@@ -59,6 +46,12 @@ public class MainViewModel : ViewModelBase
       foreach (NavigationBoardItem child in group.Children)
         Recursive(child, action);
     action.Invoke(item);
+  }
+
+  public void ResetNavigation()
+  {
+    foreach (NavigationBoardItem child in BoardMenuRootItem.Children)
+      Recursive(child, item => DatabaseService.UpdateBoardHierarchy(item, item.GetNext()));
   }
 
   public void MoveNavigationBoardItem(NavigationBoardItem source, NavigationBoardItem target, NavigationBoardItemPosition position)
@@ -75,6 +68,40 @@ public class MainViewModel : ViewModelBase
         break;
     }
   }
+
+  private Icon _newBoardGroupIcon = IconLibrary.FindGlyph("\uE82D");
+  public Icon NewBoardGroupIcon
+  {
+    get => _newBoardGroupIcon;
+    set => SetProperty(ref _newBoardGroupIcon, value);
+  }
+
+  private Icon _newBoardIcon = IconLibrary.FindGlyph("\uE70B");
+  public Icon NewBoardIcon
+  {
+    get => _newBoardIcon;
+    set => SetProperty(ref _newBoardIcon, value);
+  }
+
+  public NavigationBoardItem AddNavigationBoardItem(NavigationBoardGroupItem parent, string name, bool isGroupItem)
+  {
+    NavigationBoardItem item = isGroupItem
+      ? new NavigationBoardGroupItem(name, NewBoardGroupIcon, Guid.NewGuid())
+      : new NavigationBoardItem(name, NewBoardIcon, Guid.NewGuid());
+    parent.Add(item);
+    DatabaseService.AddBoard(item, parent.Children.Count > 1 ? parent.Children[^2] : null);
+    return item;
+  }
+
+  public void RenameNavigation(NavigationBoardItem item, string newName)
+  {
+    if (string.IsNullOrEmpty(newName) || item.Name == newName)
+      return;
+    item.Name = newName;
+    DatabaseService.UpdateBoard(item, "Name");
+  }
+
+  public void RegisterNavigation(NavigationItem item) => NavigationService.CurrentNavigation = item;
 }
 
 public enum NavigationBoardItemPosition { Before, After, Inside }

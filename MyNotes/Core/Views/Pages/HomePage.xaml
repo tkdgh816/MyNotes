@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Page x:Class="MyNotes.Core.Views.HomePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:controls="using:CommunityToolkit.WinUI.Controls">
 
   <Grid>
     <Grid.RowDefinitions>
@@ -11,15 +12,104 @@
 
     <StackPanel Orientation="Horizontal"
                 Spacing="8">
-      <Button Style="{StaticResource AppIconMediumButtonStyle}">
-        <SymbolIcon Symbol="Home" />
-      </Button>
       <TextBlock Text="Home"
                  Style="{StaticResource TitleTextBlockStyle}" />
     </StackPanel>
 
-    <ScrollViewer Grid.Row="1">
+    <Grid Grid.Row="1"
+          RowSpacing="12">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition />
+      </Grid.RowDefinitions>
+      <StackPanel Spacing="12"
+                  Grid.Row="0"
+                  Background="{StaticResource SubtleFillColorSecondary}"
+                  CornerRadius="{StaticResource ControlCornerRadius}"
+                  HorizontalAlignment="Left"
+                  Padding="12,0,12,12">
+        <RadioButtons x:Name="DatabaseTableRadioButtons"
+                      SelectedIndex="2"
+                      MaxColumns="5">
+          <RadioButton Content="Boards" />
+          <RadioButton Content="Notes" />
+          <RadioButton Content="All" />
+        </RadioButtons>
+        <StackPanel Orientation="Horizontal"
+                    Spacing="8">
+          <Button x:Name="ReadTableButton"
+                  Content="Read all data"
+                  Click="ReadTableButton_Click" />
+          <Button x:Name="DeleteDataButton"
+                  Content="Delete all data"
+                  Click="DeleteDataButton_Click" />
+          <Button x:Name="DropTableButton"
+                  Content="Drop table"
+                  Click="DropTableButton_Click" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal"
+                    Spacing="8">
+          <Button x:Name="TestWindowButton"
+                  Content="Test Window"
+                  Click="TestWindowButton_Click" />
+          <Button x:Name="ViewWindowsButton"
+                  Content="View windows"
+                  Click="ViewWindowsButton_Click" />
+        </StackPanel>
+      </StackPanel>
 
-    </ScrollViewer>
+      <Grid ColumnSpacing="4"
+            Grid.Row="1">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition />
+          <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <ScrollViewer Grid.Column="0">
+          <Grid ColumnSpacing="4">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition />
+              <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="ReadTableTextBlock0"
+                       Grid.Column="0"
+                       IsTextSelectionEnabled="True"
+                       Margin="12,0,4,0" />
+            <TextBlock x:Name="ReadTableTextBlock1"
+                       Grid.Column="1"
+                       IsTextSelectionEnabled="True"
+                       Margin="12,0,4,0" />
+          </Grid>
+        </ScrollViewer>
+
+        <ScrollViewer Grid.Column="1">
+          <Grid ColumnSpacing="4">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition />
+              <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="ReadTableTextBlock2"
+                       Grid.Column="0"
+                       IsTextSelectionEnabled="True"
+                       Margin="12,0,4,0" />
+            <TextBlock x:Name="ReadTableTextBlock3"
+                       Grid.Column="1"
+                       IsTextSelectionEnabled="True"
+                       Margin="12,0,4,0" />
+          </Grid>
+        </ScrollViewer>
+
+        <controls:GridSplitter Grid.Column="1"
+                               Width="16"
+                               HorizontalAlignment="Left"
+                               ResizeBehavior="BasedOnAlignment"
+                               ResizeDirection="Auto">
+          <controls:GridSplitter.RenderTransform>
+            <TranslateTransform X="-7" />
+          </controls:GridSplitter.RenderTransform>
+        </controls:GridSplitter>
+
+      </Grid>
+    </Grid>
   </Grid>
 </Page>

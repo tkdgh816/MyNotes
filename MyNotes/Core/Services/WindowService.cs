@@ -6,9 +6,11 @@ namespace MyNotes.Core.Services;
 public class WindowService
 {
   public MainWindow? MainWindow { get; private set; } = new();
-  public Dictionary<Note, NoteWindow> NoteWindows { get; } = new();
+  public Dictionary<Note, WeakReference<NoteWindow>> NoteWindows { get; } = new();
   public Note? CurrentNote { get; private set; }
-
+  // TEST: WeakReference Window
+  public List<WeakReference<Window>> Windows = new();
+  public List<WeakReference<Page>> Pages = new();
   public WindowService()
   {
 
@@ -26,25 +28,52 @@ public class WindowService
     {
       CurrentNote = note;
       NoteWindow newWindow = new();
-      NoteWindows[note] = newWindow;
+      // TEST: WeakReference Add Window
+      Windows.Add(new(newWindow));
+      NoteWindows[note] = new WeakReference<NoteWindow>(newWindow);
       return newWindow;
     }
   }
 
+  public void ActivateNoteWindow(Note note)
+  {
+    CurrentNote = note;
+    NoteWindow newWindow = new();
+    newWindow.Activate();
+    Windows.Add(new(newWindow));
+  }
+
   public NoteWindow? GetNoteWindow(Note note)
   {
-    NoteWindows.TryGetValue(note, out NoteWindow? window);
-    return window;
+    NoteWindows.TryGetValue(note, out WeakReference<NoteWindow>? wr);
+    if (wr is null)
+      return null;
+    return wr.TryGetTarget(out NoteWindow? window) ? window : null;
   }
 
   public bool CloseNoteWindow(Note note)
   {
-    if (NoteWindows.TryGetValue(note, out NoteWindow? window))
-    {
-      window.Close();
-      NoteWindows.Remove(note);
-      return true;
-    }
-    return false;
+    return NoteWindows.Remove(note);
+  }
+
+  public void ReadActiveWindows()
+  {
+    GC.Collect();
+    Windows.RemoveAll(wr => !wr.TryGetTarget(out _));
+    Pages.RemoveAll(wr => !wr.TryGetTarget(out _));
+    Debug.WriteLine("Windows: " + string.Join(", ", Windows.Select(
+      wr => 
+      { 
+        wr.TryGetTarget(out Window? target); 
+        return target?.GetHashCode().ToString() ?? ""; 
+      }
+    )));
+    Debug.WriteLine("Pages: " + string.Join(", ", Pages.Select(
+      wr =>
+      {
+        wr.TryGetTarget(out Page? target);
+        return target?.GetHashCode().ToString() ?? "";
+      }
+    )));
   }
 }

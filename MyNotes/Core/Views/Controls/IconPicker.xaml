@@ -43,7 +43,7 @@
                  Grid.Row="0"
                  SelectionChanged="VIEW_PrimarySelectorBar_SelectionChanged">
       <SelectorBarItem Tag="Basic"
-                       ToolTipService.ToolTip="Basic">
+                       ToolTipService.ToolTip="Basic symbols">
         <SelectorBarItem.Icon>
           <FontIcon Glyph="&#xED58;" />
         </SelectorBarItem.Icon>
@@ -147,7 +147,7 @@
       </SelectorBarItem>
     </SelectorBar>
 
-    <ScrollViewer x:Name="VIEW_IconsViewScrollViewer"
+    <ScrollView x:Name="VIEW_IconsViewScrollView"
                   Grid.Row="2">
       <ItemsRepeater x:Name="VIEW_IconsItemsRepeater"
                      ItemTemplate="{StaticResource IconPickerViewItemTemplateSelector}">
@@ -155,6 +155,6 @@
           <UniformGridLayout />
         </ItemsRepeater.Layout>
       </ItemsRepeater>
-    </ScrollViewer>
+    </ScrollView>
   </Grid>
 </UserControl>

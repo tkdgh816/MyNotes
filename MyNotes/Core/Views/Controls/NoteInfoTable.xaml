@@ -2,7 +2,7 @@
 <UserControl x:Class="MyNotes.Core.Views.NoteInfoTable"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <ScrollViewer MaxWidth="300"
+  <ScrollView MaxWidth="300"
                 HorizontalScrollMode="Auto"
                 HorizontalScrollBarVisibility="Auto"
                 VerticalScrollMode="Auto"
@@ -62,5 +62,5 @@
                  Text="Tag1 Tag2 Tag3"
                  IsTextSelectionEnabled="True" />
     </Grid>
-  </ScrollViewer>
+  </ScrollView>
 </UserControl>

@@ -9,21 +9,21 @@ public sealed partial class IconPicker : UserControl
     this.InitializeComponent();
   }
 
-  public static readonly DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof(IconSource), typeof(IconPicker), new PropertyMetadata(null));
-  public IconSource Icon
+  public static readonly DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof(Icon), typeof(IconPicker), new PropertyMetadata(null));
+  public Icon Icon
   {
-    get => (IconSource)GetValue(IconProperty);
+    get => (Icon)GetValue(IconProperty);
     set => SetValue(IconProperty, value);
   }
 
   private void FontButton_Click(object sender, RoutedEventArgs e)
   {
-    Icon = new FontIconSource() { Glyph = ((Glyph)((FrameworkElement)sender).DataContext).Code };
+    Icon = (Glyph)((FrameworkElement)sender).DataContext;
   }
 
   private void EmojiButton_Click(object sender, RoutedEventArgs e)
   {
-    Icon = new BitmapIconSource() { UriSource = new Uri(((Emoji)((FrameworkElement)sender).DataContext).Path), ShowAsMonochrome = false };
+    Icon = (Emoji)((FrameworkElement)sender).DataContext;
   }
 
   private void VIEW_PrimarySelectorBar_SelectionChanged(SelectorBar sender, SelectorBarSelectionChangedEventArgs args)
@@ -33,18 +33,17 @@ public sealed partial class IconPicker : UserControl
     {
       case "Basic":
         ControlSecondarySelectorBar(false);
-        VIEW_IconsItemsRepeater.ItemsSource = Models.Icon.Glyphs;
+        VIEW_IconsItemsRepeater.ItemsSource = IconLibrary.Glyphs;
         break;
       case "PeopleAndBody":
         ControlSecondarySelectorBar(true);
         break;
       default:
         ControlSecondarySelectorBar(false);
-        Models.Icon.Emojis.TryGetValue(selectedTag, out var items);
-        VIEW_IconsItemsRepeater.ItemsSource = items;
+        VIEW_IconsItemsRepeater.ItemsSource = IconLibrary.EmojisList[selectedTag];
         break;
     }
-    VIEW_IconsViewScrollViewer.ChangeView(0, 0, 1, true);
+    VIEW_IconsViewScrollView.ScrollTo(0, 0);
   }
 
   private void ControlSecondarySelectorBar(bool isActivated)
@@ -67,8 +66,7 @@ public sealed partial class IconPicker : UserControl
       return;
 
     string selectedTag = (string)sender.SelectedItem.Tag;
-    Models.Icon.Emojis.TryGetValue(selectedTag, out var items);
-    VIEW_IconsItemsRepeater.ItemsSource = items;
+    VIEW_IconsItemsRepeater.ItemsSource = IconLibrary.EmojisList[selectedTag];
   }
 }
 

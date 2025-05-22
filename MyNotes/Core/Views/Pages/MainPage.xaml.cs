@@ -15,6 +15,15 @@ public sealed partial class MainPage : Page
     this.InitializeComponent();
     ViewModel = App.Current.GetService<MainViewModel>();
     SetTimer();
+    //this.Loaded += MainPage_Loaded;
+  }
+
+  private void MainPage_Loaded(object sender, RoutedEventArgs e)
+  {
+    MenuFlyout ContextFlyout = new();
+    ContextFlyout.Items.Add(new MenuFlyoutItem() { Text = "Context Flyout" });
+    ScrollViewer MenuItemsHost = (ScrollViewer)((Grid)VisualTreeHelper.GetChild(VIEW_NavigationView, 0)).FindName("MenuItemsScrollViewer");
+    MenuItemsHost.ContextFlyout = ContextFlyout;
   }
 
   public MainViewModel ViewModel { get; }
@@ -42,7 +51,10 @@ public sealed partial class MainPage : Page
   private void Navigate(NavigationItem item)
   {
     if (!_isBackRequested)
+    {
+      ViewModel.RegisterNavigation(item);
       VIEW_NavigationContent_RootFrame.Navigate(item.PageType, item);
+    }
   }
 
   private void VIEW_NavigationContent_RootFrame_Navigated(object sender, NavigationEventArgs e)
@@ -54,27 +66,77 @@ public sealed partial class MainPage : Page
     _isBackRequested = false;
   }
 
-  private void VIEW_NavigationViewFooter_NewGroupButton_Click(object sender, RoutedEventArgs e)
+  private async void ShowNewGroupContentDialog(int comboBoxIndex, object? selectedNavigation)
   {
-    NavigationBoardGroupItem group = VIEW_NavigationView.SelectedItem switch
+    VIEW_NewBoardGroupInputTextBox.Text = "";
+    ComboBox optionsComboBox = VIEW_NewBoardGroupOptionsComboBox;
+    optionsComboBox.SelectedIndex = comboBoxIndex;
+
+    if (await VIEW_NewBoardGroupContentDialog.ShowAsync() == ContentDialogResult.Primary)
     {
-      NavigationBoardGroupItem groupItem => groupItem,
-      NavigationBoardItem boardItem => boardItem.Parent,
-      _ => ViewModel.ListMenuRootItem
-    };
-    group.Add(new NavigationBoardGroupItem("New Group", new FontIconSource() { Glyph = "\uE82D" }, new Guid()));
+      NavigationBoardGroupItem group = optionsComboBox.SelectedIndex switch
+      {
+        1 => selectedNavigation as NavigationBoardGroupItem,
+        2 => (selectedNavigation as NavigationBoardItem)?.Parent,
+        0 or _ => ViewModel.BoardMenuRootItem
+      } ?? ViewModel.BoardMenuRootItem;
+
+      string inputText = VIEW_NewBoardGroupInputTextBox.Text;
+      if (!string.IsNullOrWhiteSpace(inputText))
+        ViewModel.AddNavigationBoardItem(group, inputText, true);
+    }
   }
 
-  private void VIEW_NavigationViewFooter_NewBoardButton_Click(object sender, RoutedEventArgs e)
-  {
-    NavigationBoardGroupItem group = VIEW_NavigationView.SelectedItem switch
+  private int GetNewBoardOptionsComboBoxSelectedIndex()
+    => VIEW_NavigationView.SelectedItem switch
     {
-      NavigationBoardGroupItem groupItem => groupItem,
-      NavigationBoardItem boardItem => boardItem.Parent,
-      _ => ViewModel.ListMenuRootItem
+      NavigationBoardGroupItem => 1,
+      NavigationBoardItem => 2,
+      _ => 0
     };
-    group.Add(new NavigationBoardItem("New Board", new FontIconSource() { Glyph = "\uE737" }, new Guid()));
+
+  private void VIEW_NavigationViewFooter_NewGroupButton_Click(object sender, RoutedEventArgs e)
+    => ShowNewGroupContentDialog(GetNewBoardOptionsComboBoxSelectedIndex(), VIEW_NavigationView.SelectedItem);
+
+  private async void ShowNewBoardContentDialog(int comboBoxIndex, object? selectedNavigation)
+  {
+    VIEW_NewBoardInputTextBox.Text = "";
+    ComboBox optionsComboBox = VIEW_NewBoardOptionsComboBox;
+    optionsComboBox.SelectedIndex = comboBoxIndex;
+
+    if (await VIEW_NewBoardContentDialog.ShowAsync() == ContentDialogResult.Primary)
+    {
+      NavigationBoardGroupItem group = optionsComboBox.SelectedIndex switch
+      {
+        1 => selectedNavigation as NavigationBoardGroupItem,
+        2 => (selectedNavigation as NavigationBoardItem)?.Parent,
+        0 or _ => ViewModel.BoardMenuRootItem
+      } ?? ViewModel.BoardMenuRootItem;
+
+      string inputText = VIEW_NewBoardInputTextBox.Text;
+      if (!string.IsNullOrWhiteSpace(inputText))
+        ViewModel.AddNavigationBoardItem(group, inputText, false);
+    }
   }
+  private void VIEW_NavigationViewFooter_NewBoardButton_Click(object sender, RoutedEventArgs e)
+    => ShowNewBoardContentDialog(GetNewBoardOptionsComboBoxSelectedIndex(), VIEW_NavigationView.SelectedItem);
+
+  private void VIEW_NavigationViewBoardGroupItem_NewGroupMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+    => ShowNewGroupContentDialog(1, ((FrameworkElement)sender).DataContext);
+
+  private void VIEW_NavigationViewBoardGroupItem_NewBoardMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+    => ShowNewBoardContentDialog(1, ((FrameworkElement)sender).DataContext);
+
+  private async void ShowRenameBoardContentDialog(NavigationBoardItem navigation)
+  {
+    VIEW_RenameBoardInputTextBox.Text = navigation.Name;
+    VIEW_RenameBoardContentDialog.DataContext = navigation;
+    if (await VIEW_RenameBoardContentDialog.ShowAsync() == ContentDialogResult.Primary)
+      ViewModel.RenameNavigation(navigation, VIEW_RenameBoardInputTextBox.Text);
+  }
+
+  private void VIEW_NavigationViewBoardItem_RenameMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+    => ShowRenameBoardContentDialog((NavigationBoardItem)((FrameworkElement)sender).DataContext);
 
   private bool _isInEditMode = false;
   private NavigationItem? _currentNavigation;
@@ -92,18 +154,35 @@ public sealed partial class MainPage : Page
       item.IsEditable = _isInEditMode;
     foreach (Navigation item in ViewModel.FooterMenuItems)
       item.IsEditable = _isInEditMode;
-    foreach (NavigationBoardItem item in ViewModel.ListMenuItems)
+    foreach (NavigationBoardItem item in ViewModel.BoardMenuItems)
       ViewModel.Recursive(item, x => x.IsEditable = _isInEditMode);
     VIEW_NavigationView.SelectedItem = _isInEditMode ? null : _currentNavigation;
 
+    if (!_isInEditMode)
+      ViewModel.ResetNavigation();
     _isBackRequested = false;
   }
 
   private void VIEW_NavigationView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
   {
-    if (args.InvokedItemContainer is NavigationViewItem item && item.DataContext is not NavigationBoardGroupItem && !item.SelectsOnInvoked)
-      VIEW_EditTeachingTip.IsOpen = true;
+    if (args.InvokedItemContainer is NavigationViewItem itemContainer
+        && !itemContainer.SelectsOnInvoked
+        && itemContainer.DataContext is NavigationItem item)
+    {
+      switch (item)
+      {
+        case NavigationTagsItem:
+          VIEW_TagsFlyout.ShowAt(itemContainer);
+          break;
+        case NavigationBoardGroupItem:
+          break;
+        case NavigationBoardItem:
+          VIEW_EditTeachingTip.IsOpen = true;
+          break;
+      }
+    }
   }
+
 
   private void VIEW_NavigationView_Loaded(object sender, RoutedEventArgs e)
   {

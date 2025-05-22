@@ -2,21 +2,41 @@ using MyNotes.Core.Models;
 using MyNotes.Core.ViewModels;
 
 namespace MyNotes.Core.Views;
-public sealed partial class NoteBoard : Page
+public sealed partial class NoteBoardPage : Page
 {
-  public NoteBoard()
+  public NoteBoardPage()
   {
     this.InitializeComponent();
     ViewModel = App.Current.GetService<NoteBoardViewModel>();
+    this.Unloaded += NoteBoardPage_Unloaded;
+  }
+
+  private void NoteBoardPage_Unloaded(object sender, RoutedEventArgs e)
+  {
+    Navigation.PropertyChanged -= OnNavigationPropertyChanged;
+    _timer.Tick -= OnTimerTick;
+    ViewModel.Dispose();
   }
 
   public NoteBoardViewModel ViewModel { get; }
 
-  public NavigationBoardItem? Navigation { get; private set; }
+  public NavigationBoardItem Navigation { get; private set; } = null!;
   protected override void OnNavigatedTo(NavigationEventArgs e)
   {
     base.OnNavigatedTo(e);
     Navigation = (NavigationBoardItem)e.Parameter;
+    Navigation.PropertyChanged += OnNavigationPropertyChanged;
+    _timer.Tick += OnTimerTick;
+  }
+  private void OnNavigationPropertyChanged(object? sender, PropertyChangedEventArgs e)
+  {
+    if (e.PropertyName == "Icon")
+      ViewModel.DatabaseService.UpdateBoard(Navigation, "Icon");
+  }
+
+  private void VIEW_NewNoteButton_Click(object sender, RoutedEventArgs e)
+  {
+    ViewModel.CreateNewNote();
   }
 
   private void Grid_PointerEntered(object sender, PointerRoutedEventArgs e)
@@ -64,12 +84,20 @@ public sealed partial class NoteBoard : Page
     }
   }
 
+  readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(400) };
+  double _sliderValue;
   private void VIEW_StyleChangeSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
   {
     if (VIEW_NotesGridView is null)
       return;
+    _timer.Stop();
+    _sliderValue = e.NewValue;
+    _timer.Start();
+  }
 
-    switch (e.NewValue)
+  private void OnTimerTick(object? sender, object e)
+  {
+    switch (_sliderValue)
     {
       case 150:
         VIEW_NotesGridView.ItemContainerStyle = isItemsWrapGridStyle ? (Style)((App)Application.Current).Resources["AppGridViewItemContainerStyle150"] : (Style)((App)Application.Current).Resources["AppGridViewItemContainerStyle60"];
@@ -88,12 +116,6 @@ public sealed partial class NoteBoard : Page
         break;
     }
     VIEW_NotesGridView.UpdateLayout();
-  }
-
-  int num = 0;
-  private void Button_Click(object sender, RoutedEventArgs e)
-  {
-    Debug.WriteLine("Button Clicked " + num++);
   }
 
   private void VIEW_SearchAutoSuggestBox_LostFocus(object sender, RoutedEventArgs e)

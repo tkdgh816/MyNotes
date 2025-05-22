@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿#if DEBUG && !DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION
+using Microsoft.Extensions.DependencyInjection;
 
 using MyNotes.Core.Services;
 using MyNotes.Core.ViewModels;
@@ -41,3 +42,4 @@ public partial class App : Application
   public T GetService<T>() => (T)Services.GetRequiredService(typeof(T));
   #endregion
 }
+#endif

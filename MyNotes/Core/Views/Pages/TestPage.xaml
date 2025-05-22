@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page x:Class="MyNotes.Core.Views.TestPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:local="using:MyNotes.Core.Views"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d">
+
+  <StackPanel x:Name="CustomStackPanel"
+              Spacing="12">
+    <TextBox x:Name="CustomTextBox" />
+    <Button x:Name="CustomButton"
+            Content="Button"
+            Click="CustomButton_Click" />
+    <TextBlock x:Name="CustomTextBlock"
+               Text="{x:Bind Model.Text, Mode=OneWay}" />
+  </StackPanel>
+</Page>

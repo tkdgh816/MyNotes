@@ -10,23 +10,41 @@ public sealed class AppScrollViewer : Control
   }
 
   ScrollViewer ContentScrollViewer = null!;
-  Button TopButton = null!, BottomButton = null!, LeftButton = null!, RightButton = null!;
+  RepeatButton TopButton = null!, BottomButton = null!, LeftButton = null!, RightButton = null!;
 
   protected override void OnApplyTemplate()
   {
     base.OnApplyTemplate();
     ContentScrollViewer = (ScrollViewer)GetTemplateChild("ContentScrollViewer");
-    TopButton = (Button)GetTemplateChild("TopButton");
-    BottomButton = (Button)GetTemplateChild("BottomButton");
-    LeftButton = (Button)GetTemplateChild("LeftButton");
-    RightButton = (Button)GetTemplateChild("RightButton");
+    TopButton = (RepeatButton)GetTemplateChild("TopButton");
+    BottomButton = (RepeatButton)GetTemplateChild("BottomButton");
+    LeftButton = (RepeatButton)GetTemplateChild("LeftButton");
+    RightButton = (RepeatButton)GetTemplateChild("RightButton");
+
+    this.PointerEntered += (s, e) => SetScrollButtonsState();
+    this.PointerExited += (s, e) =>
+    {
+      VisualStateManager.GoToState(this, "HorizontalNoScroll", false);
+      VisualStateManager.GoToState(this, "VerticalNoScroll", false);
+    };
 
     ContentScrollViewer.ViewChanged += (s, e) => SetScrollButtonsState();
-    ContentScrollViewer.SizeChanged += (s, e) => SetScrollButtonsState();
-    TopButton.Click += (s, e) => ContentScrollViewer.ChangeView(null, ContentScrollViewer.VerticalOffset - ScrollInterval, null);
-    BottomButton.Click += (s, e) => ContentScrollViewer.ChangeView(null, ContentScrollViewer.VerticalOffset + ScrollInterval, null);
-    LeftButton.Click += (s, e) => ContentScrollViewer.ChangeView(ContentScrollViewer.HorizontalOffset - ScrollInterval, null, null);
-    RightButton.Click += (s, e) => ContentScrollViewer.ChangeView(ContentScrollViewer.HorizontalOffset + ScrollInterval, null, null);
+    TopButton.Click += (s, e) =>
+    {
+      ContentScrollViewer.ChangeView(null, Math.Clamp(ContentScrollViewer.VerticalOffset - ScrollInterval, 0.0, ContentScrollViewer.ScrollableHeight), null);
+    };
+    BottomButton.Click += (s, e) =>
+    {
+      ContentScrollViewer.ChangeView(null, Math.Clamp(ContentScrollViewer.VerticalOffset + ScrollInterval, 0.0, ContentScrollViewer.ScrollableHeight), null);
+    };
+    LeftButton.Click += (s, e) =>
+    {
+      ContentScrollViewer.ChangeView(Math.Clamp(ContentScrollViewer.HorizontalOffset - ScrollInterval, 0.0, ContentScrollViewer.ScrollableWidth), null, null);
+    };
+    RightButton.Click += (s, e) =>
+    {
+      ContentScrollViewer.ChangeView(Math.Clamp(ContentScrollViewer.HorizontalOffset + ScrollInterval, 0.0, ContentScrollViewer.ScrollableWidth), null, null);
+    };
   }
 
   public static readonly DependencyProperty ContentProperty = DependencyProperty.Register("Content", typeof(object), typeof(AppScrollViewer), new PropertyMetadata(null));
@@ -50,40 +68,39 @@ public sealed class AppScrollViewer : Control
     set => SetValue(VerticalScrollModeProperty, value);
   }
 
-
   private void SetScrollButtonsState()
   {
-    double width = ContentScrollViewer.ScrollableWidth;
-    double height = ContentScrollViewer.ScrollableHeight;
+    double scrollableWidth = ContentScrollViewer.ScrollableWidth;
+    double scrollableHeight = ContentScrollViewer.ScrollableHeight;
     double horizontalOffset = ContentScrollViewer.HorizontalOffset;
     double verticalOffset = ContentScrollViewer.VerticalOffset;
 
-    if (HorizontalScrollMode != ScrollMode.Disabled && width > 0)
+    if (HorizontalScrollMode != ScrollMode.Disabled)
     {
-      if (horizontalOffset == 0)
+      if (scrollableWidth <= 0.0)
+        VisualStateManager.GoToState(this, "HorizontalNoScroll", false);
+      else if (horizontalOffset <= 0.0)
         VisualStateManager.GoToState(this, "HorizontalScrollStart", false);
-      else if (horizontalOffset == width)
+      else if (horizontalOffset >= scrollableWidth)
         VisualStateManager.GoToState(this, "HorizontalScrollEnd", false);
       else
         VisualStateManager.GoToState(this, "HorizontalScrollMiddle", false);
     }
-    else
-      VisualStateManager.GoToState(this, "HorizontalNoScroll", false);
 
-    if (VerticalScrollMode != ScrollMode.Disabled && height >= 0)
+    if (VerticalScrollMode != ScrollMode.Disabled)
     {
-      if (verticalOffset == 0)
+      if (scrollableHeight <= 0.0)
+        VisualStateManager.GoToState(this, "VerticalNoScroll", false);
+      else if (verticalOffset <= 0.0)
         VisualStateManager.GoToState(this, "VerticalScrollStart", false);
-      else if (verticalOffset == width)
+      else if (verticalOffset >= scrollableHeight)
         VisualStateManager.GoToState(this, "VerticalScrollEnd", false);
       else
         VisualStateManager.GoToState(this, "VerticalScrollMiddle", false);
     }
-    else
-      VisualStateManager.GoToState(this, "VerticalNoScroll", false);
   }
 
-  public static readonly DependencyProperty ScrollIntervalProperty = DependencyProperty.Register("ScrollInterval", typeof(double), typeof(AppScrollViewer), new PropertyMetadata(50.0));
+  public static readonly DependencyProperty ScrollIntervalProperty = DependencyProperty.Register("ScrollInterval", typeof(double), typeof(AppScrollViewer), new PropertyMetadata(20.0));
   public double ScrollInterval
   {
     get => (double)GetValue(ScrollIntervalProperty);

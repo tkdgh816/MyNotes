@@ -2,11 +2,15 @@
 <Window x:Class="MyNotes.Core.Views.NoteWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:views="using:MyNotes.Core.Views">
+        xmlns:views="using:MyNotes.Core.Views"
+        xmlns:converters="using:MyNotes.Common.Converters">
 
-  <UserControl x:Name="VIEW_RootUserControl">
+  <UserControl x:Name="VIEW_RootUserControl"
+               Loaded="VIEW_RootUserControl_Loaded">
+    <UserControl.Resources>
+    </UserControl.Resources>
     <Grid x:Name="VIEW_RootGrid"
-          Background="#fff6cb">
+          Background="{x:Bind converters:ColorToBrushConverter.Convert(ViewModel.Note.Background), Mode=OneWay}">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto" />
         <RowDefinition />
@@ -186,19 +190,29 @@
                      SelectionFlyout="{x:Null}"
                      SelectionHighlightColorWhenNotFocused="{StaticResource AccentFillColorSelectedTextBackgroundBrush}"
                      SelectionChanged="VIEW_TextEditorRichEditBox_SelectionChanged"
-                     Loaded="VIEW_TextEditorRichEditBox_Loaded" />
+                     Loaded="VIEW_TextEditorRichEditBox_Loaded" 
+                     TextChanged="VIEW_TextEditorRichEditBox_TextChanged"/>
       </Grid>
       <!--#endregion-->
 
       <!--#region Command Bar-->
-      <views:AppScrollViewer x:Name="VIEW_CommandBarScrollViewer"
+      <ScrollViewer x:Name="VIEW_CommandBarScrollViewer"
+                    Grid.Row="2"
+                    HorizontalScrollMode="Enabled"
+                    VerticalScrollMode="Disabled"
+                    HorizontalScrollBarVisibility="Hidden"
+                    VerticalScrollBarVisibility="Disabled"
+                    Background="{StaticResource SubtleFillColorTertiaryBrush}"
+                    BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="0,1,0,0">
+        <!--<views:AppScrollViewer x:Name="VIEW_CommandBarScrollViewer"
                              Grid.Row="2"
                              HorizontalScrollMode="Enabled"
                              VerticalScrollMode="Disabled"
-                             ScrollInterval="100"
+                             ScrollInterval="20"
                              Background="{StaticResource SubtleFillColorTertiaryBrush}"
                              BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
-                             BorderThickness="0,1,0,0">
+                             BorderThickness="0,1,0,0">-->
         <StackPanel Orientation="Horizontal"
                     HorizontalAlignment="Center">
 
@@ -380,6 +394,7 @@
                   <TextBlock Text="Background color"
                              Style="{StaticResource BodyStrongTextBlockStyle}" />
                   <ColorPicker x:Name="VIEW_BackgroundColorPicker"
+                               Color="{x:Bind ViewModel.Note.Background, Mode=TwoWay}"
                                ColorSpectrumShape="Ring"
                                IsMoreButtonVisible="True"
                                IsAlphaEnabled="True"
@@ -393,10 +408,16 @@
                   Content="&#xE91B;"
                   Style="{StaticResource AppFontIconLargeButtonStyle}" />
         </StackPanel>
-        <views:AppScrollViewer.RenderTransform>
+        <!--<views:AppScrollViewer.RenderTransform>
           <TranslateTransform x:Name="VIEW_CommandBarScrollViewer_TranslateTransform" />
-        </views:AppScrollViewer.RenderTransform>
-      </views:AppScrollViewer>
+        </views:AppScrollViewer.RenderTransform>-->
+
+        <ScrollViewer.RenderTransform>
+          <TranslateTransform x:Name="VIEW_CommandBarScrollViewer_TranslateTransform" />
+        </ScrollViewer.RenderTransform>
+        <!--</views:AppScrollViewer>-->
+      </ScrollViewer>
+
       <!--#endregion-->
 
       <ContentDialog x:Name="VIEW_RemoveNoteContentDialog"
@@ -523,7 +544,7 @@
           </VisualState>
         </VisualStateGroup>
 
-        <VisualStateGroup x:Name="BackgroundColorStates">
+        <!--<VisualStateGroup x:Name="BackgroundColorStates">
           <VisualState x:Name="BackgroundColorLight">
             <VisualState.Setters>
               <Setter Target="VIEW_TitleBarGrid.Background"
@@ -541,7 +562,7 @@
                       Value="#55FFFFFF" />
             </VisualState.Setters>
           </VisualState>
-        </VisualStateGroup>
+        </VisualStateGroup>-->
       </VisualStateManager.VisualStateGroups>
     </Grid>
   </UserControl>

@@ -19,12 +19,14 @@
     <None Remove="Core\Views\NoteWindow.xaml" />
     <None Remove="Core\Views\Pages\BookmarksPage.xaml" />
     <None Remove="Core\Views\Pages\HomePage.xaml" />
-    <None Remove="Core\Views\Pages\ListsGroupPage.xaml" />
     <None Remove="Core\Views\Pages\MainPage.xaml" />
+    <None Remove="Core\Views\Pages\NotePage.xaml" />
     <None Remove="Core\Views\Pages\SearchPage.xaml" />
     <None Remove="Core\Views\Pages\SettingsPage.xaml" />
     <None Remove="Core\Views\Pages\TagsPage.xaml" />
+    <None Remove="Core\Views\Pages\TestPage.xaml" />
     <None Remove="Core\Views\Pages\TrashPage.xaml" />
+    <None Remove="Core\Views\Windows\TestWindow.xaml" />
     <None Remove="Themes\Generic.xaml" />
   </ItemGroup>
 
@@ -51,25 +53,43 @@
     <ProjectCapability Include="Msix" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="CommunityToolkit.WinUI.Behaviors" Version="8.2.250402" />
-    <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.2.250402" />
-    <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.250402" />
-    <PackageReference Include="CommunityToolkit.WinUI.Media" Version="8.2.250402" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.4" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250401001" />
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Common\Helpers\" />
     <Folder Include="Common\Extensions\" />
     <Folder Include="Common\Commands\" />
     <Folder Include="Common\Messages\" />
     <Folder Include="Contracts\" />
-    <Folder Include="Core\Views\Windows\" />
     <Folder Include="Strings\ko-KR\" />
     <Folder Include="Strings\en-US\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.2.250402" />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.250402" />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.Sizers" Version="8.2.250402" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.5" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.5" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4188" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250513003" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Core\Views\Pages\NotePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Core\Views\Pages\TestPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Core\Views\Windows\TestWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Core\Views\Controls\TagsEditor.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Core\Views\Controls\NoteInfoTable.xaml">
@@ -92,7 +112,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Core\Views\Pages\ListsGroupPage.xaml">
+    <Page Update="Core\Views\Pages\NoteBoardGroupPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

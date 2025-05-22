@@ -1,11 +1,5 @@
 using CommunityToolkit.WinUI.Helpers;
-
-using Microsoft.UI;
-using Microsoft.UI.Text;
-
 using MyNotes.Core.ViewModels;
-
-using Windows.Graphics;
 
 namespace MyNotes.Core.Views;
 
@@ -17,25 +11,54 @@ public sealed partial class NoteWindow : Window
     this.ExtendsContentIntoTitleBar = true;
     this.SetTitleBar(VIEW_TitleTextGrid);
     this.Activated += NoteWindow_Activated;
+    this.Closed += NoteWindow_Closed;
 
     _presenter = (OverlappedPresenter)AppWindow.Presenter;
     _presenter.SetBorderAndTitleBar(true, false);
     _presenter.PreferredMinimumWidth = (int)(350 * _dpi);
     _presenter.PreferredMinimumHeight = (int)(250 * _dpi);
 
-    AppWindow.Resize(new((int)(400 * _dpi), (int)(400 * _dpi)));
-
     _nonClientInputSrc = InputNonClientPointerSource.GetForWindowId(AppWindow.Id);
 
     ViewModel = App.Current.GetService<NoteViewModel>();
+    InitializeProperties();
+    _editorTimer.Tick += OnEditorTimerTick;
+    AppWindow.Changed += AppWindow_Changed;
+  }
+
+  public NoteViewModel ViewModel { get; }
+
+  private void NoteWindow_Closed(object sender, WindowEventArgs args)
+  {
+    Debug.WriteLine("NoteWindow Closed");
+    this.Activated -= NoteWindow_Activated;
+    AppWindow.Changed -= AppWindow_Changed;
+    ViewModel.UnregisterNotePropertyChangedEvent();
+    _editorTimer.Tick -= OnEditorTimerTick;
+    UpdateBodyText();
+    ViewModel.ForceUpdateNoteProperties();
+    ViewModel.CloseWindow();
+  }
+
+  private void InitializeProperties()
+  {
+    SizeInt32 size = ViewModel.Note.Size;
+    PointInt32 position = ViewModel.Note.Position;
+    AppWindow.MoveAndResize(new RectInt32(_X: position.X, _Y: position.Y, _Width: (int)(size.Width * _dpi), _Height: (int)(size.Height * _dpi)));
+    ViewModel.RegisterNotePropertyChangedEvent();
+  }
+
+  private void AppWindow_Changed(AppWindow sender, AppWindowChangedEventArgs args)
+  {
+    if (args.DidSizeChange)
+      ViewModel.ResizeWindow(AppWindow.ClientSize);
+    if (args.DidPositionChange)
+      ViewModel.MoveWindow(AppWindow.Position);
   }
 
   static double _dpi = 1.25;
   private void NoteWindow_Activated(object sender, WindowActivatedEventArgs args)
   {
-    if (_isWindowClosed)
-      return;
-
     switch (args.WindowActivationState)
     {
       case WindowActivationState.Deactivated:
@@ -51,19 +74,18 @@ public sealed partial class NoteWindow : Window
   private readonly OverlappedPresenter _presenter;
   private readonly InputNonClientPointerSource _nonClientInputSrc;
 
-  public NoteViewModel ViewModel { get; }
+  bool _isLayoutLoaded = false;
+  private void VIEW_RootUserControl_Loaded(object sender, RoutedEventArgs e)
+  {
+    _isLayoutLoaded = true;
+  }
 
   private void VIEW_MinimizeButton_Click(object sender, RoutedEventArgs e)
   {
     _presenter.Minimize();
   }
 
-  private bool _isWindowClosed = false;
-  private void VIEW_CloseButton_Click(object sender, RoutedEventArgs e)
-  {
-    _isWindowClosed = true;
-    ViewModel.CloseWindow();
-  }
+  private void VIEW_CloseButton_Click(object sender, RoutedEventArgs e) => this.Close();
 
   private void VIEW_PinButton_Click(object sender, RoutedEventArgs e)
   {
@@ -254,7 +276,7 @@ public sealed partial class NoteWindow : Window
 
   private void VIEW_BackgroundColorPicker_ColorChanged(ColorPicker sender, ColorChangedEventArgs args)
   {
-    VIEW_RootGrid.Background = new SolidColorBrush(args.NewColor);
+    return;
     if (args.NewColor.ToHsv().V > 0.5)
       VisualStateManager.GoToState(VIEW_RootUserControl, "BackgroundColorLight", false);
     else
@@ -288,5 +310,30 @@ public sealed partial class NoteWindow : Window
   private async void VIEW_AboutMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
   {
     await VIEW_NoteInfoContentDialog.ShowAsync();
+  }
+
+  private DispatcherTimer _editorTimer = new() { Interval = TimeSpan.FromSeconds(10) };
+  private int _editorCounter = 0;
+  private const int EditorCounterMax = 50;
+  private void VIEW_TextEditorRichEditBox_TextChanged(object sender, RoutedEventArgs e)
+  {
+    _editorTimer.Stop();
+    ViewModel.IsBodyChanged = true;
+    if (_editorCounter++ > EditorCounterMax)
+    {
+      _editorCounter = 0;
+      UpdateBodyText();
+    }
+    else
+      _editorTimer.Start();
+  }
+  private void OnEditorTimerTick(object? sender, object e)
+  {
+    UpdateBodyText();
+  }
+  private void UpdateBodyText()
+  {
+    VIEW_TextEditorRichEditBox.Document.GetText(TextGetOptions.AdjustCrlf, out string body);
+    ViewModel.UpdateBody(body);
   }
 }

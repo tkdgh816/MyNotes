@@ -1,10 +1,10 @@
 namespace MyNotes.Core.Views;
 
-public sealed class AppExtendedButton : Button
+public sealed class AppCompoundButton : Button
 {
-  public AppExtendedButton()
+  public AppCompoundButton()
   {
-    this.DefaultStyleKey = typeof(AppExtendedButton);
+    this.DefaultStyleKey = typeof(AppCompoundButton);
   }
 
   public static bool IsTemplateApplied { get; private set; } = false;
@@ -18,28 +18,28 @@ public sealed class AppExtendedButton : Button
     OnVisibilityChanged(this);
   }
 
-  public static readonly DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof(IconElement), typeof(AppExtendedButton), new PropertyMetadata(null));
+  public static readonly DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof(IconElement), typeof(AppCompoundButton), new PropertyMetadata(null));
   public IconElement Icon
   {
     get => (IconElement)GetValue(IconProperty);
     set => SetValue(IconProperty, value);
   }
 
-  public static readonly DependencyProperty SpacingProperty = DependencyProperty.Register("Spacing", typeof(double), typeof(AppExtendedButton), new PropertyMetadata(16.0));
+  public static readonly DependencyProperty SpacingProperty = DependencyProperty.Register("Spacing", typeof(double), typeof(AppCompoundButton), new PropertyMetadata(16.0));
   public double Spacing
   {
     get => (double)GetValue(SpacingProperty);
     set => SetValue(SpacingProperty, value);
   }
 
-  public static readonly DependencyProperty IsIconVisibleProperty = DependencyProperty.Register("IsIconVisible", typeof(Visibility), typeof(AppExtendedButton), new PropertyMetadata(Visibility.Visible, OnVisibilityChanged));
+  public static readonly DependencyProperty IsIconVisibleProperty = DependencyProperty.Register("IsIconVisible", typeof(Visibility), typeof(AppCompoundButton), new PropertyMetadata(Visibility.Visible, OnVisibilityChanged));
   public Visibility IsIconVisible
   {
     get => (Visibility)GetValue(IsIconVisibleProperty);
     set => SetValue(IsIconVisibleProperty, value);
   }
 
-  public static readonly DependencyProperty IsContentVisibleProperty = DependencyProperty.Register("IsContentVisible", typeof(Visibility), typeof(AppExtendedButton), new PropertyMetadata(Visibility.Visible, OnVisibilityChanged));
+  public static readonly DependencyProperty IsContentVisibleProperty = DependencyProperty.Register("IsContentVisible", typeof(Visibility), typeof(AppCompoundButton), new PropertyMetadata(Visibility.Visible, OnVisibilityChanged));
   public Visibility IsContentVisible
   {
     get => (Visibility)GetValue(IsContentVisibleProperty);
@@ -49,9 +49,9 @@ public sealed class AppExtendedButton : Button
   private static void OnVisibilityChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
   {
     if (IsTemplateApplied)
-      OnVisibilityChanged((AppExtendedButton)d);
+      OnVisibilityChanged((AppCompoundButton)d);
   }
 
-  private static void OnVisibilityChanged(AppExtendedButton obj)
+  private static void OnVisibilityChanged(AppCompoundButton obj)
     => obj.VIEW_RootGrid.ColumnSpacing = (obj.IsIconVisible == Visibility.Visible && obj.IsContentVisible == Visibility.Visible && obj.Icon != null && obj.Content != null) ? obj.Spacing : 0;
 }

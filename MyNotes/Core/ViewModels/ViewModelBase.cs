@@ -1,4 +1,6 @@
 ﻿namespace MyNotes.Core.ViewModels;
 
-public class ViewModelBase : ObservableObject
-{ }
+public class ViewModelBase : ObservableObject, IDisposable
+{
+  public virtual void Dispose() { }
+}
