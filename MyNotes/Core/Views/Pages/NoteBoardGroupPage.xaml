@@ -18,7 +18,8 @@
       </Grid.ColumnDefinitions>
 
       <!--#region Icon -->
-      <Button Style="{StaticResource AppIconMediumButtonStyle}">
+      <Button Style="{StaticResource AppIconMediumButtonStyle}"
+              Margin="0,0,8,0">
         <IconSourceElement IconSource="{x:Bind Navigation.Icon, Converter={StaticResource IconToIconSourceConverter}, Mode=OneWay}" />
         <Button.Flyout>
           <Flyout Placement="BottomEdgeAlignedLeft">
@@ -34,7 +35,7 @@
                  Text="{x:Bind Navigation.Name, Mode=OneWay}"
                  Style="{StaticResource TitleTextBlockStyle}"
                  TextWrapping="NoWrap"
-                 Margin="8,0" />
+                 Margin="0,0,8,0" />
       <!--#endregion -->
       
       <!--#region CommandBar -->

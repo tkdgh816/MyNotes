@@ -6,7 +6,7 @@ namespace MyNotes.Core.Services;
 public class WindowService
 {
   public MainWindow? MainWindow { get; private set; } = new();
-  public Dictionary<Note, WeakReference<NoteWindow>> NoteWindows { get; } = new();
+  public Dictionary<Note, NoteWindow> NoteWindows { get; } = new();
   public Note? CurrentNote { get; private set; }
   // TEST: WeakReference Window
   public List<WeakReference<Window>> Windows = new();
@@ -30,7 +30,7 @@ public class WindowService
       NoteWindow newWindow = new();
       // TEST: WeakReference Add Window
       Windows.Add(new(newWindow));
-      NoteWindows[note] = new WeakReference<NoteWindow>(newWindow);
+      NoteWindows[note] = newWindow;
       return newWindow;
     }
   }
@@ -45,10 +45,8 @@ public class WindowService
 
   public NoteWindow? GetNoteWindow(Note note)
   {
-    NoteWindows.TryGetValue(note, out WeakReference<NoteWindow>? wr);
-    if (wr is null)
-      return null;
-    return wr.TryGetTarget(out NoteWindow? window) ? window : null;
+    NoteWindows.TryGetValue(note, out NoteWindow? window);
+    return window;
   }
 
   public bool CloseNoteWindow(Note note)

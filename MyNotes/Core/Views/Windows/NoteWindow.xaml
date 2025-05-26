@@ -5,7 +5,8 @@
         xmlns:views="using:MyNotes.Core.Views"
         xmlns:converters="using:MyNotes.Common.Converters">
 
-  <UserControl x:Name="VIEW_RootUserControl"
+  <views:NotePage />
+  <!--<UserControl x:Name="VIEW_RootUserControl"
                Loaded="VIEW_RootUserControl_Loaded">
     <UserControl.Resources>
     </UserControl.Resources>
@@ -17,7 +18,7 @@
         <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
 
-      <!--#region Title Bar -->
+      --><!--#region Title Bar --><!--
       <Grid x:Name="VIEW_TitleBarGrid"
             Grid.Row="0"
             Background="{StaticResource SubtleFillColorTertiaryBrush}"
@@ -32,11 +33,11 @@
         <StackPanel x:Name="VIEW_TitleBarLeftStackPanel"
                     Grid.Column="0"
                     Orientation="Horizontal">
-          <!-- Dot: &#xE9B0; &#xE915;-->
+          --><!-- Dot: &#xE9B0; &#xE915;-->
           <!-- Set: &#xF5ED; &#xF5EE;-->
           <!-- Window: &#xE8A7; &#xE944; -->
           <!-- Pin: &#xE718; &#xE841;-->
-          <!-- Expand: &#xEE49; &#xEE47;-->
+          <!-- Expand: &#xEE49; &#xEE47;--><!--
           <Button x:Name="VIEW_PinButton"
                   Content="&#xEE49;"
                   Style="{StaticResource AppFontIconNormalButtonStyle}"
@@ -76,13 +77,13 @@
                     <FontIcon Glyph="&#xE932;" />
                   </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
-                <!-- Bookmark &#xE734; / Unbookmark &#xE8D9;-->
+                --><!-- Bookmark &#xE734; / Unbookmark &#xE8D9;--><!--
                 <MenuFlyoutItem Text="Unbookmark">
                   <MenuFlyoutItem.Icon>
                     <FontIcon Glyph="&#xE8D9;" />
                   </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
-                <!-- Pin to home &#xE718; / Unpin from home &#xE77A;-->
+                --><!-- Pin to home &#xE718; / Unpin from home &#xE77A;--><!--
                 <MenuFlyoutItem Text="Unpin from home">
                   <MenuFlyoutItem.Icon>
                     <FontIcon Glyph="&#xE77A;" />
@@ -168,9 +169,9 @@
           </StackPanel.RenderTransform>
         </StackPanel>
       </Grid>
-      <!--#endregion-->
+      --><!--#endregion-->
 
-      <!--#region Editor -->
+      <!--#region Editor --><!--
       <Grid Grid.Row="1">
         <Grid.Resources>
           <SolidColorBrush x:Key="TextControlBorderBrush"
@@ -193,9 +194,9 @@
                      Loaded="VIEW_TextEditorRichEditBox_Loaded" 
                      TextChanged="VIEW_TextEditorRichEditBox_TextChanged"/>
       </Grid>
-      <!--#endregion-->
+      --><!--#endregion-->
 
-      <!--#region Command Bar-->
+      <!--#region Command Bar--><!--
       <ScrollViewer x:Name="VIEW_CommandBarScrollViewer"
                     Grid.Row="2"
                     HorizontalScrollMode="Enabled"
@@ -205,14 +206,14 @@
                     Background="{StaticResource SubtleFillColorTertiaryBrush}"
                     BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
                     BorderThickness="0,1,0,0">
-        <!--<views:AppScrollViewer x:Name="VIEW_CommandBarScrollViewer"
+        --><!--<views:AppScrollViewer x:Name="VIEW_CommandBarScrollViewer"
                              Grid.Row="2"
                              HorizontalScrollMode="Enabled"
                              VerticalScrollMode="Disabled"
                              ScrollInterval="20"
                              Background="{StaticResource SubtleFillColorTertiaryBrush}"
                              BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
-                             BorderThickness="0,1,0,0">-->
+                             BorderThickness="0,1,0,0">--><!--
         <StackPanel Orientation="Horizontal"
                     HorizontalAlignment="Center">
 
@@ -408,17 +409,17 @@
                   Content="&#xE91B;"
                   Style="{StaticResource AppFontIconLargeButtonStyle}" />
         </StackPanel>
-        <!--<views:AppScrollViewer.RenderTransform>
+        --><!--<views:AppScrollViewer.RenderTransform>
           <TranslateTransform x:Name="VIEW_CommandBarScrollViewer_TranslateTransform" />
-        </views:AppScrollViewer.RenderTransform>-->
+        </views:AppScrollViewer.RenderTransform>--><!--
 
         <ScrollViewer.RenderTransform>
           <TranslateTransform x:Name="VIEW_CommandBarScrollViewer_TranslateTransform" />
         </ScrollViewer.RenderTransform>
-        <!--</views:AppScrollViewer>-->
+        --><!--</views:AppScrollViewer>--><!--
       </ScrollViewer>
 
-      <!--#endregion-->
+      --><!--#endregion--><!--
 
       <ContentDialog x:Name="VIEW_RemoveNoteContentDialog"
                      Title="Remove note"
@@ -544,7 +545,7 @@
           </VisualState>
         </VisualStateGroup>
 
-        <!--<VisualStateGroup x:Name="BackgroundColorStates">
+        --><!--<VisualStateGroup x:Name="BackgroundColorStates">
           <VisualState x:Name="BackgroundColorLight">
             <VisualState.Setters>
               <Setter Target="VIEW_TitleBarGrid.Background"
@@ -562,8 +563,8 @@
                       Value="#55FFFFFF" />
             </VisualState.Setters>
           </VisualState>
-        </VisualStateGroup>-->
+        </VisualStateGroup>--><!--
       </VisualStateManager.VisualStateGroups>
     </Grid>
-  </UserControl>
+  </UserControl>-->
 </Window>

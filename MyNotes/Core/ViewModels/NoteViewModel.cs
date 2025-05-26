@@ -33,7 +33,7 @@ public class NoteViewModel : ViewModelBase
   private void OnNoteChanged(object? sender, PropertyChangedEventArgs e)
   {
     string? propertyName = e.PropertyName;
-    if (propertyName is null)
+    if (propertyName is null || propertyName == nameof(Note.Modified))
       return;
     _timer.Stop();
     _changedNoteProperties.Add(propertyName);
@@ -76,5 +76,12 @@ public class NoteViewModel : ViewModelBase
   {
     _changedNoteProperties.Clear();
     IsBodyChanged = false;
+  }
+
+  private bool _isWindowAlwaysOnTop = false;
+  public bool IsWindowAlwaysOnTop
+  {
+    get => _isWindowAlwaysOnTop;
+    set => SetProperty(ref _isWindowAlwaysOnTop, value);
   }
 }

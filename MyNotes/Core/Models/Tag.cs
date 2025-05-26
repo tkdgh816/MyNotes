@@ -43,6 +43,30 @@ public class TagGroup : SortedObervableCollection<Tags>
         return tags;
     return null;
   }
+
+  public bool Contains(string tag)
+  {
+    string key = tag[0].ToString();
+    Tags? tags = FindGroup(key);
+    return tags is not null && tags.Contains(tag);
+  }
+
+  public IEnumerable<string> GetTagsAll()
+  {
+    foreach (Tags tags in this)
+      foreach (string tag in tags)
+        yield return tag;
+  }
+
+  public IEnumerable<string> FindTags(string text)
+  {
+    if (string.IsNullOrEmpty(text))
+      yield break;
+
+    foreach (Tags tags in this)
+      foreach (string tag in tags.Where(t => t.Contains(text, StringComparison.CurrentCultureIgnoreCase)))
+        yield return tag;
+  }
 }
 
 #region Tags

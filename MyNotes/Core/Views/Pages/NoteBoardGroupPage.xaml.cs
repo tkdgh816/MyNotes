@@ -7,7 +7,7 @@ public sealed partial class NoteBoardGroupPage : Page
   public NoteBoardGroupPage()
   {
     this.InitializeComponent();
-    ViewModel = App.Current.GetService<NoteBoardViewModel>();
+    ViewModel = App.Current.GetService<NoteHubViewModel>();
     this.Unloaded += NoteBoardGroupPage_Unloaded;
   }
 
@@ -17,13 +17,13 @@ public sealed partial class NoteBoardGroupPage : Page
     ViewModel.Dispose();
   }
 
-  public NoteBoardViewModel ViewModel { get; }
+  public NoteHubViewModel ViewModel { get; }
 
-  public NavigationBoardGroupItem Navigation { get; private set; } = null!;
+  public NavigationBoardGroup Navigation { get; private set; } = null!;
   protected override void OnNavigatedTo(NavigationEventArgs e)
   {
     base.OnNavigatedTo(e);
-    Navigation = (NavigationBoardGroupItem)e.Parameter;
+    Navigation = (NavigationBoardGroup)e.Parameter;
     Navigation.PropertyChanged += OnNavigationPropertyChanged;
   }
   private void OnNavigationPropertyChanged(object? sender, PropertyChangedEventArgs e)

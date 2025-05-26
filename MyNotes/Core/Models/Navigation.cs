@@ -53,46 +53,52 @@ public abstract class NavigationItem : Navigation
   }
 }
 
-public class NavigationSearchItem : NavigationItem
+public abstract class NavigationNotes : NavigationItem
 {
-  public NavigationSearchItem(string searchText) : base(typeof(SearchPage), searchText, IconLibrary.FindGlyph("\uE721")) { }
+  public SortedObervableCollection<Note> Notes { get; set; } = new();
+
+  protected NavigationNotes(Type pageType, string name, Icon icon) : base(pageType, name, icon) { }
 }
 
-public class NavigationHomeItem : NavigationItem
+public class NavigationSearch : NavigationNotes
 {
-  public NavigationHomeItem() : base(typeof(HomePage), "Home", IconLibrary.FindGlyph("\uE80F")) { }
+  public NavigationSearch(string searchText) : base(typeof(SearchPage), searchText, IconLibrary.FindGlyph("\uE721")) { }
 }
 
-public class NavigationBookmarksItem : NavigationItem
+public class NavigationHome : NavigationItem
 {
-  public NavigationBookmarksItem() : base(typeof(BookmarksPage), "Bookmarks", IconLibrary.FindGlyph("\uE734")) { }
+  public NavigationHome() : base(typeof(HomePage), "Home", IconLibrary.FindGlyph("\uE80F")) { }
 }
 
-public class NavigationTagsItem : NavigationItem
+public class NavigationTags : NavigationNotes
 {
-  public NavigationTagsItem() : base(typeof(TagsPage), "Tags", IconLibrary.FindGlyph("\uE8EC"))
+  public NavigationTags() : base(typeof(TagsPage), "Tags", IconLibrary.FindGlyph("\uE8EC"))
   {
     SelectsOnInvoked = false;
   }
 }
 
-public class NavigationTrashItem : NavigationItem
+public class NavigationTrash : NavigationItem
 {
-  public NavigationTrashItem() : base(typeof(TrashPage), "Trash", IconLibrary.FindGlyph("\uE74D")) { }
+  public NavigationTrash() : base(typeof(TrashPage), "Trash", IconLibrary.FindGlyph("\uE74D")) { }
 }
 
-public class NavigationSettingsItem : NavigationItem
+public class NavigationSettings : NavigationItem
 {
-  public NavigationSettingsItem() : base(typeof(SettingsPage), "Settings", IconLibrary.FindGlyph("\uE713")) { }
+  public NavigationSettings() : base(typeof(SettingsPage), "Settings", IconLibrary.FindGlyph("\uE713")) { }
 }
 
-public class NavigationBoardItem : NavigationItem
+public class NavigationBookmarks : NavigationNotes
+{
+  public NavigationBookmarks() : base(typeof(NoteHubPage), "Bookmarks", IconLibrary.FindGlyph("\uE734")) { }
+}
+
+public class NavigationBoard : NavigationNotes
 {
   public Guid Id { get; }
-  public NavigationBoardGroupItem? Parent { get; set; }
-  public ObservableCollection<Note> Notes { get; } = new();
+  public NavigationBoardGroup? Parent { get; set; }
 
-  public NavigationBoardItem(string name, Icon icon, Guid id) : base(typeof(NoteBoardPage), name, icon)
+  public NavigationBoard(string name, Icon icon, Guid id) : base(typeof(NoteHubPage), name, icon)
   {
     Id = id;
   }
@@ -104,7 +110,7 @@ public class NavigationBoardItem : NavigationItem
     return items.ToArray();
   }
 
-  public NavigationBoardItem? GetNext()
+  public NavigationBoard? GetNext()
   {
     if (Parent is null)
       return null;
@@ -116,20 +122,20 @@ public class NavigationBoardItem : NavigationItem
   }
 }
 
-public class NavigationBoardGroupItem : NavigationBoardItem
+public class NavigationBoardGroup : NavigationBoard
 {
-  private readonly ObservableCollection<NavigationBoardItem> _children = new();
-  public ReadOnlyObservableCollection<NavigationBoardItem> Children { get; }
+  private readonly ObservableCollection<NavigationBoard> _children = new();
+  public ReadOnlyObservableCollection<NavigationBoard> Children { get; }
 
-  public NavigationBoardGroupItem(string name, Icon icon, Guid id) : base(name, icon, id)
+  public NavigationBoardGroup(string name, Icon icon, Guid id) : base(name, icon, id)
   {
     PageType = typeof(NoteBoardGroupPage);
     Children = new(_children);
   }
 
-  public void Add(params NavigationBoardItem[] items)
+  public void Add(params NavigationBoard[] items)
   {
-    foreach (NavigationBoardItem item in items)
+    foreach (NavigationBoard item in items)
     {
       item.Parent?.Remove(item);
       item.Parent = this;
@@ -137,7 +143,7 @@ public class NavigationBoardGroupItem : NavigationBoardItem
     }
   }
 
-  public void Insert(int index, NavigationBoardItem item)
+  public void Insert(int index, NavigationBoard item)
   {
     if (item.Parent == this)
     {
@@ -156,13 +162,13 @@ public class NavigationBoardGroupItem : NavigationBoardItem
     }
   }
 
-  public bool Remove(NavigationBoardItem item) => _children.Contains(item) && _children.Remove(item);
+  public bool Remove(NavigationBoard item) => _children.Contains(item) && _children.Remove(item);
 
   public void RemoveAt(int index) => _children.RemoveAt(index);
 }
 
-public class NavigationBoardGroupRootItem : NavigationBoardGroupItem
+public class NavigationBoardRootGroup : NavigationBoardGroup
 {
-  public NavigationBoardGroupRootItem() : base("Root", IconLibrary.FindGlyph("\uE82D"), Guid.Empty)
+  public NavigationBoardRootGroup() : base("Root", IconLibrary.FindGlyph("\uE82D"), Guid.Empty)
   { }
 }

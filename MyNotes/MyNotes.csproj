@@ -55,7 +55,6 @@
   <ItemGroup>
     <Folder Include="Common\Helpers\" />
     <Folder Include="Common\Extensions\" />
-    <Folder Include="Common\Commands\" />
     <Folder Include="Common\Messages\" />
     <Folder Include="Contracts\" />
     <Folder Include="Strings\ko-KR\" />
@@ -66,6 +65,7 @@
     <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.2.250402" />
     <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.250402" />
     <PackageReference Include="CommunityToolkit.WinUI.Controls.Sizers" Version="8.2.250402" />
+    <PackageReference Include="CommunityToolkit.WinUI.Extensions" Version="8.2.250402" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.5" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.5" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4188" />
@@ -117,7 +117,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Core\Views\Pages\NoteBoardPage.xaml">
+    <Page Update="Core\Views\Pages\NoteHubPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

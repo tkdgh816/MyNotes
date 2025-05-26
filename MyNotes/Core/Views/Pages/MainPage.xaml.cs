@@ -36,7 +36,7 @@ public sealed partial class MainPage : Page
 
   private void AutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
   {
-    NavigationSearchItem searchItem = new(args.QueryText);
+    NavigationSearch searchItem = new(args.QueryText);
     Navigate(searchItem);
   }
 
@@ -61,7 +61,7 @@ public sealed partial class MainPage : Page
   {
     _isBackRequested = true;
     NavigationItem navigation = (NavigationItem)e.Parameter;
-    _currentNavigation = (navigation is NavigationSearchItem) ? null : navigation;
+    _currentNavigation = (navigation is NavigationSearch) ? null : navigation;
     VIEW_NavigationView.SelectedItem = _currentNavigation;
     _isBackRequested = false;
   }
@@ -74,10 +74,10 @@ public sealed partial class MainPage : Page
 
     if (await VIEW_NewBoardGroupContentDialog.ShowAsync() == ContentDialogResult.Primary)
     {
-      NavigationBoardGroupItem group = optionsComboBox.SelectedIndex switch
+      NavigationBoardGroup group = optionsComboBox.SelectedIndex switch
       {
-        1 => selectedNavigation as NavigationBoardGroupItem,
-        2 => (selectedNavigation as NavigationBoardItem)?.Parent,
+        1 => selectedNavigation as NavigationBoardGroup,
+        2 => (selectedNavigation as NavigationBoard)?.Parent,
         0 or _ => ViewModel.BoardMenuRootItem
       } ?? ViewModel.BoardMenuRootItem;
 
@@ -90,8 +90,8 @@ public sealed partial class MainPage : Page
   private int GetNewBoardOptionsComboBoxSelectedIndex()
     => VIEW_NavigationView.SelectedItem switch
     {
-      NavigationBoardGroupItem => 1,
-      NavigationBoardItem => 2,
+      NavigationBoardGroup => 1,
+      NavigationBoard => 2,
       _ => 0
     };
 
@@ -106,10 +106,10 @@ public sealed partial class MainPage : Page
 
     if (await VIEW_NewBoardContentDialog.ShowAsync() == ContentDialogResult.Primary)
     {
-      NavigationBoardGroupItem group = optionsComboBox.SelectedIndex switch
+      NavigationBoardGroup group = optionsComboBox.SelectedIndex switch
       {
-        1 => selectedNavigation as NavigationBoardGroupItem,
-        2 => (selectedNavigation as NavigationBoardItem)?.Parent,
+        1 => selectedNavigation as NavigationBoardGroup,
+        2 => (selectedNavigation as NavigationBoard)?.Parent,
         0 or _ => ViewModel.BoardMenuRootItem
       } ?? ViewModel.BoardMenuRootItem;
 
@@ -127,7 +127,7 @@ public sealed partial class MainPage : Page
   private void VIEW_NavigationViewBoardGroupItem_NewBoardMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
     => ShowNewBoardContentDialog(1, ((FrameworkElement)sender).DataContext);
 
-  private async void ShowRenameBoardContentDialog(NavigationBoardItem navigation)
+  private async void ShowRenameBoardContentDialog(NavigationBoard navigation)
   {
     VIEW_RenameBoardInputTextBox.Text = navigation.Name;
     VIEW_RenameBoardContentDialog.DataContext = navigation;
@@ -136,7 +136,7 @@ public sealed partial class MainPage : Page
   }
 
   private void VIEW_NavigationViewBoardItem_RenameMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
-    => ShowRenameBoardContentDialog((NavigationBoardItem)((FrameworkElement)sender).DataContext);
+    => ShowRenameBoardContentDialog((NavigationBoard)((FrameworkElement)sender).DataContext);
 
   private bool _isInEditMode = false;
   private NavigationItem? _currentNavigation;
@@ -154,7 +154,7 @@ public sealed partial class MainPage : Page
       item.IsEditable = _isInEditMode;
     foreach (Navigation item in ViewModel.FooterMenuItems)
       item.IsEditable = _isInEditMode;
-    foreach (NavigationBoardItem item in ViewModel.BoardMenuItems)
+    foreach (NavigationBoard item in ViewModel.BoardMenuItems)
       ViewModel.Recursive(item, x => x.IsEditable = _isInEditMode);
     VIEW_NavigationView.SelectedItem = _isInEditMode ? null : _currentNavigation;
 
@@ -171,12 +171,12 @@ public sealed partial class MainPage : Page
     {
       switch (item)
       {
-        case NavigationTagsItem:
+        case NavigationTags:
           VIEW_TagsFlyout.ShowAt(itemContainer);
           break;
-        case NavigationBoardGroupItem:
+        case NavigationBoardGroup:
           break;
-        case NavigationBoardItem:
+        case NavigationBoard:
           VIEW_EditTeachingTip.IsOpen = true;
           break;
       }
@@ -190,7 +190,7 @@ public sealed partial class MainPage : Page
   }
 
   #region NavigationView MenuItems >> Drag and Drop 
-  private NavigationBoardItem? _draggingSource;
+  private NavigationBoard? _draggingSource;
   private NavigationViewItem? _draggingItem;
   private bool _isDraggingItemExpanded;
 
@@ -207,7 +207,7 @@ public sealed partial class MainPage : Page
   {
     _draggingItem = (NavigationViewItem)sender;
     _isDraggingItemExpanded = _draggingItem.IsExpanded;
-    _draggingSource = (NavigationBoardItem)_draggingItem.DataContext;
+    _draggingSource = (NavigationBoard)_draggingItem.DataContext;
     _draggingItem.IsExpanded = false;
     _draggingItem.IsEnabled = false;
 
@@ -257,7 +257,7 @@ public sealed partial class MainPage : Page
   private void GroupNavigationViewItem_DragOver(object sender, DragEventArgs e)
   {
     NavigationViewItem item = (NavigationViewItem)sender;
-    NavigationBoardGroupItem hoveredTarget = (NavigationBoardGroupItem)item.DataContext;
+    NavigationBoardGroup hoveredTarget = (NavigationBoardGroup)item.DataContext;
     e.AcceptedOperation = DataPackageOperation.Move;
 
     double height = e.GetPosition(item).Y;
@@ -302,7 +302,7 @@ public sealed partial class MainPage : Page
   private void ItemNavigationViewItem_DragOver(object sender, DragEventArgs e)
   {
     NavigationViewItem item = (NavigationViewItem)sender;
-    NavigationBoardItem hoveredTarget = (NavigationBoardItem)item.DataContext;
+    NavigationBoard hoveredTarget = (NavigationBoard)item.DataContext;
     e.AcceptedOperation = DataPackageOperation.Move;
 
     if (_draggingSource != hoveredTarget)
@@ -336,8 +336,8 @@ public class MainNavigationViewMenuItemTemplateSelector : DataTemplateSelector
   {
     return item switch
     {
-      NavigationBoardGroupItem => BoardGroupMenuItemTemplate,
-      NavigationBoardItem => BoardMenuItemTemplate,
+      NavigationBoardGroup => BoardGroupMenuItemTemplate,
+      NavigationBoard => BoardMenuItemTemplate,
       NavigationItem => MenuItemTemplate,
       NavigationSeparator => SeparatorTemplate,
       _ => throw new ArgumentException("")

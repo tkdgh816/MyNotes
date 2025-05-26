@@ -12,13 +12,21 @@ public class DatabaseService
 
   public DatabaseService()
   {
-    _connectionString = $@"Data Source={Path.Combine(_databaseFolder.Path, "data.sqlite")}";
+    _connectionString = new SqliteConnectionStringBuilder()
+    {
+      DataSource = Path.Combine(_databaseFolder.Path, "data.sqlite"),
+      ForeignKeys = true
+    }.ToString();
     using SqliteConnection connection = new(_connectionString);
     connection.Open();
 
     using (SqliteCommand command = new(Query.CreateTable_Boards, connection))
       command.ExecuteNonQuery();
     using (SqliteCommand command = new(Query.CreateTable_Notes, connection))
+      command.ExecuteNonQuery();
+    using (SqliteCommand command = new(Query.CreateTable_Tags, connection))
+      command.ExecuteNonQuery();
+    using (SqliteCommand command = new(Query.CreateTable_NotesTags, connection))
       command.ExecuteNonQuery();
   }
 
@@ -37,13 +45,13 @@ public class DatabaseService
       _ => IconLibrary.FindEmoji(0)
     };
 
-  public void AddBoard(NavigationBoardItem navigation, NavigationBoardItem? previous = null)
+  public void AddBoard(NavigationBoard navigation, NavigationBoard? previous = null)
   {
     using SqliteConnection connection = new(_connectionString);
     connection.Open();
     using SqliteCommand command0 = new(Query.Insert_Boards, connection);
     command0.Parameters.AddWithValue("@id", navigation.Id);
-    command0.Parameters.AddWithValue("@grouped", navigation is NavigationBoardGroupItem);
+    command0.Parameters.AddWithValue("@grouped", navigation is NavigationBoardGroup);
     command0.Parameters.AddWithValue("@parent", navigation.Parent?.Id);
     command0.Parameters.AddWithValue("@next", DBNull.Value);
     command0.Parameters.AddWithValue("@name", navigation.Name);
@@ -60,7 +68,7 @@ public class DatabaseService
     }
   }
 
-  public void UpdateBoard(NavigationBoardItem navigation, string updateProperty)
+  public void UpdateBoard(NavigationBoard navigation, string updateProperty)
   {
     using SqliteConnection connection = new(_connectionString);
     connection.Open();
@@ -81,7 +89,7 @@ public class DatabaseService
     }
   }
 
-  public void UpdateBoardHierarchy(NavigationBoardItem navigation, NavigationBoardItem? next)
+  public void UpdateBoardHierarchy(NavigationBoard navigation, NavigationBoard? next)
   {
     using SqliteConnection connection = new(_connectionString);
     connection.Open();
@@ -120,6 +128,7 @@ public class DatabaseService
 
   private Dictionary<string, string> _notePropertyMap = new()
   {
+    { "BoardId", "parent" },
     { "Title", "title" },
     { "Body", "body" },
     { "Background", "background" },
@@ -129,9 +138,9 @@ public class DatabaseService
     { "IsBookmarked", "bookmarked" },
     { "IsTrashed", "trashed" },
   };
-  public void UpdateNote(Note note, string propertyName)
+  public void UpdateNote(Note note, string propertyName, bool enableModifiedChanged = true)
   {
-    List<(string, object)> fields = new() { ("modified", note.Modified) };
+    List<(string, object)> fields = enableModifiedChanged ? new() { ("modified", note.Modified) } : new();
     _notePropertyMap.TryGetValue(propertyName, out string? fieldName);
     if (fieldName is null)
       return;
@@ -214,7 +223,7 @@ public class DatabaseService
     };
   }
 
-  public void GetNavigationGroup(NavigationBoardGroupItem group)
+  public void GetNavigationGroup(NavigationBoardGroup group)
   {
     Guid? next = Guid.Empty;
     while (next is not null)
@@ -230,7 +239,7 @@ public class DatabaseService
       command.Parameters.AddWithValue("@next", next);
       using SqliteDataReader reader = command.ExecuteReader();
 
-      NavigationBoardItem? item = null;
+      NavigationBoard? item = null;
       if (reader.Read())
       {
         Guid id = new(GetReaderValue<string>(reader, "id")!);
@@ -241,11 +250,11 @@ public class DatabaseService
         Icon icon = GetIcon((IconType)iconType, iconValue);
         if (grouped)
         {
-          item = new NavigationBoardGroupItem(name, icon, id);
-          GetNavigationGroup((NavigationBoardGroupItem)item);
+          item = new NavigationBoardGroup(name, icon, id);
+          GetNavigationGroup((NavigationBoardGroup)item);
         }
         else
-          item = new NavigationBoardItem(name, icon, id);
+          item = new NavigationBoard(name, icon, id);
         group.Insert(0, item);
         next = id;
       }
@@ -254,31 +263,109 @@ public class DatabaseService
     }
   }
 
-  public IEnumerable<Note> GetNotes(NavigationBoardItem navigation)
+  public IEnumerable<Note> GetNotes(NavigationBoard navigation)
   {
     using SqliteConnection connection = new(_connectionString);
     connection.Open();
 
-    string query = "SELECT * FROM Notes WHERE parent = @parent";
+    string query = "SELECT * FROM Notes WHERE parent = @parent AND trashed = 0";
     using SqliteCommand command = new(query, connection);
     command.Parameters.AddWithValue("@parent", navigation.Id);
     using SqliteDataReader reader = command.ExecuteReader();
     while (reader.Read())
-    {
-      var id = new Guid(GetReaderValue<string>(reader, "id")!);
-      var created = GetReaderValue<DateTimeOffset>(reader, "created");
-      var modified = GetReaderValue<DateTimeOffset>(reader, "modified");
-      var title = GetReaderValue<string>(reader, "title")!;
-      var body = GetReaderValue<string>(reader, "body")!;
-      var background = ToolkitColorHelper.ToColor(GetReaderValue<string>(reader, "background")!);
-      var backdrop = (BackdropKind)GetReaderValue<int>(reader, "backdrop");
-      var size = new SizeInt32(GetReaderValue<int>(reader, "width"), GetReaderValue<int>(reader, "height"));
-      var position = new PointInt32(GetReaderValue<int>(reader, "position_x"), GetReaderValue<int>(reader, "position_y"));
-      var isBookmarked = GetReaderValue<bool>(reader, "bookmarked");
-      var isTrashed = GetReaderValue<bool>(reader, "trashed");
-      yield return new Note(id, navigation, title, created, modified)
-      { Body = body, Background = background, Backdrop = backdrop, Size = size, Position = position, IsBookmarked = isBookmarked, IsTrashed = isTrashed };
-    }
+      yield return CreateNote(reader);
+  }
+
+  public IEnumerable<Note> GetBookmarkedNotes()
+  {
+    using SqliteConnection connection = new(_connectionString);
+    connection.Open();
+
+    string query = "SELECT * FROM Notes WHERE bookmarked = 1 AND trashed = 0";
+    using SqliteCommand command = new(query, connection);
+    using SqliteDataReader reader = command.ExecuteReader();
+    while (reader.Read())
+      yield return CreateNote(reader);
+  }
+
+  private Note CreateNote(SqliteDataReader reader)
+  {
+    var id = new Guid(GetReaderValue<string>(reader, "id")!);
+    var parent = new Guid(GetReaderValue<string>(reader, "parent")!);
+    var created = GetReaderValue<DateTimeOffset>(reader, "created");
+    var modified = GetReaderValue<DateTimeOffset>(reader, "modified");
+    var title = GetReaderValue<string>(reader, "title")!;
+    var body = GetReaderValue<string>(reader, "body")!;
+    var background = ToolkitColorHelper.ToColor(GetReaderValue<string>(reader, "background")!);
+    var backdrop = (BackdropKind)GetReaderValue<int>(reader, "backdrop");
+    var size = new SizeInt32(GetReaderValue<int>(reader, "width"), GetReaderValue<int>(reader, "height"));
+    var position = new PointInt32(GetReaderValue<int>(reader, "position_x"), GetReaderValue<int>(reader, "position_y"));
+    var isBookmarked = GetReaderValue<bool>(reader, "bookmarked");
+    var isTrashed = GetReaderValue<bool>(reader, "trashed");
+    Note note = new(id, parent, title, created, modified)
+    { Body = body, Background = background, Backdrop = backdrop, Size = size, Position = position, IsBookmarked = isBookmarked, IsTrashed = isTrashed };
+    foreach (string tag in GetTags(note))
+      note.Tags.Add(tag);
+    return note;
+  }
+
+  public IEnumerable<string> GetTagsAll()
+  {
+    using SqliteConnection connection = new(_connectionString);
+    connection.Open();
+
+    string query = "SELECT * FROM Tags";
+    using SqliteCommand command = new(query, connection);
+
+    using SqliteDataReader reader = command.ExecuteReader();
+    while (reader.Read())
+      yield return GetReaderValue<string>(reader, "tag")!;
+  }
+
+  public IEnumerable<string> GetTags(Note note)
+  {
+    using SqliteConnection connection = new(_connectionString);
+    connection.Open();
+    string query = "SELECT tag FROM NotesTags WHERE id = @id ORDER BY tag ASC";
+    using SqliteCommand command = new(query, connection);
+    command.Parameters.AddWithValue("@id", note.Id);
+
+    using SqliteDataReader reader = command.ExecuteReader();
+    while (reader.Read())
+      yield return GetReaderValue<string>(reader, "tag")!;
+  }
+
+  public bool AddTag(string tag)
+  {
+    using SqliteConnection connection = new(_connectionString);
+    connection.Open();
+    string query = "INSERT OR IGNORE INTO Tags (tag) VALUES (@tag)";
+    using SqliteCommand command = new(query, connection);
+    command.Parameters.AddWithValue("@tag", tag);
+    return command.ExecuteNonQuery() > 0;
+  }
+
+  public bool AddTag(Note note, string tag)
+  {
+    using SqliteConnection connection = new(_connectionString);
+    connection.Open();
+    string query =
+@"INSERT OR IGNORE INTO NotesTags (id, tag)
+SELECT @id, tag FROM Tags WHERE tag = @tag";
+    using SqliteCommand command = new(query, connection);
+    command.Parameters.AddWithValue("@id", note.Id);
+    command.Parameters.AddWithValue("@tag", tag);
+    return command.ExecuteNonQuery() > 0;
+  }
+
+  public bool DeleteTag(string tag)
+  {
+    using SqliteConnection connection = new(_connectionString);
+    connection.Open();
+    string query = "DELETE FROM Tags WHERE tag = @tag";
+    using SqliteCommand command = new(query, connection);
+    command.Parameters.AddWithValue("@tag", tag);
+    return command.ExecuteNonQuery() > 0;
   }
 
   public IEnumerable<string> ReadTableData(string tableName)
@@ -296,17 +383,16 @@ public class DatabaseService
       {
         yield return
 @$"[ {num++} ]
-id: {reader["id"]}
-grouped: {reader["grouped"]}
-parent: {reader["parent"]}
-next: {reader["next"]}
-name: {reader["name"]}
-icon_type: {reader["icon_type"]}
-icon_value: {reader["icon_value"]}
+id || {reader["id"]}
+grouped || {reader["grouped"]}
+parent || {reader["parent"]}
+next || {reader["next"]}
+name || {reader["name"]}
+icon_type || {reader["icon_type"]}
+icon_value || {reader["icon_value"]}
 ";
       }
     }
-
     else if (tableName == "Notes")
     {
       string query = "SELECT * FROM Notes";
@@ -319,21 +405,53 @@ icon_value: {reader["icon_value"]}
         string subBody = body[..Math.Min(100, body.Length)].ReplaceLineEndings(" ");
         yield return
 @$"[ {num++} ]
-id: {reader["id"]}
-parent: {reader["parent"]}
-created: {reader["created"]}
-modified: {reader["modified"]}
-title: {reader["title"]}
-body: {subBody}
-background: {reader["background"]}
-backdrop: {reader["backdrop"]}
-width: {reader["width"]}
-height: {reader["height"]}
-position_x: {reader["position_x"]}
-position_y: {reader["position_y"]}
-bookmarked: {reader["bookmarked"]}
-trashed: {reader["trashed"]}
+id || {reader["id"]}
+parent || {reader["parent"]}
+created || {reader["created"]}
+modified || {reader["modified"]}
+title || {reader["title"]}
+body || {subBody}
+background || {reader["background"]}
+backdrop || {reader["backdrop"]}
+width || {reader["width"]}
+height || {reader["height"]}
+position_x || {reader["position_x"]}
+position_y || {reader["position_y"]}
+bookmarked || {reader["bookmarked"]}
+trashed || {reader["trashed"]}
 ";
+      }
+    }
+    else if (tableName == "Tags")
+    {
+      string query = "SELECT * FROM Tags";
+      using SqliteCommand command = new(query, connection);
+      using SqliteDataReader reader = command.ExecuteReader();
+      while (reader.Read())
+      {
+        yield return
+@$"[ {reader["tag"]} ], ";
+      }
+    }
+    else if (tableName == "NotesTags")
+    {
+      string query = "SELECT * FROM NotesTags ORDER BY id ASC, tag ASC";
+      using SqliteCommand command = new(query, connection);
+      using SqliteDataReader reader = command.ExecuteReader();
+      string id = "";
+      while (reader.Read())
+      {
+        if ((string)reader["id"] == id)
+          yield return
+@$"{reader["tag"]}, ";
+        else
+        {
+          id = (string)reader["id"];
+          yield return
+@$"
+[ {reader["id"]} ]
+{reader["tag"]}, ";
+        }
       }
     }
   }
@@ -406,6 +524,19 @@ position_y    INTEGER NOT NULL,
 bookmarked    INTEGER NOT NULL DEFAULT 0,
 trashed       INTEGER NOT NULL DEFAULT 0,
 FOREIGN KEY (parent) REFERENCES Boards(id) ON DELETE RESTRICT ON UPDATE CASCADE
+)";
+
+    public const string CreateTable_Tags =
+@"CREATE TABLE IF NOT EXISTS Tags (tag TEXT PRIMARY KEY NOT NULL)";
+
+    public const string CreateTable_NotesTags =
+@"CREATE TABLE IF NOT EXISTS NotesTags
+(
+id            TEXT NOT NULL,
+tag           TEXT NOT NULL,
+PRIMARY KEY (id, tag),
+FOREIGN KEY (id) REFERENCES Notes(id) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (tag) REFERENCES Tags(tag) ON DELETE CASCADE ON UPDATE CASCADE
 )";
 
     public const string Insert_Boards =

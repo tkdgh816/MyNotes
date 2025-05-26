@@ -2,6 +2,8 @@
 
 public class SortDescription<T> : INotifyPropertyChanged
 {
+  public IComparer<T> Comparer { get; private set; }
+
   private SortDirection _direction;
   public SortDirection Direction
   {
@@ -10,26 +12,26 @@ public class SortDescription<T> : INotifyPropertyChanged
     {
       _direction = value;
       if (value is SortDirection.Descending)
-      {
         Comparer = new ReverseComparer(Comparer);
-        Debug.WriteLine("Reverse Comparer");
-      }
+      
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Direction)));
     }
   }
 
-  public IComparer<T> Comparer { get; private set; }
+  public string? KeyPropertyName { get; set; }
 
-  public SortDescription(IComparer<T> comparer, SortDirection direction = SortDirection.Ascending)
+  public SortDescription(IComparer<T> comparer, SortDirection direction = SortDirection.Ascending, string? keyPropertyName = null)
   {
     Comparer = comparer;
     Direction = direction;
+    KeyPropertyName = keyPropertyName;
   }
 
-  public SortDescription(Func<T, IComparable> func, SortDirection direction = SortDirection.Ascending)
+  public SortDescription(Func<T, IComparable> func, SortDirection direction = SortDirection.Ascending, string? keyPropertyName = null)
   {
     Comparer = new FuncComparer() { CompareFunc = func };
     Direction = direction;
+    KeyPropertyName = keyPropertyName;
   }
 
   private class ReverseComparer : IComparer<T>

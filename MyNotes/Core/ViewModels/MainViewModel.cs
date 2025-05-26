@@ -21,18 +21,18 @@ public class MainViewModel : ViewModelBase
 
   public List<Navigation> CoreMenuItems { get; } =
   [
-    new NavigationHomeItem(),
-    new NavigationBookmarksItem(),
-    new NavigationTagsItem(),
+    new NavigationHome(),
+    new NavigationBookmarks(),
+    new NavigationTags(),
     new NavigationSeparator(),
   ];
 
-  public NavigationBoardGroupRootItem BoardMenuRootItem { get; } = new();
-  public ReadOnlyObservableCollection<NavigationBoardItem> BoardMenuItems { get; }
+  public NavigationBoardRootGroup BoardMenuRootItem { get; } = new();
+  public ReadOnlyObservableCollection<NavigationBoard> BoardMenuItems { get; }
   public List<Navigation> FooterMenuItems { get; } =
   [
-    new NavigationTrashItem(),
-    new NavigationSettingsItem()
+    new NavigationTrash(),
+    new NavigationSettings()
   ];
 
   private void InitializeNavigationsFromDatabase()
@@ -40,24 +40,24 @@ public class MainViewModel : ViewModelBase
     DatabaseService.GetNavigationGroup(BoardMenuRootItem);
   }
 
-  public void Recursive(NavigationBoardItem item, Action<NavigationBoardItem> action)
+  public void Recursive(NavigationBoard item, Action<NavigationBoard> action)
   {
-    if (item is NavigationBoardGroupItem group)
-      foreach (NavigationBoardItem child in group.Children)
+    if (item is NavigationBoardGroup group)
+      foreach (NavigationBoard child in group.Children)
         Recursive(child, action);
     action.Invoke(item);
   }
 
   public void ResetNavigation()
   {
-    foreach (NavigationBoardItem child in BoardMenuRootItem.Children)
+    foreach (NavigationBoard child in BoardMenuRootItem.Children)
       Recursive(child, item => DatabaseService.UpdateBoardHierarchy(item, item.GetNext()));
   }
 
-  public void MoveNavigationBoardItem(NavigationBoardItem source, NavigationBoardItem target, NavigationBoardItemPosition position)
+  public void MoveNavigationBoardItem(NavigationBoard source, NavigationBoard target, NavigationBoardItemPosition position)
   {
-    NavigationBoardGroupItem? sourceGroup = source.Parent;
-    NavigationBoardGroupItem? targetGroup = target.Parent;
+    NavigationBoardGroup? sourceGroup = source.Parent;
+    NavigationBoardGroup? targetGroup = target.Parent;
     switch (position)
     {
       case NavigationBoardItemPosition.Before:
@@ -83,17 +83,17 @@ public class MainViewModel : ViewModelBase
     set => SetProperty(ref _newBoardIcon, value);
   }
 
-  public NavigationBoardItem AddNavigationBoardItem(NavigationBoardGroupItem parent, string name, bool isGroupItem)
+  public NavigationBoard AddNavigationBoardItem(NavigationBoardGroup parent, string name, bool isGroupItem)
   {
-    NavigationBoardItem item = isGroupItem
-      ? new NavigationBoardGroupItem(name, NewBoardGroupIcon, Guid.NewGuid())
-      : new NavigationBoardItem(name, NewBoardIcon, Guid.NewGuid());
+    NavigationBoard item = isGroupItem
+      ? new NavigationBoardGroup(name, NewBoardGroupIcon, Guid.NewGuid())
+      : new NavigationBoard(name, NewBoardIcon, Guid.NewGuid());
     parent.Add(item);
     DatabaseService.AddBoard(item, parent.Children.Count > 1 ? parent.Children[^2] : null);
     return item;
   }
 
-  public void RenameNavigation(NavigationBoardItem item, string newName)
+  public void RenameNavigation(NavigationBoard item, string newName)
   {
     if (string.IsNullOrEmpty(newName) || item.Name == newName)
       return;

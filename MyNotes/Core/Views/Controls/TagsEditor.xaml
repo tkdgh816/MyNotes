@@ -85,7 +85,7 @@
       <SemanticZoom x:Name="VIEW_TagsSemanticZoom">
         <SemanticZoom.ZoomedOutView>
           <GridView x:Name="VIEW_TagsGroupGridView"
-                    ItemsSource="{x:Bind TagsCollectionViewSource.View.CollectionGroups, Mode=OneWay}"
+                    ItemsSource="{x:Bind ViewModel.TagsCollectionViewSource.View.CollectionGroups, Mode=OneWay}"
                     Margin="10,8,0,0">
             <GridView.ItemsPanel>
               <ItemsPanelTemplate>
@@ -112,7 +112,7 @@
 
         <SemanticZoom.ZoomedInView>
           <ListView x:Name="VIEW_TagsListView"
-                    ItemsSource="{x:Bind TagsCollectionViewSource.View, Mode=OneWay}"
+                    ItemsSource="{x:Bind ViewModel.TagsCollectionViewSource.View, Mode=OneWay}"
                     SelectionMode="Multiple"
                     IsMultiSelectCheckBoxEnabled="False"
                     SelectionChanged="VIEW_TagsListView_SelectionChanged">
@@ -130,14 +130,7 @@
                 <Grid DataContext="{x:Bind}"
                       ColumnSpacing="4"
                       CornerRadius="{StaticResource ControlCornerRadius}">
-                  <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="Auto" />
-                  </Grid.ColumnDefinitions>
-                  <TextBlock Grid.Column="0"
-                             Text="{x:Bind}" />
-                  <InfoBadge Grid.Column="1"
-                             Value="5" />
+                  <TextBlock Text="{x:Bind}" />
                   <Grid.ContextFlyout>
                     <MenuFlyout Placement="Bottom">
                       <MenuFlyoutItem Text="Delete"
@@ -167,17 +160,15 @@
           Background="{StaticResource AcrylicInAppFillColorBaseBrush}"
           Padding="8"
           ColumnSpacing="6"
-          MaxHeight="100">
+          MaxHeight="88"
+          Visibility="Collapsed">
       <Grid.ColumnDefinitions>
         <ColumnDefinition />
         <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
 
-      <ScrollView x:Name="VIEW_CommandBarTagsScrollViewer"
-                  Grid.Column="0"
+      <ScrollView Grid.Column="0"
                   ContentOrientation="Vertical"
-                  HorizontalScrollBarVisibility="Hidden"
-                  HorizontalScrollMode="Disabled"
                   Padding="0,0,8,0"
                   VerticalAlignment="Bottom">
         <ItemsRepeater ItemsSource="{x:Bind VIEW_TagsListView.SelectedItems}">
@@ -200,31 +191,23 @@
       <StackPanel Grid.Column="1"
                   VerticalAlignment="Bottom"
                   Spacing="4">
-        <StackPanel x:Name="VIEW_CommandBarOptionsStackPanel" 
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    Visibility="Collapsed">
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Right">
           <Button x:Name="VIEW_CommandBarDeselectAllButton"
                   Style="{StaticResource AppFontIconNormalButtonStyle}"
-                  Content="&#xE8E6;" 
-                  Click="VIEW_CommandBarDeselectAllButton_Click"/>
-          <Button Style="{StaticResource AppIconNormalButtonStyle}"
-                  Padding="6">
-            <ImageIcon Source="/Assets/icons/fluent/FluentShapeUnion24Regular-002.svg" />
-            <Button.Flyout>
-              <Flyout Placement="TopEdgeAlignedRight">
-                <RadioButtons MaxColumns="2">
-                  <RadioButton Content="And" />
-                  <RadioButton Content="Or" />
-                </RadioButtons>
-              </Flyout>
-            </Button.Flyout>
+                  Content="&#xE8E6;"
+                  Click="VIEW_CommandBarDeselectAllButton_Click" />
+          <Button x:Name="VIEW_CommandBarInclusionModeButton"
+                  Style="{StaticResource AppIconNormalButtonStyle}"
+                  Padding="6"
+                  Click="VIEW_CommandBarInclusionModeButton_Click">
+            <IconSourceElement IconSource="{x:Bind ViewModel.IsIntersectSelection, Converter={StaticResource BoolToSetOperationIconSourceConverter}, Mode=OneWay}" />
           </Button>
         </StackPanel>
         <Button x:Name="VIEW_CommandBarExploreButton"
                 Content="Explore"
-                Style="{StaticResource AccentButtonStyle}" 
-                Click="VIEW_CommandBarExploreButton_Click"/>
+                Style="{StaticResource AccentButtonStyle}"
+                Click="VIEW_CommandBarExploreButton_Click" />
       </StackPanel>
     </Grid>
 
@@ -255,7 +238,7 @@
         <VisualState x:Name="Unselected" />
         <VisualState x:Name="Selected">
           <VisualState.Setters>
-            <Setter Target="VIEW_CommandBarOptionsStackPanel.Visibility"
+            <Setter Target="VIEW_CommandBarGrid.Visibility"
                     Value="Visible" />
           </VisualState.Setters>
         </VisualState>

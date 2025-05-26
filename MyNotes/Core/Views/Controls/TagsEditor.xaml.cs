@@ -1,6 +1,7 @@
 using CommunityToolkit.WinUI;
 
 using MyNotes.Core.Models;
+using MyNotes.Core.ViewModels;
 
 namespace MyNotes.Core.Views;
 
@@ -9,44 +10,21 @@ public sealed partial class TagsEditor : UserControl
   public TagsEditor()
   {
     this.InitializeComponent();
-
-    TagsCollectionViewSource.Source = TagGroup;
+    ViewModel = ((App)Application.Current).GetService<TagsViewModel>();
   }
 
-  public CollectionViewSource TagsCollectionViewSource { get; } = new() { IsSourceGrouped = true };
-
-  public TagGroup TagGroup { get; } = new()
-  {
-    new ("M", ["Mango", "Melon", "Mouse", ]),
-    new ("A", ["Apple", "Apricot", "Ant", ]),
-    new ("O", ["Owl", ]),
-    new ("P", ["Peach", "Parrot", ]),
-    new ("B", ["Banana", "Blackberry", "Blueberry","Bear", ]),
-    new ("C", ["Cherry", "Cat", "Camel", "Cow", "Chicken", ]),
-    new ("D", ["Dog", "Donkey", "Dolphin", ]),
-    new ("N", ["Navy", ]),
-    new ("R", ["Rabbit", ]),
-    new ("E", ["Elephant", "Eagle",]),
-    new ("F", ["Frog", ]),
-    new ("S", ["Swan", "Snake",]),
-    new ("W", ["Whale", ]),
-    new ("G", ["Grapefruit", "Grapes", "Goat", ]),
-    new ("H", ["Horse", ]),
-    new ("K", ["Kiwi", ]),
-    new ("L", ["Lizard", ]),
-  };
-
+  public TagsViewModel ViewModel { get; }
   private void VIEW_SearchAutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
   {
     string queryText = args.QueryText;
     if (string.IsNullOrWhiteSpace(queryText))
     {
-      TagsCollectionViewSource.Source = TagGroup;
+      ViewModel.TagsCollectionViewSource.Source = ViewModel.TagGroup;
     }
     else
     {
-      TagsCollectionViewSource.Source =
-        from grp in TagGroup
+      ViewModel.TagsCollectionViewSource.Source =
+        from grp in ViewModel.TagGroup
         select new Tags(grp.Key, grp.Where(tag => tag.Contains(queryText, StringComparison.CurrentCultureIgnoreCase)));
     }
   }
@@ -65,13 +43,14 @@ public sealed partial class TagsEditor : UserControl
 
   private void VIEW_AddButtonMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
   {
-    TagsCollectionViewSource.Source = TagGroup;
+    ViewModel.TagsCollectionViewSource.Source = ViewModel.TagGroup;
     VisualStateManager.GoToState(this, "EditorModeAdd", false);
   }
 
   private void VIEW_DeleteButtonMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
   {
-    VIEW_DeleteTagsTeachingTip.IsOpen = true;
+    if (VIEW_TagsListView.SelectedItems.Count > 0)
+      VIEW_DeleteTagsTeachingTip.IsOpen = true;
   }
 
   private void VIEW_CloseAddModeButton_Click(object sender, RoutedEventArgs e)
@@ -81,11 +60,7 @@ public sealed partial class TagsEditor : UserControl
 
   private void VIEW_AddTagButton_Click(object sender, RoutedEventArgs e)
   {
-    string tag = VIEW_TagInputTextBox.Text;
-    if (!string.IsNullOrWhiteSpace(tag))
-    {
-      TagGroup.AddItem(tag);
-    }
+    ViewModel.AddTag(VIEW_TagInputTextBox.Text);
   }
 
   private void VIEW_TagsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -104,12 +79,17 @@ public sealed partial class TagsEditor : UserControl
   private void VIEW_DeleteTagsTeachingTip_ActionButtonClick(TeachingTip sender, object args)
   {
     foreach (string tag in VIEW_TagsListView.SelectedItems.Cast<string>().ToArray())
-      TagGroup.RemoveItem(tag);
+      ViewModel.DeleteTag(tag);
     VIEW_DeleteTagsTeachingTip.IsOpen = false;
   }
 
   private void VIEW_CommandBarExploreButton_Click(object sender, RoutedEventArgs e)
   {
 
+  }
+
+  private void VIEW_CommandBarInclusionModeButton_Click(object sender, RoutedEventArgs e)
+  {
+    ViewModel.IsIntersectSelection = !ViewModel.IsIntersectSelection;
   }
 }
