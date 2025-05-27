@@ -2,12 +2,14 @@
 
 namespace MyNotes.Common.Collections;
 
-public class SortedObervableCollection<T> : Collection<T>, INotifyCollectionChanged where T : IComparable<T>
+public class SortedObervableCollection<T> : Collection<T>, INotifyCollectionChanged
 {
   public SortedObervableCollection() : base(new List<T>())
   {
     SortDescriptions = new();
     SortDescriptions.CollectionChanged += OnSortDescripTionChanged;
+    if (this is IComparable<T>)
+      _comparers.Add(Comparer<T>.Default);
   }
 
   public SortedObervableCollection(IEnumerable<T> items, IEnumerable<SortDescription<T>>? sortDescriptions = null) : this()
@@ -18,23 +20,27 @@ public class SortedObervableCollection<T> : Collection<T>, INotifyCollectionChan
       SortDescriptions.CollectionChanged += OnSortDescripTionChanged;
       InitializeComparer();
     }
-
+    else
+    {
+      if (this is IComparable<T>)
+        _comparers.Add(Comparer<T>.Default);
+    }
     AddRange(items);
   }
 
   public ObservableCollection<SortDescription<T>> SortDescriptions { get; }
-  private CompositeComparer<T> _comparer = new();
+  private CompositeComparer<T> _comparers = new();
   public HashSet<string> SortKeys { get; } = new();
 
   private void InitializeComparer()
   {
-    _comparer = new();
+    _comparers = new();
     SortKeys.Clear();
     foreach (SortDescription<T> sortDescription in SortDescriptions!)
     {
       if (sortDescription.KeyPropertyName is not null)
         SortKeys.Add(sortDescription.KeyPropertyName);
-      _comparer.Add(sortDescription.Comparer); 
+      _comparers.Add(sortDescription.Comparer);
     }
   }
   private void OnSortDescripTionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -116,17 +122,15 @@ public class SortedObervableCollection<T> : Collection<T>, INotifyCollectionChan
   private Range FindRange(int index)
   {
     int startIndex = index, endIndex = index;
-    while (startIndex > 0 && this[startIndex - 1].CompareTo(this[index]) == 0)
+    while (startIndex > 0 && _comparers.Compare(this[startIndex - 1], this[index]) == 0)
       startIndex--;
-    while (endIndex < Count - 1 && this[endIndex + 1].CompareTo(this[index]) == 0)
+    while (endIndex < Count - 1 && _comparers.Compare(this[endIndex + 1], this[index]) == 0)
       endIndex++;
     return new(startIndex, endIndex);
   }
 
   public int BinarySearch(T item)
   {
-    return SortDescriptions.Count == 0
-      ? ((List<T>)Items).BinarySearch(item, Comparer<T>.Default)
-      : ((List<T>)Items).BinarySearch(item, _comparer);
+    return ((List<T>)Items).BinarySearch(item, _comparers);
   }
 }

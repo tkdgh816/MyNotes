@@ -50,26 +50,12 @@ public class Command : ICommand
 
 public class Command<T> : ICommand
 {
-  private readonly Action? _executeNoParams;
   private readonly Action<T>? _execute;
   private readonly Predicate<T>? _canExecute;
-
-  public Command(Action execute, Predicate<T>? canExecute = null)
-  {
-    _executeNoParams = execute;
-    _canExecute = canExecute;
-  }
 
   public Command(Action<T> execute, Predicate<T>? canExecute = null)
   {
     _execute = execute;
-    _canExecute = canExecute;
-  }
-
-  public Command(Action executeNoParams, Action<T> execute, Predicate<T>? canExecute = null)
-  {
-    _execute = execute;
-    _executeNoParams = executeNoParams;
     _canExecute = canExecute;
   }
 
@@ -89,7 +75,5 @@ public class Command<T> : ICommand
   {
     if (_execute is not null && parameter is not null)
       _execute((T)parameter);
-    else if (_executeNoParams is not null)
-      _executeNoParams();
   }
 }

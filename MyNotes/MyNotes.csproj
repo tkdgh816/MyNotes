@@ -16,6 +16,8 @@
     <None Remove="Assets\Square44x44Logo.targetsize-16.png" />
     <None Remove="Assets\Square44x44Logo.targetsize-24_altform-lightunplated.png" />
     <None Remove="Core\Views\Controls\IconPicker.xaml" />
+    <None Remove="Core\Views\Dialogs\MoveNoteToBoardDialog.xaml" />
+    <None Remove="Core\Views\Dialogs\TestDialog.xaml" />
     <None Remove="Core\Views\NoteWindow.xaml" />
     <None Remove="Core\Views\Pages\BookmarksPage.xaml" />
     <None Remove="Core\Views\Pages\HomePage.xaml" />
@@ -55,7 +57,6 @@
   <ItemGroup>
     <Folder Include="Common\Helpers\" />
     <Folder Include="Common\Extensions\" />
-    <Folder Include="Common\Messages\" />
     <Folder Include="Contracts\" />
     <Folder Include="Strings\ko-KR\" />
     <Folder Include="Strings\en-US\" />
@@ -70,6 +71,17 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.5" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4188" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250513003" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Core\Views\Dialogs\MoveNoteToBoardDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Core\Views\Dialogs\TestDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Core\Views\Pages\NotePage.xaml">

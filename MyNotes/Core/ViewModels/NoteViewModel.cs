@@ -1,5 +1,10 @@
-﻿using MyNotes.Core.Models;
+﻿using CommunityToolkit.Mvvm.Messaging;
+
+using MyNotes.Common.Commands;
+using MyNotes.Common.Messaging;
+using MyNotes.Core.Models;
 using MyNotes.Core.Services;
+using MyNotes.Core.Views;
 
 namespace MyNotes.Core.ViewModels;
 
@@ -10,14 +15,16 @@ public class NoteViewModel : ViewModelBase
     WindowService = windowService;
     DatabaseService = databaseService;
     Note = WindowService.CurrentNote!;
+    SetCommands();
   }
 
   public WindowService WindowService { get; }
   public DatabaseService DatabaseService { get; }
-  public Note Note { get; }
+  public Note Note { get; set; }
 
   public void GetMainWindow() => WindowService.GetMainWindow().Activate();
   public bool CloseWindow() => WindowService.CloseNoteWindow(Note);
+  public void CreateWindow() => WindowService.CreateNoteWindow(Note).Activate();
 
   public void RegisterNotePropertyChangedEvent()
   {
@@ -83,5 +90,39 @@ public class NoteViewModel : ViewModelBase
   {
     get => _isWindowAlwaysOnTop;
     set => SetProperty(ref _isWindowAlwaysOnTop, value);
+  }
+
+  public void UpdateNote(string propertyName)
+  {
+    DatabaseService.UpdateNote(Note, propertyName, false);
+  }
+
+  public void UpdateNoteTag(string tag)
+  {
+    if (string.IsNullOrWhiteSpace(tag) || Note.Tags.Contains(tag))
+      return;
+
+    Note.Tags.Add(tag);
+    DatabaseService.AddTag(Note, tag);
+  }
+
+  public Command? CreateWindowCommand { get; private set; }
+  public Command? BookmarkCommand { get; private set; }
+  public Command<NoteViewModel>? MoveToBoardCommand { get; private set; }
+
+  private void SetCommands()
+  {
+    CreateWindowCommand = new(() => WindowService.CreateNoteWindow(Note).Activate());
+
+    BookmarkCommand = new(() =>
+    {
+      Note.IsBookmarked = !Note.IsBookmarked;
+      DatabaseService.UpdateNote(Note, nameof(Note.IsBookmarked), false);
+    });
+
+    MoveToBoardCommand = new((noteViewModel) =>
+    {
+      WeakReferenceMessenger.Default.Send(new DialogRequestMessage(noteViewModel), Tokens.MoveNoteToBoard);
+    });
   }
 }

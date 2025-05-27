@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog x:Class="MyNotes.Core.Views.MoveNoteToBoardDialog"
+               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:models="using:MyNotes.Core.Models"
+               xmlns:views="using:MyNotes.Core.Views"
+               Title="Move to selected board"
+               PrimaryButtonText="Move"
+               IsPrimaryButtonEnabled="{x:Bind View_MoveToBoardTreeView.SelectedItem, Converter={StaticResource NotNullToBoolConverter}, Mode=OneWay}"
+               CloseButtonText="Close"
+               DefaultButton="Primary"
+               Style="{StaticResource DefaultContentDialogStyle}">
+  <TreeView x:Name="View_MoveToBoardTreeView"
+            ItemsSource="{x:Bind MainViewModel.BoardMenuItems}"
+            CanDragItems="False"
+            CanReorderItems="False"
+            MinWidth="300"
+            MinHeight="240"
+            MaxHeight="400">
+    <TreeView.Resources>
+      <Thickness x:Key="TreeViewItemPresenterMargin">0,2</Thickness>
+      <Thickness x:Key="TreeViewItemPresenterPadding">0,2</Thickness>
+    </TreeView.Resources>
+    <TreeView.ItemTemplateSelector>
+      <views:NavigationItemTreeViewItemTemplateSelector>
+        <views:NavigationItemTreeViewItemTemplateSelector.GroupItem>
+          <DataTemplate x:DataType="models:NavigationBoardGroup">
+            <TreeViewItem ItemsSource="{x:Bind Children}"
+                          IsEnabled="False"
+                          IsExpanded="True">
+              <Grid ColumnSpacing="8"
+                    Height="24">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="24" />
+                  <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <IconSourceElement Grid.Column="0"
+                                   IconSource="{x:Bind Icon, Converter={StaticResource IconToIconSourceConverter}}"
+                                   VerticalAlignment="Center" />
+                <Border Grid.Column="0"
+                        Background="{StaticResource LayerFillColorDefault}" />
+                <TextBlock Grid.Column="1"
+                           Text="{x:Bind Name}"
+                           VerticalAlignment="Center"
+                           Foreground="{StaticResource TextFillColorDisabled}" />
+              </Grid>
+            </TreeViewItem>
+          </DataTemplate>
+        </views:NavigationItemTreeViewItemTemplateSelector.GroupItem>
+        <views:NavigationItemTreeViewItemTemplateSelector.BoardItem>
+          <DataTemplate x:DataType="models:NavigationBoard">
+            <TreeViewItem VerticalContentAlignment="Center">
+              <Grid ColumnSpacing="12"
+                    Height="24">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="24" />
+                  <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <IconSourceElement Grid.Column="0"
+                                   IconSource="{x:Bind Icon, Converter={StaticResource IconToIconSourceConverter}}"
+                                   VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1"
+                           VerticalAlignment="Center"
+                           Text="{x:Bind Name}"
+                           Style="{StaticResource BodyStrongTextBlockStyle}" />
+              </Grid>
+            </TreeViewItem>
+          </DataTemplate>
+        </views:NavigationItemTreeViewItemTemplateSelector.BoardItem>
+      </views:NavigationItemTreeViewItemTemplateSelector>
+    </TreeView.ItemTemplateSelector>
+  </TreeView>
+</ContentDialog>

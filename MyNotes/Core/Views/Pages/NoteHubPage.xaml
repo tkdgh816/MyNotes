@@ -5,16 +5,19 @@
       xmlns:ui="using:CommunityToolkit.WinUI"
       xmlns:controls="using:CommunityToolkit.WinUI.Controls"
       xmlns:models="using:MyNotes.Core.Models"
-      xmlns:views="using:MyNotes.Core.Views">
+      xmlns:views="using:MyNotes.Core.Views"
+      xmlns:viewmodels="using:MyNotes.Core.ViewModels"
+      xmlns:interactivity="using:Microsoft.Xaml.Interactivity">
 
   <Page.Resources>
     <!--#region GridView ItemTemplate: Grid Style -->
     <DataTemplate x:Key="GridViewItemTemplate1"
-                  x:DataType="models:Note">
+                  x:DataType="viewmodels:NoteViewModel">
       <UserControl Margin="6"
-                   PointerEntered="Grid_PointerEntered"
-                   PointerExited="Grid_PointerExited">
-        <Grid Background="{x:Bind Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}"
+                   PointerEntered="GridViewItemTemplateRoot_PointerEntered"
+                   PointerExited="GridViewItemTemplateRoot_PointerExited">
+
+        <Grid Background="{x:Bind Note.Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}"
               CornerRadius="8"
               BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
               BorderThickness="1"
@@ -28,8 +31,9 @@
             <RowDefinition Height="32" />
             <RowDefinition />
           </Grid.RowDefinitions>
+
           <Grid Grid.Row="0"
-                Background="{x:Bind Background, Converter={StaticResource ColorToLayerBrushConverter}, Mode=OneWay}"
+                Background="{x:Bind Note.Background, Converter={StaticResource ColorToLayerBrushConverter}, Mode=OneWay}"
                 BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
                 BorderThickness="0,0,0,1">
             <Grid.ColumnDefinitions>
@@ -37,23 +41,23 @@
               <ColumnDefinition />
               <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <Button x:Name="VIEW_BookmarkButton"
+            <Button x:Name="Template_BookmarkButton"
                     Grid.Column="0"
                     HorizontalAlignment="Left"
                     Style="{StaticResource AppFontIconNormalButtonStyle}"
-                    Content="{x:Bind IsBookmarked, Converter={StaticResource BoolToBookmarkIconGlyphConverter}, Mode=OneWay}"
+                    Content="{x:Bind Note.IsBookmarked, Converter={StaticResource BoolToBookmarkIconGlyphConverter}, Mode=OneWay}"
                     CornerRadius="8,4,4,4"
                     Visibility="Collapsed"
-                    Click="VIEW_BookmarkButton_Click" />
+                    Command="{x:Bind BookmarkCommand}" />
             <TextBlock Grid.Column="1"
                        Padding="6,0"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"
-                       Text="{x:Bind Title, Mode=OneWay}"
+                       Text="{x:Bind Note.Title, Mode=OneWay}"
                        TextTrimming="CharacterEllipsis"
                        TextWrapping="NoWrap"
                        Style="{StaticResource BodyStrongTextBlockStyle}" />
-            <Button x:Name="VIEW_MoreButton"
+            <Button x:Name="Template_MoreButton"
                     Grid.Column="2"
                     HorizontalAlignment="Right"
                     Style="{StaticResource AppFontIconNormalButtonStyle}"
@@ -69,14 +73,13 @@
                                 Icon="Share" />
                   <AppBarButton x:Name="VIEW_RemoveNoteButton"
                                 Label="Remove"
-                                Icon="Delete" 
-                                Click="VIEW_RemoveNoteButton_Click"
-                                Command="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}}"/>
+                                Icon="Delete" />
                   <CommandBarFlyout.SecondaryCommands>
-                    <AppBarButton x:Name="VIEW_MoveToBoardButton"
+                    <AppBarButton x:Name="Template_MoveToBoartButton"
                                   Label="Move to board"
                                   Icon="{ui:FontIcon Glyph=&#xE8DE;}"
-                                  Click="VIEW_MoveToBoardButton_Click" />
+                                  Command="{x:Bind MoveToBoardCommand}"
+                                  CommandParameter="{x:Bind}"/>
                     <AppBarButton Label="Rename title"
                                   Icon="{ui:FontIcon Glyph=&#xE8AC;}" />
                     <AppBarButton x:Name="VIEW_EditTagsButton"
@@ -91,21 +94,27 @@
               </Button.Flyout>
             </Button>
           </Grid>
+
           <TextBlock Grid.Row="1"
                      Margin="6"
-                     Text="{x:Bind Body, Mode=OneWay}"
-                     DoubleTapped="UserControl_DoubleTapped" />
+                     Text="{x:Bind Note.Body, Mode=OneWay}">
+            <interactivity:Interaction.Behaviors>
+              <interactivity:EventTriggerBehavior EventName="DoubleTapped">
+                <interactivity:InvokeCommandAction Command="{x:Bind CreateWindowCommand}" />
+              </interactivity:EventTriggerBehavior>
+            </interactivity:Interaction.Behaviors>
+          </TextBlock>
 
           <Grid x:Name="VIEW_CommandBarGrid"
                 Grid.Row="1"
                 Visibility="Collapsed"
                 VerticalAlignment="Bottom"
-                Background="{x:Bind Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}">
+                Background="{x:Bind Note.Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}">
             <ScrollViewer HorizontalScrollMode="Enabled"
                           VerticalScrollMode="Disabled"
                           HorizontalScrollBarVisibility="Hidden"
                           VerticalScrollBarVisibility="Disabled">
-              <ItemsRepeater ItemsSource="{x:Bind Tags}"
+              <ItemsRepeater ItemsSource="{x:Bind Note.Tags}"
                              Margin="4">
                 <ItemsRepeater.Layout>
                   <StackLayout Orientation="Horizontal"
@@ -134,12 +143,12 @@
                     <DiscreteObjectKeyFrame KeyTime="0"
                                             Value="Visible" />
                   </ObjectAnimationUsingKeyFrames>
-                  <ObjectAnimationUsingKeyFrames Storyboard.TargetName="VIEW_BookmarkButton"
+                  <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Template_BookmarkButton"
                                                  Storyboard.TargetProperty="Visibility">
                     <DiscreteObjectKeyFrame KeyTime="0"
                                             Value="Visible" />
                   </ObjectAnimationUsingKeyFrames>
-                  <ObjectAnimationUsingKeyFrames Storyboard.TargetName="VIEW_MoreButton"
+                  <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Template_MoreButton"
                                                  Storyboard.TargetProperty="Visibility">
                     <DiscreteObjectKeyFrame KeyTime="0"
                                             Value="Visible" />
@@ -155,12 +164,11 @@
 
     <!--#region GridView ItemTemplate: List Style -->
     <DataTemplate x:Key="GridViewItemTemplate2"
-                  x:DataType="models:Note">
+                  x:DataType="viewmodels:NoteViewModel">
       <UserControl Margin="6"
-                   PointerEntered="Grid_PointerEntered"
-                   PointerExited="Grid_PointerExited"
-                   DoubleTapped="UserControl_DoubleTapped">
-        <Grid Background="{x:Bind Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}"
+                   PointerEntered="GridViewItemTemplateRoot_PointerEntered"
+                   PointerExited="GridViewItemTemplateRoot_PointerExited">
+        <Grid Background="{x:Bind Note.Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}"
               CornerRadius="8"
               BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
               BorderThickness="1"
@@ -177,17 +185,17 @@
             <TextBlock Padding="6"
                        VerticalAlignment="Center"
                        TextAlignment="Center"
-                       Text="{x:Bind Title, Mode=OneWay}"
+                       Text="{x:Bind Note.Title, Mode=OneWay}"
                        TextTrimming="CharacterEllipsis"
                        Style="{StaticResource BodyStrongTextBlockStyle}" />
           </Grid>
           <Grid Grid.Column="1">
             <TextBlock Margin="6"
-                       Text="{x:Bind Body, Mode=OneWay}" />
+                       Text="{x:Bind Note.Body, Mode=OneWay}" />
             <Grid x:Name="VIEW_CommandBarGrid"
                   Visibility="Collapsed"
                   VerticalAlignment="Bottom"
-                  Background="{x:Bind Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}">
+                  Background="{x:Bind Note.Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}">
               <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition Width="Auto" />
@@ -198,7 +206,7 @@
                             VerticalScrollMode="Disabled"
                             HorizontalScrollBarVisibility="Hidden"
                             VerticalScrollBarVisibility="Disabled">
-                <ItemsRepeater ItemsSource="{x:Bind Tags}"
+                <ItemsRepeater ItemsSource="{x:Bind Note.Tags}"
                                Margin="4,0">
                   <ItemsRepeater.Layout>
                     <StackLayout Orientation="Horizontal"
@@ -297,7 +305,7 @@
                                Content="New note"
                                Style="{StaticResource AppCommandBarButtonStyle}"
                                Visibility="{x:Bind Navigation, Converter={StaticResource NavigationBoardToVisibilityConverter}}"
-                               Click="VIEW_NewNoteButton_Click" />
+                               Command="{x:Bind ViewModel.CreateNoteCommand}"/>
       <!--#endregion-->
 
       <!--#region Search Button -->
@@ -348,9 +356,9 @@
                                Icon="Sort">
               <RadioMenuFlyoutItem GroupName="By"
                                    Text="Modified"
-                                   IsChecked="True" 
+                                   IsChecked="True"
                                    Command="{x:Bind ViewModel.SortCommand}"
-                                   CommandParameter="Modified"/>
+                                   CommandParameter="Modified" />
               <RadioMenuFlyoutItem GroupName="By"
                                    Text="Created"
                                    Command="{x:Bind ViewModel.SortCommand}"
@@ -511,7 +519,7 @@
               IncrementalLoadingThreshold="10" />
     <!--#endregion-->
 
-    <ContentDialog x:Name="VIEW_MoveToBoardContentDialog"
+    <!--<ContentDialog x:Name="VIEW_MoveToBoardContentDialog"
                    Title="Move to selected board"
                    PrimaryButtonText="Move"
                    IsPrimaryButtonEnabled="{x:Bind VIEW_MoveToBoardTreeView.SelectedItem, Converter={StaticResource NotNullToBoolConverter}, Mode=OneWay}"
@@ -577,7 +585,7 @@
           </views:NavigationItemTreeViewItemTemplateSelector>
         </TreeView.ItemTemplateSelector>
       </TreeView>
-    </ContentDialog>
+    </ContentDialog>-->
 
     <ContentDialog x:Name="VIEW_EditTagsContentDialog"
                    Title="Edit tags"

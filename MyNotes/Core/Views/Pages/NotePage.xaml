@@ -55,11 +55,11 @@
                               Click="VIEW_MoreMenuRenameMenuFlyoutItem_Click" />
               <MenuFlyoutItem Text="Edit tags"
                               Icon="{ui:FontIcon Glyph=&#xE932;}" />
-              
+
               <!-- Bookmark &#xE734; / Unbookmark &#xE8D9;-->
               <MenuFlyoutItem Text="Unbookmark"
                               Icon="{ui:FontIcon Glyph=&#xE8D9;}" />
-              
+
               <!-- Pin to home &#xE718; / Unpin from home &#xE77A;-->
               <MenuFlyoutItem Text="Unpin from home"
                               Icon="{ui:FontIcon Glyph=&#xE77A;}" />

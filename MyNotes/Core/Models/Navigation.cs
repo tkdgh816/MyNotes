@@ -55,8 +55,6 @@ public abstract class NavigationItem : Navigation
 
 public abstract class NavigationNotes : NavigationItem
 {
-  public SortedObervableCollection<Note> Notes { get; set; } = new();
-
   protected NavigationNotes(Type pageType, string name, Icon icon) : base(pageType, name, icon) { }
 }
 

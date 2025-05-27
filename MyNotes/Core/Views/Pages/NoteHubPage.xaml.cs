@@ -1,3 +1,7 @@
+using CommunityToolkit.Mvvm.Messaging;
+
+using MyNotes.Common.Commands;
+using MyNotes.Common.Messaging;
 using MyNotes.Core.Models;
 using MyNotes.Core.ViewModels;
 
@@ -12,6 +16,7 @@ public sealed partial class NoteHubPage : Page
     TagsViewModel = App.Current.GetService<TagsViewModel>();
     this.Unloaded += NoteBoardPage_Unloaded;
     _inputTimer.Tick += OnInputTimerTick;
+    RegisterMessenger();
   }
 
   private void NoteBoardPage_Unloaded(object sender, RoutedEventArgs e)
@@ -39,20 +44,11 @@ public sealed partial class NoteHubPage : Page
       ViewModel.DatabaseService.UpdateBoard((NavigationBoard)Navigation, "Icon");
   }
 
-  private void VIEW_NewNoteButton_Click(object sender, RoutedEventArgs e)
-  {
-    ViewModel.CreateNewNote();
-  }
+  private void GridViewItemTemplateRoot_PointerEntered(object sender, PointerRoutedEventArgs e)
+    => VisualStateManager.GoToState((Control)sender, "HoverStateHovering", false);
 
-  private void Grid_PointerEntered(object sender, PointerRoutedEventArgs e)
-  {
-    VisualStateManager.GoToState((Control)sender, "HoverStateHovering", false);
-  }
-
-  private void Grid_PointerExited(object sender, PointerRoutedEventArgs e)
-  {
-    VisualStateManager.GoToState((Control)sender, "HoverStateNormal", false);
-  }
+  private void GridViewItemTemplateRoot_PointerExited(object sender, PointerRoutedEventArgs e)
+    => VisualStateManager.GoToState((Control)sender, "HoverStateNormal", false);
 
   private void GridView_ChoosingItemContainer(ListViewBase sender, ChoosingItemContainerEventArgs args)
   {
@@ -159,68 +155,32 @@ public sealed partial class NoteHubPage : Page
       VIEW_SearchAutoSuggestBox.Focus(FocusState.Programmatic);
   }
 
-  private void UserControl_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
-  {
-    ViewModel.CreateNoteWindow((Note)((FrameworkElement)sender).DataContext);
-  }
-
   private void AppTagButton_Click(object sender, RoutedEventArgs e)
   {
     Note note = (Note)((FrameworkElement)sender).DataContext;
     Debug.WriteLine(note.Title);
   }
 
-  private void VIEW_BookmarkButton_Click(object sender, RoutedEventArgs e)
-  {
-    Note note = (Note)((FrameworkElement)sender).DataContext;
-    note.IsBookmarked = !note.IsBookmarked;
-    ViewModel.UpdateNote(note, nameof(Note.IsBookmarked));
-  }
-
-  private async void VIEW_MoveToBoardButton_Click(object sender, RoutedEventArgs e)
-  {
-    Note note = (Note)((FrameworkElement)sender).DataContext;
-    if (await VIEW_MoveToBoardContentDialog.ShowAsync() == ContentDialogResult.Primary)
-    {
-      NavigationBoard? selected = VIEW_MoveToBoardTreeView.SelectedItem as NavigationBoard;
-      if (selected is not null)
-      {
-        ViewModel.Navigation.Notes.Remove(note);
-        selected.Notes.Insert(0, note);
-        note.BoardId = selected.Id;
-        ViewModel.UpdateNote(note, nameof(Note.BoardId));
-      }
-    }
-  }
-
-  private void VIEW_RemoveNoteButton_Click(object sender, RoutedEventArgs e)
-  {
-    Note note = (Note)((FrameworkElement)sender).DataContext;
-    note.IsTrashed = true;
-    ViewModel.UpdateNote(note, nameof(Note.IsTrashed));
-    ViewModel.Navigation.Notes.Remove(note);
-  }
-
   private async void VIEW_EditTagsButton_Click(object sender, RoutedEventArgs e)
   {
-    Note note = (Note)((FrameworkElement)sender).DataContext;
-    VIEW_EditTagsContentDialog.DataContext = note;
-    VIEW_EditTagsItemsRepeater.ItemsSource = note.Tags;
-    VIEW_EditTagsHeaderTextBlock.Text = note.Title;
+    NoteViewModel noteViewModel = (NoteViewModel)((FrameworkElement)sender).DataContext;
+    VIEW_EditTagsContentDialog.DataContext = noteViewModel;
+    VIEW_EditTagsItemsRepeater.ItemsSource = noteViewModel.Note.Tags;
+    VIEW_EditTagsHeaderTextBlock.Text = noteViewModel.Note.Title;
     await VIEW_EditTagsContentDialog.ShowAsync();
   }
 
   private void VIEW_AddTagButton_Click(object sender, RoutedEventArgs e)
   {
-    Note note = (Note)((FrameworkElement)sender).DataContext;
-    AddTag(note);
+    NoteViewModel noteViewModel = (NoteViewModel)((FrameworkElement)sender).DataContext;
+    AddTag(noteViewModel);
   }
 
-  private void AddTag(Note note)
+  private void AddTag(NoteViewModel noteViewModel)
   {
     string tag = VIEW_AddTagAutoSuggestBox.Text.Trim();
     TagsViewModel.AddTag(tag);
-    ViewModel.UpdateNoteTag(note, tag);
+    noteViewModel.UpdateNoteTag(tag);
     VIEW_AddTagAutoSuggestBox.Text = "";
   }
 
@@ -254,23 +214,31 @@ public sealed partial class NoteHubPage : Page
 
   private void VIEW_AddTagAutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
   {
-    Note note = (Note)((FrameworkElement)sender).DataContext;
-    AddTag(note);
+    NoteViewModel noteViewModel = (NoteViewModel)((FrameworkElement)sender).DataContext;
+    AddTag(noteViewModel);
   }
-}
 
-public class NavigationItemTreeViewItemTemplateSelector : DataTemplateSelector
-{
-  public DataTemplate? GroupItem { get; set; }
-  public DataTemplate? BoardItem { get; set; }
-
-  protected override DataTemplate? SelectTemplateCore(object item)
+  private void RegisterMessenger()
   {
-    return item switch
+    WeakReferenceMessenger.Default.Register<DialogRequestMessage, string>(this, Tokens.MoveNoteToBoard, new(async (recipient, message) =>
     {
-      NavigationBoardGroup => GroupItem,
-      NavigationBoard => BoardItem,
-      _ => null
-    };
+      if (ViewModel.NoteViewModels.Contains(message.Content))
+      {
+        ContentDialog dialog = new MoveNoteToBoardDialog() { XamlRoot = VIEW_NotesGridView.XamlRoot };
+        await dialog.ShowAsync();
+      }
+      //await VIEW_MoveToBoardContentDialog.ShowAsync();
+      //NoteViewModel noteViewModel = (NoteViewModel)message.Content!;
+      //if (await VIEW_MoveToBoardContentDialog.ShowAsync() == ContentDialogResult.Primary)
+      //{
+      //  NavigationBoard? selected = VIEW_MoveToBoardTreeView.SelectedItem as NavigationBoard;
+      //  if (selected is not null)
+      //  {
+      //    ViewModel.NoteViewModels.Remove(noteViewModel);
+      //    noteViewModel.Note.BoardId = selected.Id;
+      //    noteViewModel.UpdateNote(nameof(Note.BoardId));
+      //  }
+      //}
+    }));
   }
 }
