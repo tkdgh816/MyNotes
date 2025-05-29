@@ -14,7 +14,7 @@ public sealed partial class TagsEditor : UserControl
   }
 
   public TagsViewModel ViewModel { get; }
-  private void VIEW_SearchAutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+  private void View_SearchAutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
   {
     string queryText = args.QueryText;
     if (string.IsNullOrWhiteSpace(queryText))
@@ -29,66 +29,66 @@ public sealed partial class TagsEditor : UserControl
     }
   }
 
-  private void VIEW_SelectedTagButton_Click(object sender, RoutedEventArgs e)
+  private void View_SelectedTagButton_Click(object sender, RoutedEventArgs e)
   {
     string tag = (string)((Button)sender).Content;
-    VIEW_TagsListView.MakeVisible(new SemanticZoomLocation() { Item = tag, Bounds = new Rect(0.0, 50.0, 0.0, 0.0) });
+    View_TagsListView.MakeVisible(new SemanticZoomLocation() { Item = tag, Bounds = new Rect(0.0, 50.0, 0.0, 0.0) });
   }
 
-  private void VIEW_SelectedTagButton_DeleteButtonClick(object sender, RoutedEventArgs e)
+  private void View_SelectedTagButton_DeleteButtonClick(object sender, RoutedEventArgs e)
   {
     string tag = (string)((Button)sender).Content;
-    VIEW_TagsListView.SelectedItems.Remove(tag);
+    View_TagsListView.SelectedItems.Remove(tag);
   }
 
-  private void VIEW_AddButtonMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+  private void View_AddButtonMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
   {
     ViewModel.TagsCollectionViewSource.Source = ViewModel.TagGroup;
     VisualStateManager.GoToState(this, "EditorModeAdd", false);
   }
 
-  private void VIEW_DeleteButtonMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+  private void View_DeleteButtonMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
   {
-    if (VIEW_TagsListView.SelectedItems.Count > 0)
-      VIEW_DeleteTagsTeachingTip.IsOpen = true;
+    if (View_TagsListView.SelectedItems.Count > 0)
+      View_DeleteTagsTeachingTip.IsOpen = true;
   }
 
-  private void VIEW_CloseAddModeButton_Click(object sender, RoutedEventArgs e)
+  private void View_CloseAddModeButton_Click(object sender, RoutedEventArgs e)
   {
     VisualStateManager.GoToState(this, "EditorModeNormal", false);
   }
 
-  private void VIEW_AddTagButton_Click(object sender, RoutedEventArgs e)
+  private void View_AddTagButton_Click(object sender, RoutedEventArgs e)
   {
-    ViewModel.AddTag(VIEW_TagInputTextBox.Text);
+    ViewModel.AddTag(View_TagInputTextBox.Text);
   }
 
-  private void VIEW_TagsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+  private void View_TagsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
   {
-    if (VIEW_TagsListView.SelectedItems.Count > 0)
+    if (View_TagsListView.SelectedItems.Count > 0)
       VisualStateManager.GoToState(this, "Selected", false);
     else
       VisualStateManager.GoToState(this, "Unselected", false);
   }
 
-  private void VIEW_CommandBarDeselectAllButton_Click(object sender, RoutedEventArgs e)
+  private void View_CommandBarDeselectAllButton_Click(object sender, RoutedEventArgs e)
   {
-    VIEW_TagsListView.DeselectAll();
+    View_TagsListView.DeselectAll();
   }
 
-  private void VIEW_DeleteTagsTeachingTip_ActionButtonClick(TeachingTip sender, object args)
+  private void View_DeleteTagsTeachingTip_ActionButtonClick(TeachingTip sender, object args)
   {
-    foreach (string tag in VIEW_TagsListView.SelectedItems.Cast<string>().ToArray())
+    foreach (string tag in View_TagsListView.SelectedItems.Cast<string>().ToArray())
       ViewModel.DeleteTag(tag);
-    VIEW_DeleteTagsTeachingTip.IsOpen = false;
+    View_DeleteTagsTeachingTip.IsOpen = false;
   }
 
-  private void VIEW_CommandBarExploreButton_Click(object sender, RoutedEventArgs e)
+  private void View_CommandBarExploreButton_Click(object sender, RoutedEventArgs e)
   {
 
   }
 
-  private void VIEW_CommandBarInclusionModeButton_Click(object sender, RoutedEventArgs e)
+  private void View_CommandBarInclusionModeButton_Click(object sender, RoutedEventArgs e)
   {
     ViewModel.IsIntersectSelection = !ViewModel.IsIntersectSelection;
   }

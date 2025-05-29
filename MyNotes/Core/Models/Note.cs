@@ -33,14 +33,14 @@ public class Note : ObservableObject, IComparable<Note>
   public Guid BoardId { get; set; }
   public DateTimeOffset Created { get; private set; }
 
-  //private DateTimeOffset _modified;
-  //public DateTimeOffset Modified
-  //{
-  //  get => _modified;
-  //  private set => SetProperty(ref _modified, value);
-  //}
+  private DateTimeOffset _modified;
+  public DateTimeOffset Modified
+  {
+    get => _modified;
+    private set => SetProperty(ref _modified, value);
+  }
 
-  public DateTimeOffset Modified { get; private set; }
+  //public DateTimeOffset Modified { get; private set; }
 
   private string _title;
   public string Title
@@ -102,3 +102,5 @@ public class Note : ObservableObject, IComparable<Note>
 }
 
 public enum BackdropKind { None, Acrylic, Mica }
+
+public enum NoteSortKey { Modified, Created, Title, Tag }

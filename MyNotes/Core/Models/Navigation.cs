@@ -1,5 +1,4 @@
-﻿using MyNotes.Common.Collections;
-using MyNotes.Core.Views;
+﻿using MyNotes.Core.Views;
 
 namespace MyNotes.Core.Models;
 
@@ -56,6 +55,20 @@ public abstract class NavigationItem : Navigation
 public abstract class NavigationNotes : NavigationItem
 {
   protected NavigationNotes(Type pageType, string name, Icon icon) : base(pageType, name, icon) { }
+
+  private NoteSortKey _sortKey;
+  public NoteSortKey SortKey
+  {
+    get => _sortKey;
+    set => SetProperty(ref _sortKey, value);
+  }
+
+  private ListSortDirection _sortDirection;
+  public ListSortDirection SortDirection
+  {
+    get => _sortDirection;
+    set => SetProperty(ref _sortDirection, value);
+  }
 }
 
 public class NavigationSearch : NavigationNotes
@@ -88,7 +101,7 @@ public class NavigationSettings : NavigationItem
 
 public class NavigationBookmarks : NavigationNotes
 {
-  public NavigationBookmarks() : base(typeof(NoteHubPage), "Bookmarks", IconLibrary.FindGlyph("\uE734")) { }
+  public NavigationBookmarks() : base(typeof(NoteBoardPage), "Bookmarks", IconLibrary.FindGlyph("\uE734")) { }
 }
 
 public class NavigationBoard : NavigationNotes
@@ -96,7 +109,7 @@ public class NavigationBoard : NavigationNotes
   public Guid Id { get; }
   public NavigationBoardGroup? Parent { get; set; }
 
-  public NavigationBoard(string name, Icon icon, Guid id) : base(typeof(NoteHubPage), name, icon)
+  public NavigationBoard(string name, Icon icon, Guid id) : base(typeof(NoteBoardPage), name, icon)
   {
     Id = id;
   }

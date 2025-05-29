@@ -497,32 +497,32 @@ trashed || {reader["trashed"]}
     public const string CreateTable_Boards =
 @"CREATE TABLE IF NOT EXISTS Boards
 (
-id            TEXT PRIMARY KEY NOT NULL,
-grouped       INTEGER NOT NULL DEFAULT 0,
-parent        TEXT NULL,
-next          TEXT NULL,
-name          TEXT NOT NULL DEFAULT '',
-icon_type     INTEGER NOT NULL,
-icon_value    INTEGER NOT NULL
+id              TEXT PRIMARY KEY NOT NULL,
+grouped         INTEGER NOT NULL DEFAULT 0,
+parent          TEXT NULL,
+next            TEXT NULL,
+name            TEXT NOT NULL DEFAULT '',
+icon_type       INTEGER NOT NULL,
+icon_value      INTEGER NOT NULL
 )";
 
     public const string CreateTable_Notes =
 @"CREATE TABLE IF NOT EXISTS Notes
 (
-id            TEXT PRIMARY KEY NOT NULL,
-parent        TEXT NOT NULL,
-created       TEXT NOT NULL,
-modified      TEXT NOT NULL,
-title         TEXT NOT NULL DEFAULT '',
-body          TEXT NOT NULL DEFAULT '',
-background    TEXT NOT NULL,
-backdrop      INTEGER NOT NULL,
-width         INTEGER NOT NULL,
-height        INTEGER NOT NULL,
-position_x    INTEGER NOT NULL,
-position_y    INTEGER NOT NULL,
-bookmarked    INTEGER NOT NULL DEFAULT 0,
-trashed       INTEGER NOT NULL DEFAULT 0,
+id              TEXT PRIMARY KEY NOT NULL,
+parent          TEXT NOT NULL,
+created         TEXT NOT NULL,
+modified        TEXT NOT NULL,
+title           TEXT NOT NULL DEFAULT '',
+body            TEXT NOT NULL DEFAULT '',
+background      TEXT NOT NULL,
+backdrop        INTEGER NOT NULL,
+width           INTEGER NOT NULL,
+height          INTEGER NOT NULL,
+position_x      INTEGER NOT NULL,
+position_y      INTEGER NOT NULL,
+bookmarked      INTEGER NOT NULL DEFAULT 0,
+trashed         INTEGER NOT NULL DEFAULT 0,
 FOREIGN KEY (parent) REFERENCES Boards(id) ON DELETE RESTRICT ON UPDATE CASCADE
 )";
 

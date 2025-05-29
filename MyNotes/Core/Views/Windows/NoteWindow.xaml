@@ -5,12 +5,12 @@
         xmlns:views="using:MyNotes.Core.Views"
         xmlns:converters="using:MyNotes.Common.Converters">
 
-  <views:NotePage />
-  <!--<UserControl x:Name="VIEW_RootUserControl"
-               Loaded="VIEW_RootUserControl_Loaded">
+  <views:NotePage x:Name="View_NotePage"/>
+  <!--<UserControl x:Name="View_RootUserControl"
+               Loaded="View_RootUserControl_Loaded">
     <UserControl.Resources>
     </UserControl.Resources>
-    <Grid x:Name="VIEW_RootGrid"
+    <Grid x:Name="View_RootGrid"
           Background="{x:Bind converters:ColorToBrushConverter.Convert(ViewModel.Note.Background), Mode=OneWay}">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto" />
@@ -19,7 +19,7 @@
       </Grid.RowDefinitions>
 
       --><!--#region Title Bar --><!--
-      <Grid x:Name="VIEW_TitleBarGrid"
+      <Grid x:Name="View_TitleBarGrid"
             Grid.Row="0"
             Background="{StaticResource SubtleFillColorTertiaryBrush}"
             BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
@@ -30,7 +30,7 @@
           <ColumnDefinition Width="64" />
         </Grid.ColumnDefinitions>
 
-        <StackPanel x:Name="VIEW_TitleBarLeftStackPanel"
+        <StackPanel x:Name="View_TitleBarLeftStackPanel"
                     Grid.Column="0"
                     Orientation="Horizontal">
           --><!-- Dot: &#xE9B0; &#xE915;-->
@@ -38,16 +38,16 @@
           <!-- Window: &#xE8A7; &#xE944; -->
           <!-- Pin: &#xE718; &#xE841;-->
           <!-- Expand: &#xEE49; &#xEE47;--><!--
-          <Button x:Name="VIEW_PinButton"
+          <Button x:Name="View_PinButton"
                   Content="&#xEE49;"
                   Style="{StaticResource AppFontIconNormalButtonStyle}"
-                  Click="VIEW_PinButton_Click"
+                  Click="View_PinButton_Click"
                   RenderTransformOrigin="0.5,0">
             <Button.RenderTransform>
               <ScaleTransform ScaleX="-1" />
             </Button.RenderTransform>
           </Button>
-          <Button x:Name="VIEW_MoreButton"
+          <Button x:Name="View_MoreButton"
                   Content="&#xE712;"
                   Style="{StaticResource AppFontIconNormalButtonStyle}">
             <Button.Flyout>
@@ -57,17 +57,17 @@
                     <FontIcon Glyph="&#xE710;" />
                   </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="VIEW_MoreMenuViewBoardMenuFlyoutItem"
+                <MenuFlyoutItem x:Name="View_MoreMenuViewBoardMenuFlyoutItem"
                                 Text="View board"
-                                Click="VIEW_MoreMenuViewBoardMenuFlyoutItem_Click">
+                                Click="View_MoreMenuViewBoardMenuFlyoutItem_Click">
                   <MenuFlyoutItem.Icon>
                     <FontIcon Glyph="&#xE71D;" />
                   </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="VIEW_MoreMenuRenameMenuFlyoutItem"
+                <MenuFlyoutItem x:Name="View_MoreMenuRenameMenuFlyoutItem"
                                 Text="Rename title"
-                                Click="VIEW_MoreMenuRenameMenuFlyoutItem_Click">
+                                Click="View_MoreMenuRenameMenuFlyoutItem_Click">
                   <MenuFlyoutItem.Icon>
                     <FontIcon Glyph="&#xE8AC;" />
                   </MenuFlyoutItem.Icon>
@@ -94,13 +94,13 @@
                   <MenuFlyoutSubItem.Icon>
                     <FontIcon Glyph="&#xE890;" />
                   </MenuFlyoutSubItem.Icon>
-                  <RadioMenuFlyoutItem x:Name="VIEW_ViewModeEditRadioMenuFlyoutItem"
+                  <RadioMenuFlyoutItem x:Name="View_ViewModeEditRadioMenuFlyoutItem"
                                        Text="Edit"
                                        IsChecked="True"
-                                       Click="VIEW_ViewModeEditRadioMenuFlyoutItem_Click" />
-                  <RadioMenuFlyoutItem x:Name="VIEW_ViewModeReadRadioMenuFlyoutItem"
+                                       Click="View_ViewModeEditRadioMenuFlyoutItem_Click" />
+                  <RadioMenuFlyoutItem x:Name="View_ViewModeReadRadioMenuFlyoutItem"
                                        Text="Read"
-                                       Click="VIEW_ViewModeReadRadioMenuFlyoutItem_Click" />
+                                       Click="View_ViewModeReadRadioMenuFlyoutItem_Click" />
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator />
                 <MenuFlyoutSubItem Text="Save as">
@@ -117,17 +117,17 @@
                   </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="VIEW_AboutMenuFlyoutItem"
+                <MenuFlyoutItem x:Name="View_AboutMenuFlyoutItem"
                                 Text="About"
-                                Click="VIEW_AboutMenuFlyoutItem_Click">
+                                Click="View_AboutMenuFlyoutItem_Click">
                   <MenuFlyoutItem.Icon>
                     <FontIcon Glyph="&#xE946;" />
                   </MenuFlyoutItem.Icon>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="VIEW_RemoveMenuFlyoutItem"
+                <MenuFlyoutItem x:Name="View_RemoveMenuFlyoutItem"
                                 Text="Remove"
-                                Click="VIEW_RemoveMenuFlyoutItem_Click">
+                                Click="View_RemoveMenuFlyoutItem_Click">
                   <MenuFlyoutItem.Icon>
                     <FontIcon Glyph="&#xE74D;" />
                   </MenuFlyoutItem.Icon>
@@ -137,35 +137,35 @@
           </Button>
 
           <StackPanel.RenderTransform>
-            <TranslateTransform x:Name="VIEW_TitleBarLeftStackPanel_TranslateTransform" />
+            <TranslateTransform x:Name="View_TitleBarLeftStackPanel_TranslateTransform" />
           </StackPanel.RenderTransform>
         </StackPanel>
 
-        <Grid x:Name="VIEW_TitleTextGrid"
+        <Grid x:Name="View_TitleTextGrid"
               Grid.Column="1">
-          <TextBox x:Name="VIEW_TitleTextBox"
+          <TextBox x:Name="View_TitleTextBox"
                    Text="{x:Bind ViewModel.Note.Title, Mode=TwoWay}"
                    IsEnabled="False"
                    Height="32"
                    TextAlignment="Center"
                    Style="{StaticResource AppNoteTitleBarTextBoxStyle}"
-                   LostFocus="VIEW_TitleTextBox_LostFocus" />
+                   LostFocus="View_TitleTextBox_LostFocus" />
         </Grid>
 
-        <StackPanel x:Name="VIEW_TitleBarRightStackPanel"
+        <StackPanel x:Name="View_TitleBarRightStackPanel"
                     Grid.Column="2"
                     Orientation="Horizontal">
-          <Button x:Name="VIEW_MinimizeButton"
+          <Button x:Name="View_MinimizeButton"
                   Content="&#xE738;"
                   Style="{StaticResource AppFontIconNormalButtonStyle}"
-                  Click="VIEW_MinimizeButton_Click" />
-          <Button x:Name="VIEW_CloseButton"
+                  Click="View_MinimizeButton_Click" />
+          <Button x:Name="View_CloseButton"
                   Content="&#xE711;"
                   Style="{StaticResource AppFontIconNormalButtonStyle}"
-                  Click="VIEW_CloseButton_Click" />
+                  Click="View_CloseButton_Click" />
 
           <StackPanel.RenderTransform>
-            <TranslateTransform x:Name="VIEW_TitleBarRightStackPanel_TranslateTransform" />
+            <TranslateTransform x:Name="View_TitleBarRightStackPanel_TranslateTransform" />
           </StackPanel.RenderTransform>
         </StackPanel>
       </Grid>
@@ -187,17 +187,17 @@
           <SolidColorBrush x:Key="TextControlBackgroundFocused"
                            Color="{StaticResource ControlFillColorTransparent}" />
         </Grid.Resources>
-        <RichEditBox x:Name="VIEW_TextEditorRichEditBox"
+        <RichEditBox x:Name="View_TextEditorRichEditBox"
                      SelectionFlyout="{x:Null}"
                      SelectionHighlightColorWhenNotFocused="{StaticResource AccentFillColorSelectedTextBackgroundBrush}"
-                     SelectionChanged="VIEW_TextEditorRichEditBox_SelectionChanged"
-                     Loaded="VIEW_TextEditorRichEditBox_Loaded" 
-                     TextChanged="VIEW_TextEditorRichEditBox_TextChanged"/>
+                     SelectionChanged="View_TextEditorRichEditBox_SelectionChanged"
+                     Loaded="View_TextEditorRichEditBox_Loaded" 
+                     TextChanged="View_TextEditorRichEditBox_TextChanged"/>
       </Grid>
       --><!--#endregion-->
 
       <!--#region Command Bar--><!--
-      <ScrollViewer x:Name="VIEW_CommandBarScrollViewer"
+      <ScrollViewer x:Name="View_CommandBarScrollViewer"
                     Grid.Row="2"
                     HorizontalScrollMode="Enabled"
                     VerticalScrollMode="Disabled"
@@ -206,7 +206,7 @@
                     Background="{StaticResource SubtleFillColorTertiaryBrush}"
                     BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
                     BorderThickness="0,1,0,0">
-        --><!--<views:AppScrollViewer x:Name="VIEW_CommandBarScrollViewer"
+        --><!--<views:AppScrollViewer x:Name="View_CommandBarScrollViewer"
                              Grid.Row="2"
                              HorizontalScrollMode="Enabled"
                              VerticalScrollMode="Disabled"
@@ -217,30 +217,30 @@
         <StackPanel Orientation="Horizontal"
                     HorizontalAlignment="Center">
 
-          <ToggleButton x:Name="VIEW_BoldButton"
+          <ToggleButton x:Name="View_BoldButton"
                         Content="&#xE8DD;"
                         Style="{StaticResource AppFontIconLargeTopToggleButtonStyle}"
-                        Click="VIEW_BoldButton_Click" />
-          <ToggleButton x:Name="VIEW_ItalicButton"
+                        Click="View_BoldButton_Click" />
+          <ToggleButton x:Name="View_ItalicButton"
                         Content="&#xE8DB;"
                         Style="{StaticResource AppFontIconLargeTopToggleButtonStyle}"
-                        Click="VIEW_ItalicButton_Click" />
-          <ToggleButton x:Name="VIEW_UnderlineButton"
+                        Click="View_ItalicButton_Click" />
+          <ToggleButton x:Name="View_UnderlineButton"
                         Content="&#xE8DC;"
                         Style="{StaticResource AppFontIconLargeTopToggleButtonStyle}"
-                        Click="VIEW_UnderlineButton_Click" />
-          <ToggleButton x:Name="VIEW_StrikethroughButton"
+                        Click="View_UnderlineButton_Click" />
+          <ToggleButton x:Name="View_StrikethroughButton"
                         Content="&#xEDE0;"
                         Style="{StaticResource AppFontIconLargeTopToggleButtonStyle}"
-                        Click="VIEW_StrikethroughButton_Click" />
-          <views:AppSplitButton x:Name="VIEW_MarkerButton"
+                        Click="View_StrikethroughButton_Click" />
+          <views:AppSplitButton x:Name="View_MarkerButton"
                                 Content="&#xF2C7;"
                                 Style="{StaticResource AppFontIconLargeSplitButtonStyle}"
-                                Click="VIEW_MarkerButton_Click">
+                                Click="View_MarkerButton_Click">
             <views:AppSplitButton.SecondaryButtonFlyout>
               <Flyout Placement="Bottom"
                       ShouldConstrainToRootBounds="False">
-                <GridView x:Name="VIEW_MarkerFlyoutGridView"
+                <GridView x:Name="View_MarkerFlyoutGridView"
                           Header="Marker"
                           HeaderTemplate="{StaticResource AppBoldTextHeaderTemplate}"
                           Padding="0"
@@ -267,26 +267,26 @@
           </views:AppSplitButton>
 
           <AppBarSeparator Foreground="{StaticResource ControlStrokeColorSecondary}" />
-          <Button x:Name="VIEW_FontSizeButton"
+          <Button x:Name="View_FontSizeButton"
                   Content="&#xE8E9;"
                   Style="{StaticResource AppFontIconLargeButtonStyle}">
             <Button.Flyout>
-              <Flyout x:Name="VIEW_FontSizeButtonFlyout"
+              <Flyout x:Name="View_FontSizeButtonFlyout"
                       Placement="Bottom"
                       ShouldConstrainToRootBounds="False"
-                      Opened="VIEW_FontSizeButtonFlyout_Opened">
+                      Opened="View_FontSizeButtonFlyout_Opened">
                 <StackPanel Spacing="8">
                   <TextBlock Text="Font Size"
                              Style="{StaticResource BodyStrongTextBlockStyle}" />
                   <StackPanel Orientation="Horizontal"
                               Spacing="8">
-                    <Button x:Name="VIEW_FontSizeDownButton"
+                    <Button x:Name="View_FontSizeDownButton"
                             Content="&#xE949;"
                             FontFamily="{StaticResource SymbolThemeFontFamily}"
-                            Click="VIEW_FontSizeDownButton_Click" />
-                    <ComboBox x:Name="VIEW_FontSizeComboBox"
+                            Click="View_FontSizeDownButton_Click" />
+                    <ComboBox x:Name="View_FontSizeComboBox"
                               Width="80"
-                              SelectionChanged="VIEW_FontSizeComboBox_SelectionChanged">
+                              SelectionChanged="View_FontSizeComboBox_SelectionChanged">
                       <x:String>8</x:String>
                       <x:String>9</x:String>
                       <x:String>10.5</x:String>
@@ -301,21 +301,21 @@
                       <x:String>28</x:String>
                       <x:String>30</x:String>
                     </ComboBox>
-                    <Button x:Name="VIEW_FontSizeUpButton"
+                    <Button x:Name="View_FontSizeUpButton"
                             Content="&#xE948;"
                             FontFamily="{StaticResource SymbolThemeFontFamily}"
-                            Click="VIEW_FontSizeUpButton_Click" />
+                            Click="View_FontSizeUpButton_Click" />
                   </StackPanel>
                 </StackPanel>
               </Flyout>
             </Button.Flyout>
           </Button>
 
-          <views:AppSplitButton x:Name="VIEW_FontColorButton"
+          <views:AppSplitButton x:Name="View_FontColorButton"
                                 Style="{StaticResource AppFontIconLargeSplitButtonStyle}"
-                                Click="VIEW_FontColorButton_Click">
+                                Click="View_FontColorButton_Click">
             <Grid>
-              <FontIcon x:Name="VIEW_FontColorButtonFillFontIcon"
+              <FontIcon x:Name="View_FontColorButtonFillFontIcon"
                         Glyph="&#xE73B;"
                         Foreground="Black"
                         RenderTransformOrigin="0.5,0.97">
@@ -328,43 +328,43 @@
 
             </Grid>
             <views:AppSplitButton.SecondaryButtonFlyout>
-              <Flyout x:Name="VIEW_FontColorButtonFlyout"
+              <Flyout x:Name="View_FontColorButtonFlyout"
                       Placement="Bottom"
                       ShouldConstrainToRootBounds="False">
                 <StackPanel Spacing="8">
                   <TextBlock Text="Font color"
                              Style="{StaticResource BodyStrongTextBlockStyle}" />
-                  <ColorPicker x:Name="VIEW_FontColorPicker"
+                  <ColorPicker x:Name="View_FontColorPicker"
                                Color="Black"
                                ColorSpectrumShape="Ring"
                                IsMoreButtonVisible="True"
-                               ColorChanged="VIEW_FontColorPicker_ColorChanged" />
+                               ColorChanged="View_FontColorPicker_ColorChanged" />
                 </StackPanel>
               </Flyout>
             </views:AppSplitButton.SecondaryButtonFlyout>
           </views:AppSplitButton>
 
-          <views:AppSplitButton x:Name="VIEW_HighlightButton"
+          <views:AppSplitButton x:Name="View_HighlightButton"
                                 Style="{StaticResource AppFontIconLargeSplitButtonStyle}"
-                                Click="VIEW_HighlightButton_Click">
+                                Click="View_HighlightButton_Click">
             <Grid>
-              <FontIcon x:Name="VIEW_HighlightButtonFillFontIcon"
+              <FontIcon x:Name="View_HighlightButtonFillFontIcon"
                         Glyph="&#xE891;"
                         Foreground="LightSeaGreen" />
               <FontIcon Glyph="&#xE7E6;" />
             </Grid>
             <views:AppSplitButton.SecondaryButtonFlyout>
-              <Flyout x:Name="VIEW_HighlightButtonFlyout"
+              <Flyout x:Name="View_HighlightButtonFlyout"
                       Placement="Bottom"
                       ShouldConstrainToRootBounds="False">
                 <StackPanel Spacing="8">
                   <TextBlock Text="Highlight color"
                              Style="{StaticResource BodyStrongTextBlockStyle}" />
-                  <ColorPicker x:Name="VIEW_HighlightColorPicker"
+                  <ColorPicker x:Name="View_HighlightColorPicker"
                                Color="LightSeaGreen"
                                ColorSpectrumShape="Ring"
                                IsMoreButtonVisible="True"
-                               ColorChanged="VIEW_HighlightColorPicker_ColorChanged" />
+                               ColorChanged="View_HighlightColorPicker_ColorChanged" />
                 </StackPanel>
               </Flyout>
             </views:AppSplitButton.SecondaryButtonFlyout>
@@ -372,18 +372,18 @@
 
           <AppBarSeparator Foreground="{StaticResource ControlStrokeColorSecondary}" />
 
-          <Button x:Name="VIEW_BackgroundColorButton"
+          <Button x:Name="View_BackgroundColorButton"
                   Content="&#xE790;"
                   Style="{StaticResource AppFontIconLargeButtonStyle}">
             <Button.Flyout>
               <Flyout Placement="Bottom"
                       ShouldConstrainToRootBounds="False">
                 <StackPanel Spacing="8">
-                  <RadioButtons x:Name="VIEW_BackdropRadioButtons"
+                  <RadioButtons x:Name="View_BackdropRadioButtons"
                                 Header="Backdrop type"
                                 HeaderTemplate="{StaticResource AppBoldTextHeaderTemplate}"
                                 MaxColumns="2"
-                                SelectionChanged="VIEW_BackdropRadioButtons_SelectionChanged">
+                                SelectionChanged="View_BackdropRadioButtons_SelectionChanged">
                     <RadioButton Content="None"
                                  IsChecked="True" />
                     <RadioButton Content="Acrylic" />
@@ -394,41 +394,41 @@
 
                   <TextBlock Text="Background color"
                              Style="{StaticResource BodyStrongTextBlockStyle}" />
-                  <ColorPicker x:Name="VIEW_BackgroundColorPicker"
+                  <ColorPicker x:Name="View_BackgroundColorPicker"
                                Color="{x:Bind ViewModel.Note.Background, Mode=TwoWay}"
                                ColorSpectrumShape="Ring"
                                IsMoreButtonVisible="True"
                                IsAlphaEnabled="True"
-                               ColorChanged="VIEW_BackgroundColorPicker_ColorChanged" />
+                               ColorChanged="View_BackgroundColorPicker_ColorChanged" />
                 </StackPanel>
               </Flyout>
             </Button.Flyout>
           </Button>
 
-          <Button x:Name="VIEW_ImageButton"
+          <Button x:Name="View_ImageButton"
                   Content="&#xE91B;"
                   Style="{StaticResource AppFontIconLargeButtonStyle}" />
         </StackPanel>
         --><!--<views:AppScrollViewer.RenderTransform>
-          <TranslateTransform x:Name="VIEW_CommandBarScrollViewer_TranslateTransform" />
+          <TranslateTransform x:Name="View_CommandBarScrollViewer_TranslateTransform" />
         </views:AppScrollViewer.RenderTransform>--><!--
 
         <ScrollViewer.RenderTransform>
-          <TranslateTransform x:Name="VIEW_CommandBarScrollViewer_TranslateTransform" />
+          <TranslateTransform x:Name="View_CommandBarScrollViewer_TranslateTransform" />
         </ScrollViewer.RenderTransform>
         --><!--</views:AppScrollViewer>--><!--
       </ScrollViewer>
 
       --><!--#endregion--><!--
 
-      <ContentDialog x:Name="VIEW_RemoveNoteContentDialog"
+      <ContentDialog x:Name="View_RemoveNoteContentDialog"
                      Title="Remove note"
                      PrimaryButtonText="Yes"
                      CloseButtonText="Cancel"
                      DefaultButton="Close">
         <ContentDialog.Content>Remove this note?</ContentDialog.Content>
       </ContentDialog>
-      <ContentDialog x:Name="VIEW_NoteInfoContentDialog"
+      <ContentDialog x:Name="View_NoteInfoContentDialog"
                      Title="About"
                      CloseButtonText="Close"
                      DefaultButton="Close">
@@ -439,19 +439,19 @@
         <VisualStateGroup x:Name="WindowActivationStates">
           <VisualState x:Name="WindowActivated">
             <Storyboard>
-              <ObjectAnimationUsingKeyFrames Storyboard.TargetName="VIEW_CommandBarScrollViewer"
+              <ObjectAnimationUsingKeyFrames Storyboard.TargetName="View_CommandBarScrollViewer"
                                              Storyboard.TargetProperty="Visibility">
                 <DiscreteObjectKeyFrame KeyTime="0:0:0.1"
                                         Value="Visible" />
               </ObjectAnimationUsingKeyFrames>
-              <DoubleAnimationUsingKeyFrames Storyboard.TargetName="VIEW_CommandBarScrollViewer"
+              <DoubleAnimationUsingKeyFrames Storyboard.TargetName="View_CommandBarScrollViewer"
                                              Storyboard.TargetProperty="Opacity"
                                              BeginTime="0:0:0.1">
                 <SplineDoubleKeyFrame KeyTime="0:0:0.15"
                                       KeySpline="0.2,0.7 0.5,1.0"
                                       Value="1" />
               </DoubleAnimationUsingKeyFrames>
-              <DoubleAnimationUsingKeyFrames Storyboard.TargetName="VIEW_CommandBarScrollViewer_TranslateTransform"
+              <DoubleAnimationUsingKeyFrames Storyboard.TargetName="View_CommandBarScrollViewer_TranslateTransform"
                                              Storyboard.TargetProperty="Y"
                                              BeginTime="0:0:0.1">
                 <SplineDoubleKeyFrame KeyTime="0:0:0.15"
@@ -459,14 +459,14 @@
                                       Value="0" />
               </DoubleAnimationUsingKeyFrames>
 
-              <DoubleAnimationUsingKeyFrames Storyboard.TargetName="VIEW_TitleBarLeftStackPanel"
+              <DoubleAnimationUsingKeyFrames Storyboard.TargetName="View_TitleBarLeftStackPanel"
                                              Storyboard.TargetProperty="Opacity"
                                              BeginTime="0:0:0.1">
                 <SplineDoubleKeyFrame KeyTime="0:0:0.15"
                                       KeySpline="0.2,0.7 0.5,1.0"
                                       Value="1" />
               </DoubleAnimationUsingKeyFrames>
-              <DoubleAnimationUsingKeyFrames Storyboard.TargetName="VIEW_TitleBarLeftStackPanel_TranslateTransform"
+              <DoubleAnimationUsingKeyFrames Storyboard.TargetName="View_TitleBarLeftStackPanel_TranslateTransform"
                                              Storyboard.TargetProperty="Y"
                                              BeginTime="0:0:0.1">
                 <SplineDoubleKeyFrame KeyTime="0:0:0.15"
@@ -474,14 +474,14 @@
                                       Value="0" />
               </DoubleAnimationUsingKeyFrames>
 
-              <DoubleAnimationUsingKeyFrames Storyboard.TargetName="VIEW_TitleBarRightStackPanel"
+              <DoubleAnimationUsingKeyFrames Storyboard.TargetName="View_TitleBarRightStackPanel"
                                              Storyboard.TargetProperty="Opacity"
                                              BeginTime="0:0:0.1">
                 <SplineDoubleKeyFrame KeyTime="0:0:0.15"
                                       KeySpline="0.2,0.7 0.5,1.0"
                                       Value="1" />
               </DoubleAnimationUsingKeyFrames>
-              <DoubleAnimationUsingKeyFrames Storyboard.TargetName="VIEW_TitleBarRightStackPanel_TranslateTransform"
+              <DoubleAnimationUsingKeyFrames Storyboard.TargetName="View_TitleBarRightStackPanel_TranslateTransform"
                                              Storyboard.TargetProperty="Y"
                                              BeginTime="0:0:0.1">
                 <SplineDoubleKeyFrame KeyTime="0:0:0.15"
@@ -493,39 +493,39 @@
 
           <VisualState x:Name="WindowDeactivated">
             <Storyboard>
-              <ObjectAnimationUsingKeyFrames Storyboard.TargetName="VIEW_CommandBarScrollViewer"
+              <ObjectAnimationUsingKeyFrames Storyboard.TargetName="View_CommandBarScrollViewer"
                                              Storyboard.TargetProperty="Visibility">
                 <DiscreteObjectKeyFrame KeyTime="0"
                                         Value="Collapsed" />
               </ObjectAnimationUsingKeyFrames>
-              <ObjectAnimationUsingKeyFrames Storyboard.TargetName="VIEW_CommandBarScrollViewer"
+              <ObjectAnimationUsingKeyFrames Storyboard.TargetName="View_CommandBarScrollViewer"
                                              Storyboard.TargetProperty="Opacity">
                 <DiscreteObjectKeyFrame KeyTime="0"
                                         Value="0" />
               </ObjectAnimationUsingKeyFrames>
-              <ObjectAnimationUsingKeyFrames Storyboard.TargetName="VIEW_CommandBarScrollViewer_TranslateTransform"
+              <ObjectAnimationUsingKeyFrames Storyboard.TargetName="View_CommandBarScrollViewer_TranslateTransform"
                                              Storyboard.TargetProperty="Y">
                 <DiscreteObjectKeyFrame KeyTime="0"
                                         Value="36" />
               </ObjectAnimationUsingKeyFrames>
 
-              <ObjectAnimationUsingKeyFrames Storyboard.TargetName="VIEW_TitleBarLeftStackPanel"
+              <ObjectAnimationUsingKeyFrames Storyboard.TargetName="View_TitleBarLeftStackPanel"
                                              Storyboard.TargetProperty="Opacity">
                 <DiscreteObjectKeyFrame KeyTime="0"
                                         Value="0" />
               </ObjectAnimationUsingKeyFrames>
-              <ObjectAnimationUsingKeyFrames Storyboard.TargetName="VIEW_TitleBarLeftStackPanel_TranslateTransform"
+              <ObjectAnimationUsingKeyFrames Storyboard.TargetName="View_TitleBarLeftStackPanel_TranslateTransform"
                                              Storyboard.TargetProperty="Y">
                 <DiscreteObjectKeyFrame KeyTime="0"
                                         Value="-32" />
               </ObjectAnimationUsingKeyFrames>
 
-              <ObjectAnimationUsingKeyFrames Storyboard.TargetName="VIEW_TitleBarRightStackPanel"
+              <ObjectAnimationUsingKeyFrames Storyboard.TargetName="View_TitleBarRightStackPanel"
                                              Storyboard.TargetProperty="Opacity">
                 <DiscreteObjectKeyFrame KeyTime="0"
                                         Value="0" />
               </ObjectAnimationUsingKeyFrames>
-              <ObjectAnimationUsingKeyFrames Storyboard.TargetName="VIEW_TitleBarRightStackPanel_TranslateTransform"
+              <ObjectAnimationUsingKeyFrames Storyboard.TargetName="View_TitleBarRightStackPanel_TranslateTransform"
                                              Storyboard.TargetProperty="Y">
                 <DiscreteObjectKeyFrame KeyTime="0"
                                         Value="-32" />
@@ -539,7 +539,7 @@
           <VisualState x:Name="TextEditorSelectionNormal" />
           <VisualState x:Name="TextEditorSelectionChangingColor">
             <VisualState.Setters>
-              <Setter Target="VIEW_TextEditorRichEditBox.SelectionHighlightColorWhenNotFocused"
+              <Setter Target="View_TextEditorRichEditBox.SelectionHighlightColorWhenNotFocused"
                       Value="{x:Null}" />
             </VisualState.Setters>
           </VisualState>
@@ -548,18 +548,18 @@
         --><!--<VisualStateGroup x:Name="BackgroundColorStates">
           <VisualState x:Name="BackgroundColorLight">
             <VisualState.Setters>
-              <Setter Target="VIEW_TitleBarGrid.Background"
+              <Setter Target="View_TitleBarGrid.Background"
                       Value="#08000000" />
-              <Setter Target="VIEW_CommandBarScrollViewer.Background"
+              <Setter Target="View_CommandBarScrollViewer.Background"
                       Value="#08000000" />
             </VisualState.Setters>
           </VisualState>
 
           <VisualState x:Name="BackgroundColorDark">
             <VisualState.Setters>
-              <Setter Target="VIEW_TitleBarGrid.Background"
+              <Setter Target="View_TitleBarGrid.Background"
                       Value="#55FFFFFF" />
-              <Setter Target="VIEW_CommandBarScrollViewer.Background"
+              <Setter Target="View_CommandBarScrollViewer.Background"
                       Value="#55FFFFFF" />
             </VisualState.Setters>
           </VisualState>

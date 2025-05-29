@@ -2,5 +2,6 @@
 
 public class ViewModelBase : ObservableObject, IDisposable
 {
-  public virtual void Dispose() { }
+  public virtual void Dispose()
+  { }
 }

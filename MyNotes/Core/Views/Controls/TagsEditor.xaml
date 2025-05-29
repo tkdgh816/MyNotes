@@ -20,7 +20,7 @@
           Padding="12,8,12,0">
       <TextBlock Text="Tags"
                  Style="{StaticResource SubtitleTextBlockStyle}" />
-      <Button x:Name="VIEW_EditButton"
+      <Button x:Name="View_EditButton"
               Style="{StaticResource AppFontIconNormalButtonStyle}"
               HorizontalAlignment="Right"
               Content="&#xE70F;">
@@ -28,22 +28,22 @@
           <MenuFlyout Placement="LeftEdgeAlignedTop">
             <MenuFlyoutItem Icon="Add"
                             Text="Add"
-                            Click="VIEW_AddButtonMenuFlyoutItem_Click" />
+                            Click="View_AddButtonMenuFlyoutItem_Click" />
             <MenuFlyoutItem Icon="Delete"
                             Text="Delete"
-                            Click="VIEW_DeleteButtonMenuFlyoutItem_Click" />
+                            Click="View_DeleteButtonMenuFlyoutItem_Click" />
           </MenuFlyout>
         </Button.Flyout>
       </Button>
     </Grid>
 
     <Grid Grid.Row="1">
-      <AutoSuggestBox x:Name="VIEW_SearchAutoSuggestBox"
+      <AutoSuggestBox x:Name="View_SearchAutoSuggestBox"
                       Margin="12,0"
                       PlaceholderText="Search tags"
                       QueryIcon="Find"
-                      QuerySubmitted="VIEW_SearchAutoSuggestBox_QuerySubmitted" />
-      <Grid x:Name="VIEW_AddTagGrid"
+                      QuerySubmitted="View_SearchAutoSuggestBox_QuerySubmitted" />
+      <Grid x:Name="View_AddTagGrid"
             RowSpacing="4"
             ColumnSpacing="4"
             Padding="12,4,12,12"
@@ -61,30 +61,30 @@
                    Grid.Row="0"
                    Grid.Column="0"
                    VerticalAlignment="Center" />
-        <Button x:Name="VIEW_CloseAddModeButton"
+        <Button x:Name="View_CloseAddModeButton"
                 Grid.Row="0"
                 Grid.Column="1"
                 Style="{StaticResource AppFontIconNormalButtonStyle}"
                 Content="&#xE711;"
                 HorizontalAlignment="Right"
-                Click="VIEW_CloseAddModeButton_Click" />
-        <TextBox x:Name="VIEW_TagInputTextBox"
+                Click="View_CloseAddModeButton_Click" />
+        <TextBox x:Name="View_TagInputTextBox"
                  Grid.Row="1"
                  Grid.Column="0"
                  PlaceholderText="Enter a tag" />
-        <Button x:Name="VIEW_AddTagButton"
+        <Button x:Name="View_AddTagButton"
                 Grid.Row="1"
                 Grid.Column="1"
                 Content="Add"
                 Style="{StaticResource AccentButtonStyle}"
-                Click="VIEW_AddTagButton_Click" />
+                Click="View_AddTagButton_Click" />
       </Grid>
     </Grid>
 
     <Grid Grid.Row="2">
-      <SemanticZoom x:Name="VIEW_TagsSemanticZoom">
+      <SemanticZoom x:Name="View_TagsSemanticZoom">
         <SemanticZoom.ZoomedOutView>
-          <GridView x:Name="VIEW_TagsGroupGridView"
+          <GridView x:Name="View_TagsGroupGridView"
                     ItemsSource="{x:Bind ViewModel.TagsCollectionViewSource.View.CollectionGroups, Mode=OneWay}"
                     Margin="10,8,0,0">
             <GridView.ItemsPanel>
@@ -111,11 +111,11 @@
         </SemanticZoom.ZoomedOutView>
 
         <SemanticZoom.ZoomedInView>
-          <ListView x:Name="VIEW_TagsListView"
+          <ListView x:Name="View_TagsListView"
                     ItemsSource="{x:Bind ViewModel.TagsCollectionViewSource.View, Mode=OneWay}"
                     SelectionMode="Multiple"
                     IsMultiSelectCheckBoxEnabled="False"
-                    SelectionChanged="VIEW_TagsListView_SelectionChanged">
+                    SelectionChanged="View_TagsListView_SelectionChanged">
             <ListView.ItemsPanel>
               <ItemsPanelTemplate>
                 <ItemsWrapGrid Orientation="Horizontal"
@@ -155,7 +155,7 @@
       </SemanticZoom>
     </Grid>
 
-    <Grid x:Name="VIEW_CommandBarGrid"
+    <Grid x:Name="View_CommandBarGrid"
           Grid.Row="3"
           Background="{StaticResource AcrylicInAppFillColorBaseBrush}"
           Padding="8"
@@ -171,7 +171,7 @@
                   ContentOrientation="Vertical"
                   Padding="0,0,8,0"
                   VerticalAlignment="Bottom">
-        <ItemsRepeater ItemsSource="{x:Bind VIEW_TagsListView.SelectedItems}">
+        <ItemsRepeater ItemsSource="{x:Bind View_TagsListView.SelectedItems}">
           <ItemsRepeater.Layout>
             <controls:WrapLayout HorizontalSpacing="4"
                                  VerticalSpacing="4" />
@@ -179,10 +179,10 @@
 
           <ItemsRepeater.ItemTemplate>
             <DataTemplate x:DataType="x:String">
-              <views:AppTagButton x:Name="VIEW_SelectedTagButton"
+              <views:AppTagButton x:Name="View_SelectedTagButton"
                                   Content="{x:Bind}"
-                                  Click="VIEW_SelectedTagButton_Click"
-                                  DeleteButtonClick="VIEW_SelectedTagButton_DeleteButtonClick" />
+                                  Click="View_SelectedTagButton_Click"
+                                  DeleteButtonClick="View_SelectedTagButton_DeleteButtonClick" />
             </DataTemplate>
           </ItemsRepeater.ItemTemplate>
         </ItemsRepeater>
@@ -193,31 +193,31 @@
                   Spacing="4">
         <StackPanel Orientation="Horizontal"
                     HorizontalAlignment="Right">
-          <Button x:Name="VIEW_CommandBarDeselectAllButton"
+          <Button x:Name="View_CommandBarDeselectAllButton"
                   Style="{StaticResource AppFontIconNormalButtonStyle}"
                   Content="&#xE8E6;"
-                  Click="VIEW_CommandBarDeselectAllButton_Click" />
-          <Button x:Name="VIEW_CommandBarInclusionModeButton"
+                  Click="View_CommandBarDeselectAllButton_Click" />
+          <Button x:Name="View_CommandBarInclusionModeButton"
                   Style="{StaticResource AppIconNormalButtonStyle}"
                   Padding="6"
-                  Click="VIEW_CommandBarInclusionModeButton_Click">
+                  Click="View_CommandBarInclusionModeButton_Click">
             <IconSourceElement IconSource="{x:Bind ViewModel.IsIntersectSelection, Converter={StaticResource BoolToSetOperationIconSourceConverter}, Mode=OneWay}" />
           </Button>
         </StackPanel>
-        <Button x:Name="VIEW_CommandBarExploreButton"
+        <Button x:Name="View_CommandBarExploreButton"
                 Content="Explore"
                 Style="{StaticResource AccentButtonStyle}"
-                Click="VIEW_CommandBarExploreButton_Click" />
+                Click="View_CommandBarExploreButton_Click" />
       </StackPanel>
     </Grid>
 
-    <TeachingTip x:Name="VIEW_DeleteTagsTeachingTip"
-                 Target="{x:Bind VIEW_CommandBarGrid}"
+    <TeachingTip x:Name="View_DeleteTagsTeachingTip"
+                 Target="{x:Bind View_CommandBarGrid}"
                  Title="Delete selected tags"
                  PreferredPlacement="Top"
                  ActionButtonContent="Delete"
                  ActionButtonStyle="{StaticResource AccentButtonStyle}"
-                 ActionButtonClick="VIEW_DeleteTagsTeachingTip_ActionButtonClick"
+                 ActionButtonClick="View_DeleteTagsTeachingTip_ActionButtonClick"
                  CloseButtonContent="Close"
                  IsLightDismissEnabled="True" />
     <VisualStateManager.VisualStateGroups>
@@ -226,9 +226,9 @@
 
         <VisualState x:Name="EditorModeAdd">
           <VisualState.Setters>
-            <Setter Target="VIEW_SearchAutoSuggestBox.Visibility"
+            <Setter Target="View_SearchAutoSuggestBox.Visibility"
                     Value="Collapsed" />
-            <Setter Target="VIEW_AddTagGrid.Visibility"
+            <Setter Target="View_AddTagGrid.Visibility"
                     Value="Visible" />
           </VisualState.Setters>
         </VisualState>
@@ -238,7 +238,7 @@
         <VisualState x:Name="Unselected" />
         <VisualState x:Name="Selected">
           <VisualState.Setters>
-            <Setter Target="VIEW_CommandBarGrid.Visibility"
+            <Setter Target="View_CommandBarGrid.Visibility"
                     Value="Visible" />
           </VisualState.Setters>
         </VisualState>

@@ -30,8 +30,7 @@ public class NoteHubViewModel : ViewModelBase
   static NoteViewModel InitializeNoteViewModel(Note note)
   {
     note.Initialize();
-    NoteViewModel noteViewModel = ((App)Application.Current).GetService<NoteViewModel>();
-    noteViewModel.Note = note;
+    NoteViewModel noteViewModel = ((App)Application.Current).GetService<NoteViewModelFactory>().Create(note);
     return noteViewModel;
   }
 

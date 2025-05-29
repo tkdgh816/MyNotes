@@ -1,5 +1,6 @@
 ﻿using MyNotes.Core.Models;
 using MyNotes.Core.Services;
+using MyNotes.Core.Views;
 
 namespace MyNotes.Core.ViewModels;
 
@@ -15,8 +16,8 @@ public class MainViewModel : ViewModelBase
     MenuItems.Source = new List<IList>() { CoreMenuItems, BoardMenuItems };
   }
 
-  public DatabaseService DatabaseService { get; }
-  public NavigationService NavigationService { get; }
+  private readonly DatabaseService DatabaseService;
+  private readonly NavigationService NavigationService;
   public CollectionViewSource MenuItems { get; } = new() { IsSourceGrouped = true };
 
   public List<Navigation> CoreMenuItems { get; } =

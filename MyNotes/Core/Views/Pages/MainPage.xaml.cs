@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml.Media.Imaging;
 
 using MyNotes.Core.Models;
+using MyNotes.Core.Services;
 using MyNotes.Core.ViewModels;
 
 using Windows.ApplicationModel.DataTransfer;
@@ -15,24 +16,24 @@ public sealed partial class MainPage : Page
     this.InitializeComponent();
     ViewModel = App.Current.GetService<MainViewModel>();
     SetTimer();
-    //this.Loaded += MainPage_Loaded;
+    //this.Loaded += MainPage_Loaded; 
   }
 
   private void MainPage_Loaded(object sender, RoutedEventArgs e)
   {
     MenuFlyout ContextFlyout = new();
     ContextFlyout.Items.Add(new MenuFlyoutItem() { Text = "Context Flyout" });
-    ScrollViewer MenuItemsHost = (ScrollViewer)((Grid)VisualTreeHelper.GetChild(VIEW_NavigationView, 0)).FindName("MenuItemsScrollViewer");
+    ScrollViewer MenuItemsHost = (ScrollViewer)((Grid)VisualTreeHelper.GetChild(View_NavigationView, 0)).FindName("MenuItemsScrollViewer");
     MenuItemsHost.ContextFlyout = ContextFlyout;
   }
 
   public MainViewModel ViewModel { get; }
 
-  private void VIEW_TitleBar_BackRequested(TitleBar sender, object args)
-    => VIEW_NavigationContent_RootFrame.GoBack();
+  private void View_TitleBar_BackRequested(TitleBar sender, object args)
+    => View_NavigationContent_RootFrame.GoBack();
 
-  private void VIEW_TitleBar_PaneToggleRequested(TitleBar sender, object args)
-    => VIEW_NavigationView.IsPaneOpen = !VIEW_NavigationView.IsPaneOpen;
+  private void View_TitleBar_PaneToggleRequested(TitleBar sender, object args)
+    => View_NavigationView.IsPaneOpen = !View_NavigationView.IsPaneOpen;
 
   private void AutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
   {
@@ -41,7 +42,7 @@ public sealed partial class MainPage : Page
   }
 
   bool _isBackRequested = false;
-  private void VIEW_NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+  private void View_NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
   {
     if (args.SelectedItem is not NavigationItem selected)
       return;
@@ -53,26 +54,29 @@ public sealed partial class MainPage : Page
     if (!_isBackRequested)
     {
       ViewModel.RegisterNavigation(item);
-      VIEW_NavigationContent_RootFrame.Navigate(item.PageType, item);
+      View_NavigationContent_RootFrame.Navigate(item.PageType, item);
+
+      //TEST: Page
+      WindowService.Pages.Add(new((Page)View_NavigationContent_RootFrame.Content));
     }
   }
 
-  private void VIEW_NavigationContent_RootFrame_Navigated(object sender, NavigationEventArgs e)
+  private void View_NavigationContent_RootFrame_Navigated(object sender, NavigationEventArgs e)
   {
     _isBackRequested = true;
     NavigationItem navigation = (NavigationItem)e.Parameter;
     _currentNavigation = (navigation is NavigationSearch) ? null : navigation;
-    VIEW_NavigationView.SelectedItem = _currentNavigation;
+    View_NavigationView.SelectedItem = _currentNavigation;
     _isBackRequested = false;
   }
 
   private async void ShowNewGroupContentDialog(int comboBoxIndex, object? selectedNavigation)
   {
-    VIEW_NewBoardGroupInputTextBox.Text = "";
-    ComboBox optionsComboBox = VIEW_NewBoardGroupOptionsComboBox;
+    View_NewBoardGroupInputTextBox.Text = "";
+    ComboBox optionsComboBox = View_NewBoardGroupOptionsComboBox;
     optionsComboBox.SelectedIndex = comboBoxIndex;
 
-    if (await VIEW_NewBoardGroupContentDialog.ShowAsync() == ContentDialogResult.Primary)
+    if (await View_NewBoardGroupContentDialog.ShowAsync() == ContentDialogResult.Primary)
     {
       NavigationBoardGroup group = optionsComboBox.SelectedIndex switch
       {
@@ -81,30 +85,30 @@ public sealed partial class MainPage : Page
         0 or _ => ViewModel.BoardMenuRootItem
       } ?? ViewModel.BoardMenuRootItem;
 
-      string inputText = VIEW_NewBoardGroupInputTextBox.Text;
+      string inputText = View_NewBoardGroupInputTextBox.Text;
       if (!string.IsNullOrWhiteSpace(inputText))
         ViewModel.AddNavigationBoardItem(group, inputText, true);
     }
   }
 
   private int GetNewBoardOptionsComboBoxSelectedIndex()
-    => VIEW_NavigationView.SelectedItem switch
+    => View_NavigationView.SelectedItem switch
     {
       NavigationBoardGroup => 1,
       NavigationBoard => 2,
       _ => 0
     };
 
-  private void VIEW_NavigationViewFooter_NewGroupButton_Click(object sender, RoutedEventArgs e)
-    => ShowNewGroupContentDialog(GetNewBoardOptionsComboBoxSelectedIndex(), VIEW_NavigationView.SelectedItem);
+  private void View_NavigationViewFooter_NewGroupButton_Click(object sender, RoutedEventArgs e)
+    => ShowNewGroupContentDialog(GetNewBoardOptionsComboBoxSelectedIndex(), View_NavigationView.SelectedItem);
 
   private async void ShowNewBoardContentDialog(int comboBoxIndex, object? selectedNavigation)
   {
-    VIEW_NewBoardInputTextBox.Text = "";
-    ComboBox optionsComboBox = VIEW_NewBoardOptionsComboBox;
+    View_NewBoardInputTextBox.Text = "";
+    ComboBox optionsComboBox = View_NewBoardOptionsComboBox;
     optionsComboBox.SelectedIndex = comboBoxIndex;
 
-    if (await VIEW_NewBoardContentDialog.ShowAsync() == ContentDialogResult.Primary)
+    if (await View_NewBoardContentDialog.ShowAsync() == ContentDialogResult.Primary)
     {
       NavigationBoardGroup group = optionsComboBox.SelectedIndex switch
       {
@@ -113,57 +117,57 @@ public sealed partial class MainPage : Page
         0 or _ => ViewModel.BoardMenuRootItem
       } ?? ViewModel.BoardMenuRootItem;
 
-      string inputText = VIEW_NewBoardInputTextBox.Text;
+      string inputText = View_NewBoardInputTextBox.Text;
       if (!string.IsNullOrWhiteSpace(inputText))
         ViewModel.AddNavigationBoardItem(group, inputText, false);
     }
   }
-  private void VIEW_NavigationViewFooter_NewBoardButton_Click(object sender, RoutedEventArgs e)
-    => ShowNewBoardContentDialog(GetNewBoardOptionsComboBoxSelectedIndex(), VIEW_NavigationView.SelectedItem);
+  private void View_NavigationViewFooter_NewBoardButton_Click(object sender, RoutedEventArgs e)
+    => ShowNewBoardContentDialog(GetNewBoardOptionsComboBoxSelectedIndex(), View_NavigationView.SelectedItem);
 
-  private void VIEW_NavigationViewBoardGroupItem_NewGroupMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+  private void View_NavigationViewBoardGroupItem_NewGroupMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
     => ShowNewGroupContentDialog(1, ((FrameworkElement)sender).DataContext);
 
-  private void VIEW_NavigationViewBoardGroupItem_NewBoardMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+  private void View_NavigationViewBoardGroupItem_NewBoardMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
     => ShowNewBoardContentDialog(1, ((FrameworkElement)sender).DataContext);
 
   private async void ShowRenameBoardContentDialog(NavigationBoard navigation)
   {
-    VIEW_RenameBoardInputTextBox.Text = navigation.Name;
-    VIEW_RenameBoardContentDialog.DataContext = navigation;
-    if (await VIEW_RenameBoardContentDialog.ShowAsync() == ContentDialogResult.Primary)
-      ViewModel.RenameNavigation(navigation, VIEW_RenameBoardInputTextBox.Text);
+    View_RenameBoardInputTextBox.Text = navigation.Name;
+    View_RenameBoardContentDialog.DataContext = navigation;
+    if (await View_RenameBoardContentDialog.ShowAsync() == ContentDialogResult.Primary)
+      ViewModel.RenameNavigation(navigation, View_RenameBoardInputTextBox.Text);
   }
 
-  private void VIEW_NavigationViewBoardItem_RenameMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+  private void View_NavigationViewBoardItem_RenameMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
     => ShowRenameBoardContentDialog((NavigationBoard)((FrameworkElement)sender).DataContext);
 
   private bool _isInEditMode = false;
   private NavigationItem? _currentNavigation;
-  private void VIEW_NavigationViewFooter_EditNavigationViewItem_Click(object sender, RoutedEventArgs e)
+  private void View_NavigationViewFooter_EditNavigationViewItem_Click(object sender, RoutedEventArgs e)
   {
     _isBackRequested = true;
     _isInEditMode = !_isInEditMode;
 
-    VIEW_NavigationViewFooter_NewGroupButton.IsEnabled = !_isInEditMode;
-    VIEW_NavigationViewFooter_NewBoardButton.IsEnabled = !_isInEditMode;
+    View_NavigationViewFooter_NewGroupButton.IsEnabled = !_isInEditMode;
+    View_NavigationViewFooter_NewBoardButton.IsEnabled = !_isInEditMode;
 
-    VIEW_TitleBar.IsBackButtonVisible = !_isInEditMode;
-    VIEW_NavigationVIew_AutoSuggestBox.IsEnabled = !_isInEditMode;
+    View_TitleBar.IsBackButtonVisible = !_isInEditMode;
+    View_NavigationVIew_AutoSuggestBox.IsEnabled = !_isInEditMode;
     foreach (Navigation item in ViewModel.CoreMenuItems)
       item.IsEditable = _isInEditMode;
     foreach (Navigation item in ViewModel.FooterMenuItems)
       item.IsEditable = _isInEditMode;
     foreach (NavigationBoard item in ViewModel.BoardMenuItems)
       ViewModel.Recursive(item, x => x.IsEditable = _isInEditMode);
-    VIEW_NavigationView.SelectedItem = _isInEditMode ? null : _currentNavigation;
+    View_NavigationView.SelectedItem = _isInEditMode ? null : _currentNavigation;
 
     if (!_isInEditMode)
       ViewModel.ResetNavigation();
     _isBackRequested = false;
   }
 
-  private void VIEW_NavigationView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
+  private void View_NavigationView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
   {
     if (args.InvokedItemContainer is NavigationViewItem itemContainer
         && !itemContainer.SelectsOnInvoked
@@ -172,21 +176,21 @@ public sealed partial class MainPage : Page
       switch (item)
       {
         case NavigationTags:
-          VIEW_TagsFlyout.ShowAt(itemContainer);
+          View_TagsFlyout.ShowAt(itemContainer);
           break;
         case NavigationBoardGroup:
           break;
         case NavigationBoard:
-          VIEW_EditTeachingTip.IsOpen = true;
+          View_EditTeachingTip.IsOpen = true;
           break;
       }
     }
   }
 
 
-  private void VIEW_NavigationView_Loaded(object sender, RoutedEventArgs e)
+  private void View_NavigationView_Loaded(object sender, RoutedEventArgs e)
   {
-    VIEW_NavigationView.SelectedItem = ViewModel.CoreMenuItems[0];
+    View_NavigationView.SelectedItem = ViewModel.CoreMenuItems[0];
   }
 
   #region NavigationView MenuItems >> Drag and Drop 
@@ -324,6 +328,20 @@ public sealed partial class MainPage : Page
     _timer.Stop();
   }
   #endregion
+
+
+  //TEST: View Windows And Pages
+  private void ViewWindowsButton_Click(object sender, RoutedEventArgs e)
+  {
+    WindowService.ReadActiveWindows();
+  }
+
+  private void TestWindowButton_Click(object sender, RoutedEventArgs e)
+  {
+    TestWindow window = new();
+    window.Activate();
+    WindowService.Windows.Add(new(window));
+  }
 }
 
 public class MainNavigationViewMenuItemTemplateSelector : DataTemplateSelector

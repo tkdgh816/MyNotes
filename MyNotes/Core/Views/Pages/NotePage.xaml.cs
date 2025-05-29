@@ -1,5 +1,7 @@
-using CommunityToolkit.WinUI.Helpers;
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 
+using MyNotes.Common.Messaging;
 using MyNotes.Core.Models;
 using MyNotes.Core.ViewModels;
 
@@ -10,59 +12,36 @@ public sealed partial class NotePage : Page
   public NotePage()
   {
     InitializeComponent();
-    ViewModel = App.Current.GetService<NoteViewModel>();
-    ViewModel.WindowService.Pages.Add(new(this));
     this.Loaded += NotePage_Loaded;
+    this.Unloaded += NotePage_Unloaded;
+    RegisterMessengers();
   }
 
   private void NotePage_Loaded(object sender, RoutedEventArgs e)
   {
-    _noteWindow = ViewModel.WindowService.GetNoteWindow(ViewModel.Note)!;
-    _appWindow = _noteWindow.AppWindow;
-
-    _noteWindow.SetTitleBar(VIEW_TitleTextGrid);
-    _noteWindow.Activated += NoteWindow_Activated;
-    _noteWindow.Closed += NoteWindow_Closed;
-
-    _presenter = (OverlappedPresenter)_appWindow.Presenter;
-    _presenter.SetBorderAndTitleBar(true, false);
-    _presenter.PreferredMinimumWidth = (int)(350 * _dpi);
-    _presenter.PreferredMinimumHeight = (int)(250 * _dpi);
-
-    _nonClientInputSrc = InputNonClientPointerSource.GetForWindowId(_appWindow.Id);
-
-
-    ViewModel.RegisterNotePropertyChangedEvent();
-    _editorTimer.Tick += OnEditorTimerTick;
-    _appWindow.Changed += AppWindow_Changed;
+    ViewModel.SetWindowTitlebar(View_TitleTextGrid);
+    RegisterEvents();
   }
 
-  private NoteWindow _noteWindow = null!;
-  private AppWindow _appWindow = null!;
-  private OverlappedPresenter _presenter = null!;
-  private InputNonClientPointerSource _nonClientInputSrc = null!;
-  public NoteViewModel ViewModel { get; }
-
-  private void NoteWindow_Closed(object sender, WindowEventArgs args)
+  private void NotePage_Unloaded(object sender, RoutedEventArgs e)
   {
-    _noteWindow.Activated -= NoteWindow_Activated;
-    _appWindow.Changed -= AppWindow_Changed;
-    ViewModel.UnregisterNotePropertyChangedEvent();
-    _editorTimer.Tick -= OnEditorTimerTick;
+    UnRegisterEvents();
     UpdateBodyText();
     ViewModel.ForceUpdateNoteProperties();
-    ViewModel.CloseWindow();
-    _noteWindow = null;
-    _appWindow = null;
   }
 
-  private void AppWindow_Changed(AppWindow sender, AppWindowChangedEventArgs args)
+  public NoteViewModel ViewModel { get; set; } = null!;
+
+  #region Handling Events
+  private void RegisterEvents()
   {
-    if (args.DidSizeChange)
-      ViewModel.ResizeWindow(_appWindow.ClientSize);
-    if (args.DidPositionChange)
-      ViewModel.MoveWindow(_appWindow.Position);
+    _editorInputDebounceTimer.Tick += OnEditorInputDebounceTimerTick;
   }
+  private void UnRegisterEvents()
+  {
+    _editorInputDebounceTimer.Tick -= OnEditorInputDebounceTimerTick;
+  }
+  #endregion
 
   static double _dpi = 1.25;
   private void NoteWindow_Activated(object sender, WindowActivatedEventArgs args)
@@ -70,7 +49,7 @@ public sealed partial class NotePage : Page
     switch (args.WindowActivationState)
     {
       case WindowActivationState.Deactivated:
-        VIEW_TitleBarGrid.Focus(FocusState.Programmatic);
+        View_TitleBarGrid.Focus(FocusState.Programmatic);
         VisualStateManager.GoToState(this, "WindowDeactivated", false);
         break;
       default:
@@ -79,76 +58,93 @@ public sealed partial class NotePage : Page
     }
   }
 
-  private void VIEW_MinimizeButton_Click(object sender, RoutedEventArgs e)
+  private void View_TextEditorRichEditBox_Loaded(object sender, RoutedEventArgs e)
   {
-    _presenter.Minimize();
+    View_TextEditorRichEditBox.Document.SetText(TextSetOptions.None, ViewModel.Note.Body);
   }
 
-  private void VIEW_CloseButton_Click(object sender, RoutedEventArgs e) => _noteWindow.Close();
-
-  private void VIEW_PinButton_Click(object sender, RoutedEventArgs e)
+  private void View_TitleTextBox_LostFocus(object sender, RoutedEventArgs e)
   {
-    ViewModel.IsWindowAlwaysOnTop = !ViewModel.IsWindowAlwaysOnTop;
-    _presenter.IsAlwaysOnTop = ViewModel.IsWindowAlwaysOnTop;
+    ViewModel.SetWindowRegionRects(null);
+    View_TitleTextBox.IsEnabled = false;
   }
 
-  private void VIEW_TextEditorRichEditBox_Loaded(object sender, RoutedEventArgs e)
-  {
-    VIEW_TextEditorRichEditBox.Document.SetText(TextSetOptions.None, ViewModel.Note.Body);
-  }
-
-  private void VIEW_TitleTextBox_LostFocus(object sender, RoutedEventArgs e)
-  {
-    _nonClientInputSrc.SetRegionRects(NonClientRegionKind.Passthrough, null);
-    VIEW_TitleTextBox.IsEnabled = false;
-  }
-
-  private void VIEW_MoreMenuViewBoardMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+  private void View_MoreMenuViewBoardMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
   {
     ViewModel.GetMainWindow();
   }
 
   RectInt32 _titleTextGridRect = new() { X = (int)(64 * _dpi), Y = 0, Height = (int)(32 * _dpi) };
-  private void VIEW_MoreMenuRenameMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+  private void View_MoreMenuRenameMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
   {
-    _titleTextGridRect.Width = (int)(VIEW_TitleTextGrid.ActualWidth * _dpi);
-    _nonClientInputSrc.SetRegionRects(NonClientRegionKind.Passthrough, [_titleTextGridRect]);
-    VIEW_TitleTextBox.IsEnabled = true;
-    VIEW_TitleTextBox.Focus(FocusState.Programmatic);
+    _titleTextGridRect.Width = (int)(View_TitleTextGrid.ActualWidth * _dpi);
+    ViewModel.SetWindowRegionRects([_titleTextGridRect]);
+    View_TitleTextBox.IsEnabled = true;
+    View_TitleTextBox.Focus(FocusState.Programmatic);
   }
 
-  private void VIEW_TextEditorRichEditBox_SelectionChanged(object sender, RoutedEventArgs e)
+  #region Timers
+  private DispatcherTimer _editorInputDebounceTimer = new() { Interval = TimeSpan.FromSeconds(10) };
+  private void OnEditorInputDebounceTimerTick(object? sender, object e)
   {
-    //VIEW_TextEditorRichEditBox.Document.Selection.GetRect(PointOptions.IncludeInset, out Rect rect, out _);
+    UpdateBodyText();
+  }
+  #endregion
+
+  #region Editor Text & Style Changed
+  private int _editorCounter = 0;
+  private const int EditorCounterMax = 50;
+  private void View_TextEditorRichEditBox_TextChanged(object sender, RoutedEventArgs e)
+  {
+    _editorInputDebounceTimer.Stop();
+    ViewModel.IsBodyChanged = true;
+    if (_editorCounter++ > EditorCounterMax)
+    {
+      _editorCounter = 0;
+      UpdateBodyText();
+    }
+    else
+      _editorInputDebounceTimer.Start();
+  }
+
+  private void UpdateBodyText()
+  {
+    View_TextEditorRichEditBox.Document.GetText(TextGetOptions.AdjustCrlf, out string body);
+    ViewModel.UpdateBody(body);
+  }
+
+  private void View_TextEditorRichEditBox_SelectionChanged(object sender, RoutedEventArgs e)
+  {
+    //View_TextEditorRichEditBox.Document.Selection.GetRect(PointOptions.IncludeInset, out Rect rect, out _);
     //Debug.WriteLine($"{rect.X}, {rect.Width}, {rect.Y}, {rect.Height}");
-    var selectedText = VIEW_TextEditorRichEditBox.Document.Selection;
+    var selectedText = View_TextEditorRichEditBox.Document.Selection;
     if (selectedText is not null)
     {
       var characterFormat = selectedText.CharacterFormat;
-      VIEW_BoldButton.IsChecked = selectedText.CharacterFormat.Bold == FormatEffect.On;
-      VIEW_ItalicButton.IsChecked = selectedText.CharacterFormat.Italic == FormatEffect.On;
-      VIEW_UnderlineButton.IsChecked = selectedText.CharacterFormat.Underline == UnderlineType.Single;
-      VIEW_StrikethroughButton.IsChecked = selectedText.CharacterFormat.Strikethrough == FormatEffect.On;
+      View_BoldButton.IsChecked = selectedText.CharacterFormat.Bold == FormatEffect.On;
+      View_ItalicButton.IsChecked = selectedText.CharacterFormat.Italic == FormatEffect.On;
+      View_UnderlineButton.IsChecked = selectedText.CharacterFormat.Underline == UnderlineType.Single;
+      View_StrikethroughButton.IsChecked = selectedText.CharacterFormat.Strikethrough == FormatEffect.On;
     }
   }
 
-  private void VIEW_BoldButton_Click(object sender, RoutedEventArgs e)
+  private void View_BoldButton_Click(object sender, RoutedEventArgs e)
   {
-    var selectedText = VIEW_TextEditorRichEditBox.Document.Selection;
+    var selectedText = View_TextEditorRichEditBox.Document.Selection;
     if (selectedText is not null)
       selectedText.CharacterFormat.Bold = FormatEffect.Toggle;
   }
 
-  private void VIEW_ItalicButton_Click(object sender, RoutedEventArgs e)
+  private void View_ItalicButton_Click(object sender, RoutedEventArgs e)
   {
-    var selectedText = VIEW_TextEditorRichEditBox.Document.Selection;
+    var selectedText = View_TextEditorRichEditBox.Document.Selection;
     if (selectedText is not null)
       selectedText.CharacterFormat.Italic = FormatEffect.Toggle;
   }
 
-  private void VIEW_UnderlineButton_Click(object sender, RoutedEventArgs e)
+  private void View_UnderlineButton_Click(object sender, RoutedEventArgs e)
   {
-    var selectedText = VIEW_TextEditorRichEditBox.Document.Selection;
+    var selectedText = View_TextEditorRichEditBox.Document.Selection;
     if (selectedText is not null)
     {
       if (selectedText.CharacterFormat.Underline == UnderlineType.None)
@@ -158,19 +154,19 @@ public sealed partial class NotePage : Page
     }
   }
 
-  private void VIEW_StrikethroughButton_Click(object sender, RoutedEventArgs e)
+  private void View_StrikethroughButton_Click(object sender, RoutedEventArgs e)
   {
-    var selectedText = VIEW_TextEditorRichEditBox.Document.Selection;
+    var selectedText = View_TextEditorRichEditBox.Document.Selection;
     if (selectedText is not null)
       selectedText.CharacterFormat.Strikethrough = FormatEffect.Toggle;
   }
 
-  private void VIEW_MarkerButton_Click(object sender, RoutedEventArgs e)
+  private void View_MarkerButton_Click(object sender, RoutedEventArgs e)
   {
-    var selectedText = VIEW_TextEditorRichEditBox.Document.Selection;
+    var selectedText = View_TextEditorRichEditBox.Document.Selection;
     if (selectedText is not null)
     {
-      MarkerType markerType = VIEW_MarkerFlyoutGridView.SelectedIndex switch
+      MarkerType markerType = View_MarkerFlyoutGridView.SelectedIndex switch
       {
         1 => MarkerType.Arabic,
         2 => MarkerType.LowercaseEnglishLetter,
@@ -186,138 +182,121 @@ public sealed partial class NotePage : Page
   }
 
   private bool _preventComboBoxSelectionChanging;
-  private void VIEW_FontSizeButtonFlyout_Opened(object sender, object e)
+  private void View_FontSizeButtonFlyout_Opened(object sender, object e)
   {
-    var selectedText = VIEW_TextEditorRichEditBox.Document.Selection;
+    var selectedText = View_TextEditorRichEditBox.Document.Selection;
     if (selectedText is not null)
     {
       var startPosition = selectedText.StartPosition;
-      var textRange = VIEW_TextEditorRichEditBox.Document.GetRange(startPosition, startPosition + 1);
+      var textRange = View_TextEditorRichEditBox.Document.GetRange(startPosition, startPosition + 1);
       _preventComboBoxSelectionChanging = true;
-      VIEW_FontSizeComboBox.SelectedItem = textRange.CharacterFormat.Size.ToString();
+      View_FontSizeComboBox.SelectedItem = textRange.CharacterFormat.Size.ToString();
       _preventComboBoxSelectionChanging = false;
     }
   }
 
-  private void VIEW_FontSizeDownButton_Click(object sender, RoutedEventArgs e)
+  private void View_FontSizeDownButton_Click(object sender, RoutedEventArgs e)
   {
-    VIEW_FontSizeComboBox.SelectedIndex -= 1;
+    View_FontSizeComboBox.SelectedIndex -= 1;
   }
 
-  private void VIEW_FontSizeUpButton_Click(object sender, RoutedEventArgs e)
+  private void View_FontSizeUpButton_Click(object sender, RoutedEventArgs e)
   {
-    VIEW_FontSizeComboBox.SelectedIndex += 1;
+    View_FontSizeComboBox.SelectedIndex += 1;
   }
 
   const int FontSizeComboBoxItemsCount = 12;
-  private void VIEW_FontSizeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+  private void View_FontSizeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
   {
-    var selectedText = VIEW_TextEditorRichEditBox.Document.Selection;
+    var selectedText = View_TextEditorRichEditBox.Document.Selection;
     if (selectedText is not null && !_preventComboBoxSelectionChanging)
     {
-      if (float.TryParse((string)VIEW_FontSizeComboBox.SelectedItem, out var fontSize))
+      if (float.TryParse((string)View_FontSizeComboBox.SelectedItem, out var fontSize))
         selectedText.CharacterFormat.Size = fontSize;
       else
         selectedText.CharacterFormat.Size = 10.5f;
     }
 
-    VIEW_FontSizeDownButton.IsEnabled = VIEW_FontSizeComboBox.SelectedIndex != 0;
-    VIEW_FontSizeUpButton.IsEnabled = VIEW_FontSizeComboBox.SelectedIndex != FontSizeComboBoxItemsCount;
+    View_FontSizeDownButton.IsEnabled = View_FontSizeComboBox.SelectedIndex != 0;
+    View_FontSizeUpButton.IsEnabled = View_FontSizeComboBox.SelectedIndex != FontSizeComboBoxItemsCount;
 
   }
 
-  private void VIEW_FontColorPicker_ColorChanged(ColorPicker sender, ColorChangedEventArgs args)
+  private void View_FontColorPicker_ColorChanged(ColorPicker sender, ColorChangedEventArgs args)
   {
-    VIEW_FontColorButtonFillFontIcon.Foreground = new SolidColorBrush(args.NewColor);
+    View_FontColorButtonFillFontIcon.Foreground = new SolidColorBrush(args.NewColor);
   }
 
-  private void VIEW_FontColorButton_Click(object sender, RoutedEventArgs e)
+  private void View_FontColorButton_Click(object sender, RoutedEventArgs e)
   {
-    var selectedText = VIEW_TextEditorRichEditBox.Document.Selection;
+    var selectedText = View_TextEditorRichEditBox.Document.Selection;
     if (selectedText is not null)
     {
-      selectedText.CharacterFormat.ForegroundColor = VIEW_FontColorPicker.Color;
+      selectedText.CharacterFormat.ForegroundColor = View_FontColorPicker.Color;
     }
   }
 
-  private void VIEW_HighlightColorPicker_ColorChanged(ColorPicker sender, ColorChangedEventArgs args)
+  private void View_HighlightColorPicker_ColorChanged(ColorPicker sender, ColorChangedEventArgs args)
   {
-    VIEW_HighlightButtonFillFontIcon.Foreground = new SolidColorBrush(args.NewColor);
+    View_HighlightButtonFillFontIcon.Foreground = new SolidColorBrush(args.NewColor);
   }
 
 
-  private void VIEW_HighlightButton_Click(object sender, RoutedEventArgs e)
+  private void View_HighlightButton_Click(object sender, RoutedEventArgs e)
   {
-    var selectedText = VIEW_TextEditorRichEditBox.Document.Selection;
+    var selectedText = View_TextEditorRichEditBox.Document.Selection;
     if (selectedText is not null)
     {
-      selectedText.CharacterFormat.BackgroundColor = VIEW_HighlightColorPicker.Color;
+      selectedText.CharacterFormat.BackgroundColor = View_HighlightColorPicker.Color;
     }
   }
+  #endregion
 
-  private void VIEW_BackdropRadioButtons_SelectionChanged(object sender, SelectionChangedEventArgs e)
-  {
-    int selectedIndex = VIEW_BackdropRadioButtons.SelectedIndex;
-    _noteWindow.SystemBackdrop = selectedIndex switch
-    {
-      1 => new DesktopAcrylicBackdrop(),
-      2 => new MicaBackdrop(),
-      0 or _ => null,
-    };
-    ViewModel.Note.Backdrop = (BackdropKind)selectedIndex;
-  }
-
-  private void VIEW_ViewModeEditRadioMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+  private void View_ViewModeEditRadioMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
     => ChangeViewMode(true);
 
-  private void VIEW_ViewModeReadRadioMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+  private void View_ViewModeReadRadioMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
     => ChangeViewMode(false);
 
   public void ChangeViewMode(bool isEditMode)
   {
-    VIEW_TextEditorRichEditBox.IsReadOnly = !isEditMode;
-    VIEW_BoldButton.IsEnabled = isEditMode;
-    VIEW_ItalicButton.IsEnabled = isEditMode;
-    VIEW_UnderlineButton.IsEnabled = isEditMode;
-    VIEW_StrikethroughButton.IsEnabled = isEditMode;
-    VIEW_MarkerButton.IsEnabled = isEditMode;
-    VIEW_FontSizeButton.IsEnabled = isEditMode;
-    VIEW_FontColorButton.IsEnabled = isEditMode;
-    VIEW_HighlightButton.IsEnabled = isEditMode;
+    View_TextEditorRichEditBox.IsReadOnly = !isEditMode;
+    View_BoldButton.IsEnabled = isEditMode;
+    View_ItalicButton.IsEnabled = isEditMode;
+    View_UnderlineButton.IsEnabled = isEditMode;
+    View_StrikethroughButton.IsEnabled = isEditMode;
+    View_MarkerButton.IsEnabled = isEditMode;
+    View_FontSizeButton.IsEnabled = isEditMode;
+    View_FontColorButton.IsEnabled = isEditMode;
+    View_HighlightButton.IsEnabled = isEditMode;
   }
 
-  private async void VIEW_RemoveMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+  private async void View_RemoveMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
   {
-    await VIEW_RemoveNoteContentDialog.ShowAsync();
+    await View_RemoveNoteContentDialog.ShowAsync();
   }
 
-  private async void VIEW_AboutMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+  private async void View_AboutMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
   {
-    await VIEW_NoteInfoContentDialog.ShowAsync();
+    await View_NoteInfoContentDialog.ShowAsync();
   }
 
-  private DispatcherTimer _editorTimer = new() { Interval = TimeSpan.FromSeconds(10) };
-  private int _editorCounter = 0;
-  private const int EditorCounterMax = 50;
-  private void VIEW_TextEditorRichEditBox_TextChanged(object sender, RoutedEventArgs e)
+  #region Messengers
+  private void RegisterMessengers()
   {
-    _editorTimer.Stop();
-    ViewModel.IsBodyChanged = true;
-    if (_editorCounter++ > EditorCounterMax)
+    WeakReferenceMessenger.Default.Register<Message, string>(this, Tokens.ToggleNoteWindowActivation, new((recipient, message) =>
     {
-      _editorCounter = 0;
-      UpdateBodyText();
-    }
-    else
-      _editorTimer.Start();
+      if (message.Sender == ViewModel.Note)
+      {
+        if ((bool)message.Content!)
+          VisualStateManager.GoToState(this, "WindowActivated", false);
+        else
+        {
+          View_TitleBarGrid.Focus(FocusState.Programmatic);
+          VisualStateManager.GoToState(this, "WindowDeactivated", false);
+        }
+      }
+    }));
   }
-  private void OnEditorTimerTick(object? sender, object e)
-  {
-    UpdateBodyText();
-  }
-  private void UpdateBodyText()
-  {
-    VIEW_TextEditorRichEditBox.Document.GetText(TextGetOptions.AdjustCrlf, out string body);
-    ViewModel.UpdateBody(body);
-  }
+  #endregion
 }

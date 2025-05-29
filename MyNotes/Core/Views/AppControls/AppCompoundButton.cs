@@ -8,12 +8,12 @@ public sealed class AppCompoundButton : Button
   }
 
   public static bool IsTemplateApplied { get; private set; } = false;
-  public Grid VIEW_RootGrid { get; private set; } = null!;
+  public Grid View_RootGrid { get; private set; } = null!;
 
   protected override void OnApplyTemplate()
   {
     base.OnApplyTemplate();
-    VIEW_RootGrid = (Grid)GetTemplateChild("RootGrid");
+    View_RootGrid = (Grid)GetTemplateChild("RootGrid");
     IsTemplateApplied = true;
     OnVisibilityChanged(this);
   }
@@ -53,5 +53,5 @@ public sealed class AppCompoundButton : Button
   }
 
   private static void OnVisibilityChanged(AppCompoundButton obj)
-    => obj.VIEW_RootGrid.ColumnSpacing = (obj.IsIconVisible == Visibility.Visible && obj.IsContentVisible == Visibility.Visible && obj.Icon != null && obj.Content != null) ? obj.Spacing : 0;
+    => obj.View_RootGrid.ColumnSpacing = (obj.IsIconVisible == Visibility.Visible && obj.IsContentVisible == Visibility.Visible && obj.Icon != null && obj.Content != null) ? obj.Spacing : 0;
 }

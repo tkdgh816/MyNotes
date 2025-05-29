@@ -40,9 +40,9 @@
       <RowDefinition />
     </Grid.RowDefinitions>
 
-    <SelectorBar x:Name="VIEW_PrimarySelectorBar"
+    <SelectorBar x:Name="View_PrimarySelectorBar"
                  Grid.Row="0"
-                 SelectionChanged="VIEW_PrimarySelectorBar_SelectionChanged">
+                 SelectionChanged="View_PrimarySelectorBar_SelectionChanged">
       <SelectorBarItem Tag="Basic"
                        Icon="{ui:FontIcon Glyph=&#xED58;}"
                        ToolTipService.ToolTip="Basic symbols" />
@@ -76,10 +76,10 @@
                        ToolTipService.ToolTip="Symbols &amp; Flags" />
     </SelectorBar>
 
-    <SelectorBar x:Name="VIEW_SecondarySelectorBar"
+    <SelectorBar x:Name="View_SecondarySelectorBar"
                  Grid.Row="1"
-                 SelectionChanged="VIEW_SecondarySelectorBar_SelectionChanged">
-      <SelectorBarItem x:Name="VIEW_PeopleAndBodyGeneralSelectorBarItem"
+                 SelectionChanged="View_SecondarySelectorBar_SelectionChanged">
+      <SelectorBarItem x:Name="View_PeopleAndBodyGeneralSelectorBarItem"
                        Tag="PeopleAndBodyGeneral"
                        ToolTipService.ToolTip="General">
         <Ellipse Fill="#ffc83d"
@@ -124,9 +124,9 @@
       </SelectorBarItem>
     </SelectorBar>
 
-    <ScrollView x:Name="VIEW_IconsViewScrollView"
+    <ScrollView x:Name="View_IconsViewScrollView"
                   Grid.Row="2">
-      <ItemsRepeater x:Name="VIEW_IconsItemsRepeater"
+      <ItemsRepeater x:Name="View_IconsItemsRepeater"
                      ItemTemplate="{StaticResource IconPickerViewItemTemplateSelector}">
         <ItemsRepeater.Layout>
           <UniformGridLayout />

@@ -23,7 +23,7 @@
         <IconSourceElement IconSource="{x:Bind Navigation.Icon, Converter={StaticResource IconToIconSourceConverter}, Mode=OneWay}" />
         <Button.Flyout>
           <Flyout Placement="BottomEdgeAlignedLeft">
-            <views:IconPicker x:Name="VIEW_IconPicker"
+            <views:IconPicker x:Name="View_IconPicker"
                               Icon="{x:Bind Navigation.Icon, Mode=TwoWay}" />
           </Flyout>
         </Button.Flyout>

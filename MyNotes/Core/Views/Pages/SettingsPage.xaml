@@ -17,7 +17,7 @@
                  Style="{StaticResource TitleTextBlockStyle}" />
     </StackPanel>
 
-    <ScrollViewer x:Name="VIEW_ScrollViewer"
+    <ScrollViewer x:Name="View_ScrollViewer"
                   Grid.Row="1">
       <StackPanel Padding="0,0,18,12"
                   Spacing="12">

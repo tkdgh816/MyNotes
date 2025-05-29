@@ -12,6 +12,13 @@ public class SortedObervableCollection<T> : Collection<T>, INotifyCollectionChan
       _comparers.Add(Comparer<T>.Default);
   }
 
+  public SortedObervableCollection(IEnumerable<SortDescription<T>> sortDescriptions) : this()
+  {
+    SortDescriptions = new(sortDescriptions);
+    SortDescriptions.CollectionChanged += OnSortDescripTionChanged;
+    InitializeComparer();
+  }
+
   public SortedObervableCollection(IEnumerable<T> items, IEnumerable<SortDescription<T>>? sortDescriptions = null) : this()
   {
     if (sortDescriptions is not null)
@@ -102,11 +109,26 @@ public class SortedObervableCollection<T> : Collection<T>, INotifyCollectionChan
     if (sender is T item && e.PropertyName is not null && SortKeys.Contains(e.PropertyName))
     {
       int oldIndex = IndexOf(item);
+      Debug.WriteLine("Move: " + CheckItemMove(oldIndex));
+      if (!CheckItemMove(oldIndex))
+        return;
       base.RemoveItem(oldIndex);
       int newIndex = FindInsertIndex(BinarySearch(item));
       base.InsertItem(newIndex, item);
       OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move, item, newIndex, oldIndex));
     }
+  }
+
+  private bool CheckItemMove(int index)
+  {
+    if (Count <= 1)
+      return false;
+    if (index == 0)
+      return _comparers.Compare(this[index], this[index + 1]) > 0;
+    else if (index == Count - 1)
+      return _comparers.Compare(this[index], this[index - 1]) < 0;
+    else
+      return _comparers.Compare(this[index], this[index + 1]) > 0 || _comparers.Compare(this[index], this[index - 1]) < 0;
   }
 
   public void AddRange(IEnumerable<T> collection)

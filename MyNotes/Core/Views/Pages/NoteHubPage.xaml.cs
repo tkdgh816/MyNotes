@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.Messaging;
 
-using MyNotes.Common.Commands;
 using MyNotes.Common.Messaging;
 using MyNotes.Core.Models;
 using MyNotes.Core.ViewModels;
@@ -22,7 +21,7 @@ public sealed partial class NoteHubPage : Page
   private void NoteBoardPage_Unloaded(object sender, RoutedEventArgs e)
   {
     Navigation.PropertyChanged -= OnNavigationPropertyChanged;
-    _timer.Tick -= OnTimerTick;
+    _viewStyleSliderTimer.Tick -= OnTimerTick;
     ViewModel.Dispose();
   }
 
@@ -36,7 +35,7 @@ public sealed partial class NoteHubPage : Page
     base.OnNavigatedTo(e);
     Navigation = (NavigationNotes)e.Parameter;
     Navigation.PropertyChanged += OnNavigationPropertyChanged;
-    _timer.Tick += OnTimerTick;
+    _viewStyleSliderTimer.Tick += OnTimerTick;
   }
   private void OnNavigationPropertyChanged(object? sender, PropertyChangedEventArgs e)
   {
@@ -61,7 +60,7 @@ public sealed partial class NoteHubPage : Page
   }
 
   bool isItemsWrapGridStyle = true;
-  private void VIEW_StyleChangeRadioButton_Click(object sender, RoutedEventArgs e)
+  private void View_StyleChangeRadioButton_Click(object sender, RoutedEventArgs e)
   {
     if (sender is RadioButton item)
     {
@@ -69,39 +68,39 @@ public sealed partial class NoteHubPage : Page
       {
         case "GridStyle":
           isItemsWrapGridStyle = true;
-          VIEW_NotesGridView.ItemsPanel = (ItemsPanelTemplate)((App)Application.Current).Resources["AppItemPanelTemplate1"];
-          VIEW_NotesGridView.ItemTemplate = (DataTemplate)this.Resources["GridViewItemTemplate1"];
+          View_NotesGridView.ItemsPanel = (ItemsPanelTemplate)((App)Application.Current).Resources["AppItemPanelTemplate1"];
+          View_NotesGridView.ItemTemplate = (DataTemplate)this.Resources["GridViewItemTemplate1"];
           break;
         case "ListStyle":
           isItemsWrapGridStyle = false;
-          VIEW_NotesGridView.ItemsPanel = (ItemsPanelTemplate)((App)Application.Current).Resources["AppItemPanelTemplate2"];
-          VIEW_NotesGridView.ItemTemplate = (DataTemplate)this.Resources["GridViewItemTemplate2"];
+          View_NotesGridView.ItemsPanel = (ItemsPanelTemplate)((App)Application.Current).Resources["AppItemPanelTemplate2"];
+          View_NotesGridView.ItemTemplate = (DataTemplate)this.Resources["GridViewItemTemplate2"];
           break;
       }
       ChangeViewSize();
-      VIEW_NotesGridView.UpdateLayout();
+      View_NotesGridView.UpdateLayout();
     }
   }
 
-  readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(400) };
+  readonly DispatcherTimer _viewStyleSliderTimer = new() { Interval = TimeSpan.FromMilliseconds(400) };
   double _styleSliderValue = 240;
-  private void VIEW_StyleChangeSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+  private void View_StyleChangeSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
   {
-    if (VIEW_NotesGridView is null)
+    if (View_NotesGridView is null)
       return;
-    _timer.Stop();
+    _viewStyleSliderTimer.Stop();
     _styleSliderValue = e.NewValue;
-    _timer.Start();
+    _viewStyleSliderTimer.Start();
   }
 
   double _ratioSliderValue = 50;
-  private void VIEW_RatioChangeSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+  private void View_RatioChangeSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
   {
-    if (VIEW_NotesGridView is null)
+    if (View_NotesGridView is null)
       return;
-    _timer.Stop();
+    _viewStyleSliderTimer.Stop();
     _ratioSliderValue = e.NewValue;
-    _timer.Start();
+    _viewStyleSliderTimer.Start();
   }
 
   private void ChangeViewSize()
@@ -131,28 +130,28 @@ public sealed partial class NoteHubPage : Page
       _ => "210Moderate"
     };
 
-    VIEW_NotesGridView.ItemContainerStyle = (Style)((App)Application.Current).Resources[styleName];
-    VIEW_NotesGridView.UpdateLayout();
+    View_NotesGridView.ItemContainerStyle = (Style)((App)Application.Current).Resources[styleName];
+    View_NotesGridView.UpdateLayout();
   }
   private void OnTimerTick(object? sender, object e)
   {
     ChangeViewSize();
   }
 
-  private void VIEW_SearchAutoSuggestBox_LostFocus(object sender, RoutedEventArgs e)
+  private void View_SearchAutoSuggestBox_LostFocus(object sender, RoutedEventArgs e)
   {
     VisualStateManager.GoToState(this, "SearchBoxNormal", false);
   }
 
-  private void VIEW_SearchButton_Click(object sender, RoutedEventArgs e)
+  private void View_SearchButton_Click(object sender, RoutedEventArgs e)
   {
     VisualStateManager.GoToState(this, "SearchBoxSearching", false);
   }
 
-  private void VIEW_SearchAutoSuggestBox_LayoutUpdated(object sender, object e)
+  private void View_SearchAutoSuggestBox_LayoutUpdated(object sender, object e)
   {
-    if (VIEW_SearchAutoSuggestBox.Visibility is Visibility.Visible)
-      VIEW_SearchAutoSuggestBox.Focus(FocusState.Programmatic);
+    if (View_SearchAutoSuggestBox.Visibility is Visibility.Visible)
+      View_SearchAutoSuggestBox.Focus(FocusState.Programmatic);
   }
 
   private void AppTagButton_Click(object sender, RoutedEventArgs e)
@@ -161,16 +160,16 @@ public sealed partial class NoteHubPage : Page
     Debug.WriteLine(note.Title);
   }
 
-  private async void VIEW_EditTagsButton_Click(object sender, RoutedEventArgs e)
+  private async void View_EditTagsButton_Click(object sender, RoutedEventArgs e)
   {
-    NoteViewModel noteViewModel = (NoteViewModel)((FrameworkElement)sender).DataContext;
-    VIEW_EditTagsContentDialog.DataContext = noteViewModel;
-    VIEW_EditTagsItemsRepeater.ItemsSource = noteViewModel.Note.Tags;
-    VIEW_EditTagsHeaderTextBlock.Text = noteViewModel.Note.Title;
-    await VIEW_EditTagsContentDialog.ShowAsync();
+    //NoteViewModel noteViewModel = (NoteViewModel)((FrameworkElement)sender).DataContext;
+    //View_EditTagsContentDialog.DataContext = noteViewModel;
+    //View_EditTagsItemsRepeater.ItemsSource = noteViewModel.Note.Tags;
+    //View_EditTagsHeaderTextBlock.Text = noteViewModel.Note.Title;
+    //await View_EditTagsContentDialog.ShowAsync();
   }
 
-  private void VIEW_AddTagButton_Click(object sender, RoutedEventArgs e)
+  private void View_AddTagButton_Click(object sender, RoutedEventArgs e)
   {
     NoteViewModel noteViewModel = (NoteViewModel)((FrameworkElement)sender).DataContext;
     AddTag(noteViewModel);
@@ -178,18 +177,18 @@ public sealed partial class NoteHubPage : Page
 
   private void AddTag(NoteViewModel noteViewModel)
   {
-    string tag = VIEW_AddTagAutoSuggestBox.Text.Trim();
-    TagsViewModel.AddTag(tag);
-    noteViewModel.UpdateNoteTag(tag);
-    VIEW_AddTagAutoSuggestBox.Text = "";
+    //string tag = View_AddTagAutoSuggestBox.Text.Trim();
+    //TagsViewModel.AddTag(tag);
+    //noteViewModel.UpdateNoteTag(tag);
+    //View_AddTagAutoSuggestBox.Text = "";
   }
 
-  private void VIEW_AddTagAutoSuggestBox_GotFocus(object sender, RoutedEventArgs e)
+  private void View_AddTagAutoSuggestBox_GotFocus(object sender, RoutedEventArgs e)
   {
     ViewTagsSuggestion();
   }
 
-  private void VIEW_AddTagAutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+  private void View_AddTagAutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
   {
     if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
       ViewTagsSuggestion();
@@ -199,11 +198,11 @@ public sealed partial class NoteHubPage : Page
 
   private void OnInputTimerTick(object? sender, object e)
   {
-    string inputText = VIEW_AddTagAutoSuggestBox.Text;
-    VIEW_AddTagAutoSuggestBox.ItemsSource = string.IsNullOrEmpty(inputText)
-      ? TagsViewModel.TagGroup.GetTagsAll()
-      : TagsViewModel.TagGroup.FindTags(inputText);
-    _inputTimer.Stop();
+    //string inputText = View_AddTagAutoSuggestBox.Text;
+    //View_AddTagAutoSuggestBox.ItemsSource = string.IsNullOrEmpty(inputText)
+    //  ? TagsViewModel.TagGroup.GetTagsAll()
+    //  : TagsViewModel.TagGroup.FindTags(inputText);
+    //_inputTimer.Stop();
   }
 
   private void ViewTagsSuggestion()
@@ -212,7 +211,7 @@ public sealed partial class NoteHubPage : Page
     _inputTimer.Start();
   }
 
-  private void VIEW_AddTagAutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+  private void View_AddTagAutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
   {
     NoteViewModel noteViewModel = (NoteViewModel)((FrameworkElement)sender).DataContext;
     AddTag(noteViewModel);
@@ -222,23 +221,20 @@ public sealed partial class NoteHubPage : Page
   {
     WeakReferenceMessenger.Default.Register<DialogRequestMessage, string>(this, Tokens.MoveNoteToBoard, new(async (recipient, message) =>
     {
-      if (ViewModel.NoteViewModels.Contains(message.Content))
+      NoteViewModel noteViewModel = (NoteViewModel)message.Content!;
+      if (ViewModel.NoteViewModels.Contains(noteViewModel))
       {
-        ContentDialog dialog = new MoveNoteToBoardDialog() { XamlRoot = VIEW_NotesGridView.XamlRoot };
-        await dialog.ShowAsync();
+        //if (await View_MoveToBoardContentDialog.ShowAsync() == ContentDialogResult.Primary)
+        //{
+        //  NavigationBoard? selected = View_MoveToBoardTreeView.SelectedItem as NavigationBoard;
+        //  if (selected is not null)
+        //  {
+        //    ViewModel.NoteViewModels.Remove(noteViewModel);
+        //    noteViewModel.Note.BoardId = selected.Id;
+        //    noteViewModel.UpdateNote(nameof(Note.BoardId));
+        //  }
+        //}
       }
-      //await VIEW_MoveToBoardContentDialog.ShowAsync();
-      //NoteViewModel noteViewModel = (NoteViewModel)message.Content!;
-      //if (await VIEW_MoveToBoardContentDialog.ShowAsync() == ContentDialogResult.Primary)
-      //{
-      //  NavigationBoard? selected = VIEW_MoveToBoardTreeView.SelectedItem as NavigationBoard;
-      //  if (selected is not null)
-      //  {
-      //    ViewModel.NoteViewModels.Remove(noteViewModel);
-      //    noteViewModel.Note.BoardId = selected.Id;
-      //    noteViewModel.UpdateNote(nameof(Note.BoardId));
-      //  }
-      //}
     }));
   }
 }

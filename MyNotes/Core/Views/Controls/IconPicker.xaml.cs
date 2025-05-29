@@ -26,47 +26,47 @@ public sealed partial class IconPicker : UserControl
     Icon = (Emoji)((FrameworkElement)sender).DataContext;
   }
 
-  private void VIEW_PrimarySelectorBar_SelectionChanged(SelectorBar sender, SelectorBarSelectionChangedEventArgs args)
+  private void View_PrimarySelectorBar_SelectionChanged(SelectorBar sender, SelectorBarSelectionChangedEventArgs args)
   {
     string selectedTag = (string)sender.SelectedItem.Tag;
     switch (selectedTag)
     {
       case "Basic":
         ControlSecondarySelectorBar(false);
-        VIEW_IconsItemsRepeater.ItemsSource = IconLibrary.Glyphs;
+        View_IconsItemsRepeater.ItemsSource = IconLibrary.Glyphs;
         break;
       case "PeopleAndBody":
         ControlSecondarySelectorBar(true);
         break;
       default:
         ControlSecondarySelectorBar(false);
-        VIEW_IconsItemsRepeater.ItemsSource = IconLibrary.EmojisList[selectedTag];
+        View_IconsItemsRepeater.ItemsSource = IconLibrary.EmojisList[selectedTag];
         break;
     }
-    VIEW_IconsViewScrollView.ScrollTo(0, 0);
+    View_IconsViewScrollView.ScrollTo(0, 0);
   }
 
   private void ControlSecondarySelectorBar(bool isActivated)
   {
     if(isActivated)
     {
-      VIEW_SecondarySelectorBar.Visibility = Visibility.Visible;
-      VIEW_SecondarySelectorBar.SelectedItem = VIEW_PeopleAndBodyGeneralSelectorBarItem;
+      View_SecondarySelectorBar.Visibility = Visibility.Visible;
+      View_SecondarySelectorBar.SelectedItem = View_PeopleAndBodyGeneralSelectorBarItem;
     }
     else
     {
-      VIEW_SecondarySelectorBar.Visibility = Visibility.Collapsed;
-      VIEW_SecondarySelectorBar.SelectedItem = null;
+      View_SecondarySelectorBar.Visibility = Visibility.Collapsed;
+      View_SecondarySelectorBar.SelectedItem = null;
     }
   }
 
-  private void VIEW_SecondarySelectorBar_SelectionChanged(SelectorBar sender, SelectorBarSelectionChangedEventArgs args)
+  private void View_SecondarySelectorBar_SelectionChanged(SelectorBar sender, SelectorBarSelectionChangedEventArgs args)
   {
     if (sender.SelectedItem is null)
       return;
 
     string selectedTag = (string)sender.SelectedItem.Tag;
-    VIEW_IconsItemsRepeater.ItemsSource = IconLibrary.EmojisList[selectedTag];
+    View_IconsItemsRepeater.ItemsSource = IconLibrary.EmojisList[selectedTag];
   }
 }
 

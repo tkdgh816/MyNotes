@@ -12,6 +12,6 @@ public sealed partial class SearchPage : Page
   protected override void OnNavigatedTo(NavigationEventArgs e)
   {
     base.OnNavigatedTo(e);
-    VIEW_TitleTextBlock.Text = "Search results for " + ((NavigationItem)e.Parameter).Name;
+    View_TitleTextBlock.Text = "Search results for " + ((NavigationItem)e.Parameter).Name;
   }
 }

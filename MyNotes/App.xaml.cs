@@ -33,8 +33,8 @@ public partial class App : Application
 
     // ViewModels
     services.AddSingleton<MainViewModel>();
-    services.AddTransient<NoteHubViewModel>();
-    services.AddTransient<NoteViewModel>();
+    services.AddTransient<NoteBoardViewModel>();
+    services.AddSingleton<NoteViewModelFactory>();
     services.AddSingleton<TagsViewModel>();
 
     return services.BuildServiceProvider();

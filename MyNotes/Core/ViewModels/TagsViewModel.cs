@@ -13,7 +13,7 @@ public class TagsViewModel : ViewModelBase
     TagsCollectionViewSource.Source = TagGroup;
   }
 
-  public DatabaseService DatabaseService { get; }
+  private readonly DatabaseService DatabaseService;
   public CollectionViewSource TagsCollectionViewSource { get; } = new() { IsSourceGrouped = true };
   public TagGroup TagGroup { get; } = new();
 

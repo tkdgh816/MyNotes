@@ -84,18 +84,18 @@
                              Style="{StaticResource BodyStrongTextBlockStyle}" />
                 </views:AppMenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="VIEW_NavigationViewBoardGroupItem_RenameMenuFlyoutItem"
+                <MenuFlyoutItem x:Name="View_NavigationViewBoardGroupItem_RenameMenuFlyoutItem"
                                 Text="Rename"
                                 Icon="Rename"
-                                Click="VIEW_NavigationViewBoardItem_RenameMenuFlyoutItem_Click" />
-                <MenuFlyoutItem x:Name="VIEW_NavigationViewBoardGroupItem_NewGroupMenuFlyoutItem"
+                                Click="View_NavigationViewBoardItem_RenameMenuFlyoutItem_Click" />
+                <MenuFlyoutItem x:Name="View_NavigationViewBoardGroupItem_NewGroupMenuFlyoutItem"
                                 Text="New group"
                                 Icon="Add"
-                                Click="VIEW_NavigationViewBoardGroupItem_NewGroupMenuFlyoutItem_Click" />
-                <MenuFlyoutItem x:Name="VIEW_NavigationViewBoardGroupItem_NewBoardMenuFlyoutItem"
+                                Click="View_NavigationViewBoardGroupItem_NewGroupMenuFlyoutItem_Click" />
+                <MenuFlyoutItem x:Name="View_NavigationViewBoardGroupItem_NewBoardMenuFlyoutItem"
                                 Text="New board"
                                 Icon="Add"
-                                Click="VIEW_NavigationViewBoardGroupItem_NewBoardMenuFlyoutItem_Click" />
+                                Click="View_NavigationViewBoardGroupItem_NewBoardMenuFlyoutItem_Click" />
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem Text="Remove"
                                 Icon="Delete" />
@@ -147,10 +147,10 @@
                              Style="{StaticResource BodyStrongTextBlockStyle}" />
                 </views:AppMenuFlyoutItem>
                 <MenuFlyoutSeparator />
-                <MenuFlyoutItem x:Name="VIEW_NavigationViewBoardItem_RenameMenuFlyoutItem"
+                <MenuFlyoutItem x:Name="View_NavigationViewBoardItem_RenameMenuFlyoutItem"
                                 Text="Rename"
                                 Icon="Rename"
-                                Click="VIEW_NavigationViewBoardItem_RenameMenuFlyoutItem_Click" />
+                                Click="View_NavigationViewBoardItem_RenameMenuFlyoutItem_Click" />
                 <MenuFlyoutSeparator />
                 <MenuFlyoutItem Text="Remove"
                                 Icon="Delete" />
@@ -163,27 +163,42 @@
     <!--#endregion-->
   </Page.Resources>
 
-  <Grid x:Name="VIEW_RootGrid">
+  <Grid x:Name="View_RootGrid">
     <Grid.RowDefinitions>
       <RowDefinition Height="48" />
       <RowDefinition />
     </Grid.RowDefinitions>
 
-    <TitleBar x:Name="VIEW_TitleBar"
+    <TitleBar x:Name="View_TitleBar"
               Grid.Row="0"
-              IsBackButtonEnabled="{x:Bind VIEW_NavigationContent_RootFrame.CanGoBack, Mode=OneWay}"
+              IsBackButtonEnabled="{x:Bind View_NavigationContent_RootFrame.CanGoBack, Mode=OneWay}"
               IsBackButtonVisible="True"
-              BackRequested="VIEW_TitleBar_BackRequested"
+              BackRequested="View_TitleBar_BackRequested"
               IsPaneToggleButtonVisible="True"
-              PaneToggleRequested="VIEW_TitleBar_PaneToggleRequested"
+              PaneToggleRequested="View_TitleBar_PaneToggleRequested"
               Margin="2,0,0,0"
               Title="MyNotes">
       <TitleBar.IconSource>
         <ImageIconSource ImageSource="ms-appx:///Assets/icons/app/AppIcon_16.png" />
       </TitleBar.IconSource>
+      <TitleBar.RightHeader>
+        <Button Style="{StaticResource AppFontIconNormalButtonStyle}"
+                Width="100"
+                Content="&#xEC7A;"
+                Click="ViewWindowsButton_Click" >
+          <!--<Button.Flyout>
+            <MenuFlyout Placement="Bottom">
+              <MenuFlyoutItem Text="View Windows and Pages"
+                              Click="ViewWindowsButton_Click" />
+              <MenuFlyoutItem Text="Test Window"
+                              Click="TestWindowButton_Click" />
+            </MenuFlyout>
+          </Button.Flyout>-->
+        </Button>
+      </TitleBar.RightHeader>
     </TitleBar>
 
-    <NavigationView x:Name="VIEW_NavigationView"
+    <NavigationView x:Name="View_NavigationView"
                     Grid.Row="1"
                     IsBackButtonVisible="Collapsed"
                     IsPaneToggleButtonVisible="False"
@@ -191,11 +206,11 @@
                     MenuItemTemplateSelector="{StaticResource MainNavigationViewMenuItemTemplateSelector}"
                     MenuItemsSource="{x:Bind ViewModel.MenuItems.View}"
                     FooterMenuItemsSource="{x:Bind ViewModel.FooterMenuItems}"
-                    SelectionChanged="VIEW_NavigationView_SelectionChanged"
-                    ItemInvoked="VIEW_NavigationView_ItemInvoked"
-                    Loaded="VIEW_NavigationView_Loaded">
+                    SelectionChanged="View_NavigationView_SelectionChanged"
+                    ItemInvoked="View_NavigationView_ItemInvoked"
+                    Loaded="View_NavigationView_Loaded">
       <NavigationView.AutoSuggestBox>
-        <AutoSuggestBox x:Name="VIEW_NavigationVIew_AutoSuggestBox"
+        <AutoSuggestBox x:Name="View_NavigationVIew_AutoSuggestBox"
                         PlaceholderText="Search notes"
                         QueryIcon="Find"
                         QuerySubmitted="AutoSuggestBox_QuerySubmitted">
@@ -203,9 +218,9 @@
       </NavigationView.AutoSuggestBox>
 
       <NavigationView.Content>
-        <Frame x:Name="VIEW_NavigationContent_RootFrame"
+        <Frame x:Name="View_NavigationContent_RootFrame"
                Padding="12,0,0,0"
-               Navigated="VIEW_NavigationContent_RootFrame_Navigated" />
+               Navigated="View_NavigationContent_RootFrame_Navigated" />
       </NavigationView.Content>
 
       <NavigationView.PaneFooter>
@@ -216,40 +231,40 @@
               <ColumnDefinition />
               <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <views:AppCompoundButton x:Name="VIEW_NavigationViewFooter_NewGroupButton"
+            <views:AppCompoundButton x:Name="View_NavigationViewFooter_NewGroupButton"
                                      Grid.Column="0"
                                      Content="New group"
                                      Icon="{ui:FontIcon Glyph=&#xE82E;}"
                                      Style="{StaticResource AppNavigationButtonStyle}"
-                                     Click="VIEW_NavigationViewFooter_NewGroupButton_Click" />
-            <views:AppCompoundButton x:Name="VIEW_NavigationViewFooter_NewBoardButton"
+                                     Click="View_NavigationViewFooter_NewGroupButton_Click" />
+            <views:AppCompoundButton x:Name="View_NavigationViewFooter_NewBoardButton"
                                      Grid.Column="1"
                                      Content="New board"
                                      Icon="{ui:FontIcon Glyph=&#xED0E;}"
                                      Style="{StaticResource AppNavigationButtonStyle}"
-                                     Click="VIEW_NavigationViewFooter_NewBoardButton_Click" />
-            <views:AppCompoundButton x:Name="VIEW_NavigationViewFooter_EditNavigationViewItem"
+                                     Click="View_NavigationViewFooter_NewBoardButton_Click" />
+            <views:AppCompoundButton x:Name="View_NavigationViewFooter_EditNavigationViewItem"
                                      Grid.Column="2"
                                      Icon="{ui:FontIcon Glyph=&#xE932;}"
                                      Style="{StaticResource AppNavigationButtonStyle}"
                                      ToolTipService.ToolTip="Edit"
-                                     Click="VIEW_NavigationViewFooter_EditNavigationViewItem_Click" />
+                                     Click="View_NavigationViewFooter_EditNavigationViewItem_Click" />
           </Grid>
           <NavigationViewItemSeparator />
         </StackPanel>
       </NavigationView.PaneFooter>
     </NavigationView>
 
-    <TeachingTip x:Name="VIEW_EditTeachingTip"
-                 Target="{x:Bind VIEW_NavigationViewFooter_EditNavigationViewItem}"
+    <TeachingTip x:Name="View_EditTeachingTip"
+                 Target="{x:Bind View_NavigationViewFooter_EditNavigationViewItem}"
                  Title="Turn off edit mode to select item."
                  IsLightDismissEnabled="True" />
 
     <!--#region Rename Board ContentDialog-->
-    <ContentDialog x:Name="VIEW_RenameBoardContentDialog"
+    <ContentDialog x:Name="View_RenameBoardContentDialog"
                    Title="Rename"
                    PrimaryButtonText="OK"
-                   IsPrimaryButtonEnabled="{x:Bind VIEW_RenameBoardInputTextBox.Text, Converter={StaticResource EmptyStringToBoolConverter}, Mode=OneWay}"
+                   IsPrimaryButtonEnabled="{x:Bind View_RenameBoardInputTextBox.Text, Converter={StaticResource EmptyStringToBoolConverter}, Mode=OneWay}"
                    CloseButtonText="Cancel"
                    DefaultButton="Primary">
       <Grid ColumnSpacing="8">
@@ -267,7 +282,7 @@
             </Flyout>
           </Button.Flyout>
         </Button>
-        <TextBox x:Name="VIEW_RenameBoardInputTextBox"
+        <TextBox x:Name="View_RenameBoardInputTextBox"
                  Grid.Column="1"
                  VerticalAlignment="Center"
                  PlaceholderText="Enter name" />
@@ -276,10 +291,10 @@
     <!--#endregion-->
 
     <!--#region New Board Group ContentDialog -->
-    <ContentDialog x:Name="VIEW_NewBoardGroupContentDialog"
+    <ContentDialog x:Name="View_NewBoardGroupContentDialog"
                    Title="New board"
                    PrimaryButtonText="Add"
-                   IsPrimaryButtonEnabled="{x:Bind VIEW_NewBoardGroupInputTextBox.Text, Converter={StaticResource EmptyStringToBoolConverter}, Mode=OneWay}"
+                   IsPrimaryButtonEnabled="{x:Bind View_NewBoardGroupInputTextBox.Text, Converter={StaticResource EmptyStringToBoolConverter}, Mode=OneWay}"
                    CloseButtonText="Cancel"
                    DefaultButton="Primary">
       <StackPanel Spacing="8">
@@ -288,15 +303,15 @@
                     Spacing="8">
           <TextBlock Text="Add item as"
                      VerticalAlignment="Center" />
-          <ComboBox x:Name="VIEW_NewBoardGroupOptionsComboBox"
+          <ComboBox x:Name="View_NewBoardGroupOptionsComboBox"
                     SelectedIndex="0"
                     HorizontalAlignment="Right"
                     MinWidth="120">
             <ComboBoxItem Content="root" />
             <ComboBoxItem Content="child of selected"
-                          IsEnabled="{x:Bind VIEW_NavigationView.SelectedItem, Converter={StaticResource NavigationBoardGroupToBoolConverter}, Mode=OneWay}" />
+                          IsEnabled="{x:Bind View_NavigationView.SelectedItem, Converter={StaticResource NavigationBoardGroupToBoolConverter}, Mode=OneWay}" />
             <ComboBoxItem Content="sibling of selected"
-                          IsEnabled="{x:Bind VIEW_NavigationView.SelectedItem, Converter={StaticResource NavigationBoardToBoolConverter}, Mode=OneWay}" />
+                          IsEnabled="{x:Bind View_NavigationView.SelectedItem, Converter={StaticResource NavigationBoardToBoolConverter}, Mode=OneWay}" />
           </ComboBox>
         </StackPanel>
         <Grid ColumnSpacing="8">
@@ -314,7 +329,7 @@
               </Flyout>
             </Button.Flyout>
           </Button>
-          <TextBox x:Name="VIEW_NewBoardGroupInputTextBox"
+          <TextBox x:Name="View_NewBoardGroupInputTextBox"
                    Grid.Column="1"
                    VerticalAlignment="Center"
                    PlaceholderText="Enter group name" />
@@ -324,10 +339,10 @@
     <!--#endregion-->
 
     <!--#region New Board ContentDialog -->
-    <ContentDialog x:Name="VIEW_NewBoardContentDialog"
+    <ContentDialog x:Name="View_NewBoardContentDialog"
                    Title="New board"
                    PrimaryButtonText="Add"
-                   IsPrimaryButtonEnabled="{x:Bind VIEW_NewBoardInputTextBox.Text, Converter={StaticResource EmptyStringToBoolConverter}, Mode=OneWay}"
+                   IsPrimaryButtonEnabled="{x:Bind View_NewBoardInputTextBox.Text, Converter={StaticResource EmptyStringToBoolConverter}, Mode=OneWay}"
                    CloseButtonText="Cancel"
                    DefaultButton="Primary">
       <StackPanel Spacing="8">
@@ -336,15 +351,15 @@
                     Spacing="8">
           <TextBlock Text="Add item as"
                      VerticalAlignment="Center" />
-          <ComboBox x:Name="VIEW_NewBoardOptionsComboBox"
+          <ComboBox x:Name="View_NewBoardOptionsComboBox"
                     SelectedIndex="0"
                     HorizontalAlignment="Right"
                     MinWidth="120">
             <ComboBoxItem Content="root" />
             <ComboBoxItem Content="child of selected"
-                          IsEnabled="{x:Bind VIEW_NavigationView.SelectedItem, Converter={StaticResource NavigationBoardGroupToBoolConverter}, Mode=OneWay}" />
+                          IsEnabled="{x:Bind View_NavigationView.SelectedItem, Converter={StaticResource NavigationBoardGroupToBoolConverter}, Mode=OneWay}" />
             <ComboBoxItem Content="sibling of selected"
-                          IsEnabled="{x:Bind VIEW_NavigationView.SelectedItem, Converter={StaticResource NavigationBoardToBoolConverter}, Mode=OneWay}" />
+                          IsEnabled="{x:Bind View_NavigationView.SelectedItem, Converter={StaticResource NavigationBoardToBoolConverter}, Mode=OneWay}" />
           </ComboBox>
         </StackPanel>
         <Grid ColumnSpacing="8">
@@ -362,7 +377,7 @@
               </Flyout>
             </Button.Flyout>
           </Button>
-          <TextBox x:Name="VIEW_NewBoardInputTextBox"
+          <TextBox x:Name="View_NewBoardInputTextBox"
                    Grid.Column="1"
                    VerticalAlignment="Center"
                    PlaceholderText="Enter board name" />
@@ -373,7 +388,7 @@
   </Grid>
 
   <FlyoutBase.AttachedFlyout>
-    <Flyout x:Name="VIEW_TagsFlyout"
+    <Flyout x:Name="View_TagsFlyout"
             Placement="RightEdgeAlignedTop">
       <Flyout.FlyoutPresenterStyle>
         <Style TargetType="FlyoutPresenter"
