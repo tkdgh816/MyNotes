@@ -149,7 +149,7 @@ public sealed partial class HomePage : Page
   {
     TestWindow window = new();
     window.Activate();
-    WindowService.Windows.Add(new(window));
+    WindowService.WindowReferences.Add(new(window));
   }
 
   public double CalculateContrastRatio(Color first, Color second)

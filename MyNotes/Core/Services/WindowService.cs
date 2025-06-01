@@ -2,6 +2,7 @@
 
 using MyNotes.Common.Messaging;
 using MyNotes.Core.Models;
+using MyNotes.Core.ViewModels;
 using MyNotes.Core.Views;
 
 namespace MyNotes.Core.Services;
@@ -12,8 +13,9 @@ public class WindowService
   public Dictionary<Note, NoteWindow> NoteWindows { get; } = new();
 
   // TEST: WeakReference Window
-  public static readonly List<WeakReference<Window>> Windows = new();
-  public static readonly List<WeakReference<Page>> Pages = new();
+  public static readonly List<WeakReference<Window>> WindowReferences = new();
+  public static readonly List<WeakReference<Page>> PageReferences = new();
+  public static readonly List<WeakReference<Note>> NoteReferences = new();
   public WindowService()
   {
 
@@ -31,7 +33,8 @@ public class WindowService
     {
       NoteWindow newWindow = new(note);
       // TEST: WeakReference Add Window
-      Windows.Add(new(newWindow));
+      NoteReferences.Add(new(note));
+      WindowReferences.Add(new(newWindow));
       NoteWindows[note] = newWindow;
       InitializeNoteWindow(note, newWindow);
       return newWindow;
@@ -90,7 +93,7 @@ public class WindowService
   {
     NoteWindow newWindow = new(note);
     newWindow.Activate();
-    Windows.Add(new(newWindow));
+    WindowReferences.Add(new(newWindow));
   }
 
   public NoteWindow? GetNoteWindow(Note note)
@@ -152,21 +155,32 @@ public class WindowService
   public static void ReadActiveWindows()
   {
     GC.Collect();
-    Windows.RemoveAll(wr => !wr.TryGetTarget(out _));
-    Pages.RemoveAll(wr => !wr.TryGetTarget(out _));
-    Debug.WriteLine("Windows: " + string.Join(", ", Windows.Select(
+    WindowReferences.RemoveAll(wr => !wr.TryGetTarget(out _));
+    PageReferences.RemoveAll(wr => !wr.TryGetTarget(out _));
+    Debug.WriteLine("Windows: " + string.Join(", ", WindowReferences.Select(
       wr =>
       {
         wr.TryGetTarget(out Window? target);
         return target?.GetHashCode().ToString() ?? "";
       }
     )));
-    Debug.WriteLine("Pages: " + string.Join(", ", Pages.Select(
+    Debug.WriteLine("Pages: " + string.Join(", ", PageReferences.Select(
       wr =>
       {
         wr.TryGetTarget(out Page? target);
         return target?.GetHashCode().ToString() ?? "";
       }
     )));
+    Debug.WriteLine("Notes: " + string.Join(", ", NoteReferences.Select(
+      wr =>
+      {
+        if (wr.TryGetTarget(out Note? target))
+          return target.Title;
+        else
+          return "";
+      }
+    )));
+    Debug.WriteLine("NoteBoardViewModelFactory: " + string.Join(", ", App.Current.GetService<NoteBoardViewModelFactory>()._cache.Select((pair) => $"({pair.Key.Name}, {pair.Value.TryGetTarget(out _)})")));
+    Debug.WriteLine("NoteViewModelFactory: " + string.Join(", ", App.Current.GetService<NoteViewModelFactory>()._cache.Select((pair) => $"({pair.Key.Title}, {pair.Value.TryGetTarget(out _)})")));
   }
 }

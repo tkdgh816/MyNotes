@@ -10,7 +10,373 @@
       xmlns:interactivity="using:Microsoft.Xaml.Interactivity">
 
   <Page.Resources>
+    <!--#region CollectionViewSource -->
+    <CollectionViewSource x:Name="NotesCollectionViewSource" />
+    <!--#endregion -->
+
     <!--#region GridView ItemTemplate: Grid Style -->
+    <!--
+    <DataTemplate x:Key="GridViewItemTemplate_GridStyle">
+      <UserControl x:Name="Template_RootUserControl"
+                   Margin="6"
+                   PointerEntered="Template_RootUserControl_PointerEntered"
+                   PointerExited="Template_RootUserControl_PointerExited">
+        <Grid Background="{Binding Note.Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}"
+              CornerRadius="8"
+              BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
+              BorderThickness="1"
+              Translation="0,0,12">
+
+          <Grid.Shadow>
+            <ThemeShadow />
+          </Grid.Shadow>
+
+          <Grid.RowDefinitions>
+            <RowDefinition Height="32" />
+            <RowDefinition />
+          </Grid.RowDefinitions>
+
+          -->
+    <!-- Note Header -->
+    <!--
+          <Grid Grid.Row="0"
+                Background="{Binding Note.Background, Converter={StaticResource ColorToLayerBrushConverter}, Mode=OneWay}"
+                BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
+                BorderThickness="0,0,0,1">
+
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            -->
+    <!-- Bookmark Button -->
+    <!--
+            <Button x:Name="Template_BookmarkButton"
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    Style="{StaticResource AppFontIconNormalButtonStyle}"
+                    Content="{Binding Note.IsBookmarked, Converter={StaticResource BoolToBookmarkIconGlyphConverter}, Mode=OneWay}"
+                    CornerRadius="8,4,4,4"
+                    Visibility="Collapsed"
+                    Command="{Binding BookmarkCommand}" />
+
+            -->
+    <!-- Note Title -->
+    <!--
+            <TextBlock Grid.Column="1"
+                       Padding="6,0"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Text="{Binding Note.Title, Mode=OneWay}"
+                       TextTrimming="CharacterEllipsis"
+                       TextWrapping="NoWrap"
+                       Style="{StaticResource BodyStrongTextBlockStyle}">
+              <interactivity:Interaction.Behaviors>
+                <interactivity:EventTriggerBehavior EventName="DoubleTapped">
+                  <interactivity:InvokeCommandAction Command="{Binding CreateWindowCommand}"
+                                                     CommandParameter="{Binding Note.IsTrashed, Converter={StaticResource BoolNegationConverter}}" />
+                </interactivity:EventTriggerBehavior>
+              </interactivity:Interaction.Behaviors>
+            </TextBlock>
+
+            -->
+    <!-- More Button -->
+    <!--
+            <Button x:Name="Template_MoreButton"
+                    Grid.Column="2"
+                    HorizontalAlignment="Right"
+                    Style="{StaticResource AppFontIconNormalButtonStyle}"
+                    Content="&#xE712;"
+                    CornerRadius="4,8,4,4"
+                    Visibility="Collapsed">
+              <Button.Flyout>
+                <CommandBarFlyout Placement="Bottom"
+                                  AlwaysExpanded="True">
+                  <AppBarButton Label="View"
+                                Icon="{ui:FontIcon Glyph=&#xE8AD;}" />
+                  <AppBarButton Label="Share"
+                                Icon="Share" />
+                  <AppBarButton x:Name="Template_RemoveNoteButton"
+                                Label="Remove"
+                                Icon="Delete"
+                                Command="{Binding RemoveCommand}" />
+                  <CommandBarFlyout.SecondaryCommands>
+                    <AppBarButton x:Name="Template_MoveToBoardButton"
+                                  Label="Move to board"
+                                  Icon="{ui:FontIcon Glyph=&#xE8DE;}" />
+                    <AppBarButton x:Name="Template_RenameTitleButton"
+                                  Label="Rename title"
+                                  Icon="{ui:FontIcon Glyph=&#xE8AC;}"
+                                  Command="{Binding RenameTitleCommand}" />
+                    <AppBarButton x:Name="Template_EditTagsButton"
+                                  Label="Edit tags"
+                                  Icon="{ui:FontIcon Glyph=&#xE932;}" />
+                    <AppBarSeparator />
+                    <AppBarButton Label="About"
+                                  Icon="{ui:FontIcon Glyph=&#xE946;}" />
+                  </CommandBarFlyout.SecondaryCommands>
+                </CommandBarFlyout>
+              </Button.Flyout>
+            </Button>
+          </Grid>
+
+          -->
+    <!-- Note Body -->
+    <!--
+          <TextBlock Grid.Row="1"
+                     Margin="6"
+                     Text="{Binding Note.Body, Mode=OneWay}">
+            <interactivity:Interaction.Behaviors>
+              <interactivity:EventTriggerBehavior EventName="DoubleTapped">
+                <interactivity:InvokeCommandAction Command="{Binding CreateWindowCommand}"
+                                                   CommandParameter="{Binding Note.IsTrashed, Converter={StaticResource BoolNegationConverter}}" />
+              </interactivity:EventTriggerBehavior>
+            </interactivity:Interaction.Behaviors>
+          </TextBlock>
+
+          -->
+    <!-- Note CommandBar -->
+    <!--
+          <Grid x:Name="Template_CommandBarGrid"
+                Grid.Row="1"
+                Visibility="Collapsed"
+                VerticalAlignment="Bottom"
+                Background="{Binding Note.Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}">
+            <ScrollViewer HorizontalScrollMode="Enabled"
+                          VerticalScrollMode="Disabled"
+                          HorizontalScrollBarVisibility="Hidden"
+                          VerticalScrollBarVisibility="Disabled">
+              <ItemsRepeater ItemsSource="{Binding Note.Tags}"
+                             Margin="4">
+                <ItemsRepeater.Layout>
+                  <StackLayout Orientation="Horizontal"
+                               Spacing="4" />
+                </ItemsRepeater.Layout>
+                <ItemsRepeater.ItemTemplate>
+                  <DataTemplate x:DataType="x:String">
+                    <views:AppTagButton RemoveButtonVisible="Collapsed">
+                      <TextBlock Text="{Binding}"
+                                 TextTrimming="CharacterEllipsis" />
+                    </views:AppTagButton>
+                  </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+              </ItemsRepeater>
+            </ScrollViewer>
+          </Grid>
+
+          -->
+    <!-- Visual States -->
+    <!--
+          <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="HoverStates">
+              <VisualState x:Name="HoverStateNormal" />
+              <VisualState x:Name="HoverStateHovering">
+                <Storyboard>
+                  <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Template_CommandBarGrid"
+                                                 Storyboard.TargetProperty="Visibility">
+                    <DiscreteObjectKeyFrame KeyTime="0"
+                                            Value="Visible" />
+                  </ObjectAnimationUsingKeyFrames>
+                  <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Template_BookmarkButton"
+                                                 Storyboard.TargetProperty="Visibility">
+                    <DiscreteObjectKeyFrame KeyTime="0"
+                                            Value="Visible" />
+                  </ObjectAnimationUsingKeyFrames>
+                  <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Template_MoreButton"
+                                                 Storyboard.TargetProperty="Visibility">
+                    <DiscreteObjectKeyFrame KeyTime="0"
+                                            Value="Visible" />
+                  </ObjectAnimationUsingKeyFrames>
+                </Storyboard>
+              </VisualState>
+            </VisualStateGroup>
+          </VisualStateManager.VisualStateGroups>
+        </Grid>
+      </UserControl>
+    </DataTemplate>
+    -->
+    <!--#endregion-->
+
+    <!--#region GridView ItemTemplate: List Style -->
+    <!--
+    <DataTemplate x:Key="GridViewItemTemplate_ListStyle">
+      <UserControl x:Name="Template_RootUserControl"
+                   Margin="6"
+                   PointerEntered="Template_RootUserControl_PointerEntered"
+                   PointerExited="Template_RootUserControl_PointerExited">
+        <Grid Background="{Binding Note.Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}"
+              CornerRadius="8"
+              BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
+              BorderThickness="1"
+              Translation="0,0,12">
+
+          <Grid.Shadow>
+            <ThemeShadow />
+          </Grid.Shadow>
+
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition MinWidth="120"
+                              MaxWidth="200" />
+            <ColumnDefinition Width="5*" />
+          </Grid.ColumnDefinitions>
+
+          -->
+    <!-- Note Title -->
+    <!--
+          <Grid Grid.Column="0"
+                Background="{StaticResource SubtleFillColorSecondary}"
+                BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
+                BorderThickness="0,0,1,0">
+            <TextBlock Padding="6"
+                       VerticalAlignment="Center"
+                       TextAlignment="Center"
+                       Text="{Binding Note.Title, Mode=OneWay}"
+                       TextTrimming="CharacterEllipsis"
+                       Style="{StaticResource BodyStrongTextBlockStyle}">   
+              <interactivity:Interaction.Behaviors>
+                <interactivity:EventTriggerBehavior EventName="DoubleTapped">
+                  <interactivity:InvokeCommandAction Command="{Binding CreateWindowCommand}"
+                                                     CommandParameter="{Binding Note.IsTrashed, Converter={StaticResource BoolNegationConverter}}" />
+                </interactivity:EventTriggerBehavior>
+              </interactivity:Interaction.Behaviors>
+            </TextBlock>
+          </Grid>
+
+          <Grid Grid.Column="1">
+            -->
+    <!-- Note Body -->
+    <!--
+            <TextBlock Margin="6"
+                       Text="{Binding Note.Body, Mode=OneWay}">   
+              <interactivity:Interaction.Behaviors>
+                <interactivity:EventTriggerBehavior EventName="DoubleTapped">
+                  <interactivity:InvokeCommandAction Command="{Binding CreateWindowCommand}"
+                                                     CommandParameter="{Binding Note.IsTrashed, Converter={StaticResource BoolNegationConverter}}" />
+                </interactivity:EventTriggerBehavior>
+              </interactivity:Interaction.Behaviors>
+            </TextBlock>
+
+            -->
+    <!-- Note CommandBar -->
+    <!--
+            <Grid x:Name="Template_CommandBarGrid"
+                  Visibility="Collapsed"
+                  VerticalAlignment="Bottom"
+                  Background="{Binding Note.Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+
+              -->
+    <!-- Note Tags -->
+    <!--
+              <ScrollViewer Grid.Column="0"
+                            HorizontalScrollMode="Enabled"
+                            VerticalScrollMode="Disabled"
+                            HorizontalScrollBarVisibility="Hidden"
+                            VerticalScrollBarVisibility="Disabled">
+                <ItemsRepeater ItemsSource="{Binding Note.Tags}"
+                               Margin="4,0">
+                  <ItemsRepeater.Layout>
+                    <StackLayout Orientation="Horizontal"
+                                 Spacing="4" />
+                  </ItemsRepeater.Layout>
+                  <ItemsRepeater.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                      <views:AppTagButton>
+                        <TextBlock Text="{Binding}"
+                                   TextTrimming="CharacterEllipsis" />
+                      </views:AppTagButton>
+                    </DataTemplate>
+                  </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+              </ScrollViewer>
+
+              -->
+    <!-- Command Buttons -->
+    <!--
+              <StackPanel Grid.Column="1"
+                          Orientation="Horizontal"
+                          HorizontalAlignment="Right">
+
+                -->
+    <!-- Bookmark Button -->
+    <!--
+                <Button x:Name="Template_BookmarkButton"
+                        Style="{StaticResource AppFontIconNormalButtonStyle}"
+                        Content="{Binding Note.IsBookmarked, Converter={StaticResource BoolToBookmarkIconGlyphConverter}, Mode=OneWay}"
+                        CornerRadius="8,4,4,4"
+                        Visibility="Collapsed"
+                        Command="{Binding BookmarkCommand}" />
+
+                -->
+    <!-- More Button -->
+    <!--
+                <Button x:Name="Template_MoreButton"
+                        Style="{StaticResource AppFontIconNormalButtonStyle}"
+                        Content="&#xE712;"
+                        CornerRadius="4,8,4,4"
+                        Visibility="Collapsed">
+                  <Button.Flyout>
+                    <CommandBarFlyout Placement="TopEdgeAlignedRight"
+                                      AlwaysExpanded="True">
+                      <AppBarButton Label="View"
+                                    Icon="{ui:FontIcon Glyph=&#xE8AD;}" />
+                      <AppBarButton Label="Share"
+                                    Icon="Share" />
+                      <AppBarButton x:Name="Template_RemoveNoteButton"
+                                    Label="Remove"
+                                    Icon="Delete"
+                                    Command="{Binding RemoveCommand}" />
+                      <CommandBarFlyout.SecondaryCommands>
+                        <AppBarButton x:Name="Template_MoveToBoardButton"
+                                      Label="Move to board"
+                                      Icon="{ui:FontIcon Glyph=&#xE8DE;}" />
+                        <AppBarButton x:Name="Template_RenameTitleButton"
+                                      Label="Rename title"
+                                      Icon="{ui:FontIcon Glyph=&#xE8AC;}"
+                                      Command="{Binding RenameTitleCommand}" />
+                        <AppBarButton x:Name="Template_EditTagsButton"
+                                      Label="Edit tags"
+                                      Icon="{ui:FontIcon Glyph=&#xE932;}" />
+                        <AppBarSeparator />
+                        <AppBarButton Label="About"
+                                      Icon="{ui:FontIcon Glyph=&#xE946;}" />
+                      </CommandBarFlyout.SecondaryCommands>
+                    </CommandBarFlyout>
+                  </Button.Flyout>
+                </Button>
+              </StackPanel>
+            </Grid>
+          </Grid>
+
+          -->
+    <!-- Visual States -->
+    <!--
+          <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="HoverStates">
+              <VisualState x:Name="HoverStateNormal" />
+              <VisualState x:Name="HoverStateHovering">
+                <Storyboard>
+                  <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Template_CommandBarGrid"
+                                                 Storyboard.TargetProperty="Visibility">
+                    <DiscreteObjectKeyFrame KeyTime="0"
+                                            Value="Visible" />
+                  </ObjectAnimationUsingKeyFrames>
+                </Storyboard>
+              </VisualState>
+            </VisualStateGroup>
+          </VisualStateManager.VisualStateGroups>
+        </Grid>
+      </UserControl>
+    </DataTemplate>
+    -->
+    <!--#endregion-->
+
+    <!--#region GridView ItemTemplate: Grid Style-->
     <DataTemplate x:Key="GridViewItemTemplate_GridStyle"
                   x:DataType="viewmodels:NoteViewModel">
       <UserControl x:Name="Template_RootUserControl"
@@ -32,7 +398,7 @@
             <RowDefinition />
           </Grid.RowDefinitions>
 
-          <!-- Note Header -->
+          <!--Note Header-->
           <Grid Grid.Row="0"
                 Background="{x:Bind Note.Background, Converter={StaticResource ColorToLayerBrushConverter}, Mode=OneWay}"
                 BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
@@ -44,7 +410,7 @@
               <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <!-- Bookmark Button -->
+            <!--Bookmark Button-->
             <Button x:Name="Template_BookmarkButton"
                     Grid.Column="0"
                     HorizontalAlignment="Left"
@@ -54,7 +420,7 @@
                     Visibility="Collapsed"
                     Command="{x:Bind BookmarkCommand}" />
 
-            <!-- Note Title -->
+            <!--Note Title-->
             <TextBlock Grid.Column="1"
                        Padding="6,0"
                        HorizontalAlignment="Center"
@@ -65,12 +431,13 @@
                        Style="{StaticResource BodyStrongTextBlockStyle}">
               <interactivity:Interaction.Behaviors>
                 <interactivity:EventTriggerBehavior EventName="DoubleTapped">
-                  <interactivity:InvokeCommandAction Command="{x:Bind CreateWindowCommand}" />
+                  <interactivity:InvokeCommandAction Command="{x:Bind CreateWindowCommand}"
+                                                     CommandParameter="{x:Bind Note.IsTrashed, Converter={StaticResource BoolNegationConverter}}" />
                 </interactivity:EventTriggerBehavior>
               </interactivity:Interaction.Behaviors>
             </TextBlock>
 
-            <!-- More Button -->
+            <!--More Button-->
             <Button x:Name="Template_MoreButton"
                     Grid.Column="2"
                     HorizontalAlignment="Right"
@@ -95,7 +462,8 @@
                                   Icon="{ui:FontIcon Glyph=&#xE8DE;}" />
                     <AppBarButton x:Name="Template_RenameTitleButton"
                                   Label="Rename title"
-                                  Icon="{ui:FontIcon Glyph=&#xE8AC;}" />
+                                  Icon="{ui:FontIcon Glyph=&#xE8AC;}"
+                                  Command="{x:Bind RenameTitleCommand}" />
                     <AppBarButton x:Name="Template_EditTagsButton"
                                   Label="Edit tags"
                                   Icon="{ui:FontIcon Glyph=&#xE932;}" />
@@ -108,18 +476,19 @@
             </Button>
           </Grid>
 
-          <!-- Note Body -->
+          <!--Note Body-->
           <TextBlock Grid.Row="1"
                      Margin="6"
                      Text="{x:Bind Note.Body, Mode=OneWay}">
             <interactivity:Interaction.Behaviors>
               <interactivity:EventTriggerBehavior EventName="DoubleTapped">
-                <interactivity:InvokeCommandAction Command="{x:Bind CreateWindowCommand}" />
+                <interactivity:InvokeCommandAction Command="{x:Bind CreateWindowCommand}"
+                                                   CommandParameter="{x:Bind Note.IsTrashed, Converter={StaticResource BoolNegationConverter}}" />
               </interactivity:EventTriggerBehavior>
             </interactivity:Interaction.Behaviors>
           </TextBlock>
 
-          <!-- Note CommandBar -->
+          <!--Note CommandBar-->
           <Grid x:Name="Template_CommandBarGrid"
                 Grid.Row="1"
                 Visibility="Collapsed"
@@ -147,7 +516,7 @@
             </ScrollViewer>
           </Grid>
 
-          <!-- Visual States -->
+          <!--Visual States-->
           <VisualStateManager.VisualStateGroups>
             <VisualStateGroup x:Name="HoverStates">
               <VisualState x:Name="HoverStateNormal" />
@@ -177,7 +546,7 @@
     </DataTemplate>
     <!--#endregion-->
 
-    <!--#region GridView ItemTemplate: List Style -->
+    <!--#region GridView ItemTemplate: List Style-->
     <DataTemplate x:Key="GridViewItemTemplate_ListStyle"
                   x:DataType="viewmodels:NoteViewModel">
       <UserControl x:Name="Template_RootUserControl"
@@ -200,7 +569,7 @@
             <ColumnDefinition Width="5*" />
           </Grid.ColumnDefinitions>
 
-          <!-- Note Title -->
+          <!--Note Title-->
           <Grid Grid.Column="0"
                 Background="{StaticResource SubtleFillColorSecondary}"
                 BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
@@ -213,24 +582,26 @@
                        Style="{StaticResource BodyStrongTextBlockStyle}">   
               <interactivity:Interaction.Behaviors>
                 <interactivity:EventTriggerBehavior EventName="DoubleTapped">
-                  <interactivity:InvokeCommandAction Command="{x:Bind CreateWindowCommand}" />
+                  <interactivity:InvokeCommandAction Command="{x:Bind CreateWindowCommand}"
+                                                     CommandParameter="{x:Bind Note.IsTrashed, Converter={StaticResource BoolNegationConverter}}" />
                 </interactivity:EventTriggerBehavior>
               </interactivity:Interaction.Behaviors>
             </TextBlock>
           </Grid>
 
           <Grid Grid.Column="1">
-            <!-- Note Body -->
+            <!--Note Body-->
             <TextBlock Margin="6"
                        Text="{x:Bind Note.Body, Mode=OneWay}">   
               <interactivity:Interaction.Behaviors>
                 <interactivity:EventTriggerBehavior EventName="DoubleTapped">
-                  <interactivity:InvokeCommandAction Command="{x:Bind CreateWindowCommand}" />
+                  <interactivity:InvokeCommandAction Command="{x:Bind CreateWindowCommand}"
+                                                     CommandParameter="{x:Bind Note.IsTrashed, Converter={StaticResource BoolNegationConverter}}" />
                 </interactivity:EventTriggerBehavior>
               </interactivity:Interaction.Behaviors>
             </TextBlock>
 
-            <!-- Note CommandBar -->
+            <!--Note CommandBar-->
             <Grid x:Name="Template_CommandBarGrid"
                   Visibility="Collapsed"
                   VerticalAlignment="Bottom"
@@ -240,7 +611,7 @@
                 <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
 
-              <!-- Note Tags -->
+              <!--Note Tags-->
               <ScrollViewer Grid.Column="0"
                             HorizontalScrollMode="Enabled"
                             VerticalScrollMode="Disabled"
@@ -263,12 +634,12 @@
                 </ItemsRepeater>
               </ScrollViewer>
 
-              <!-- Command Buttons -->
+              <!--Command Buttons-->
               <StackPanel Grid.Column="1"
                           Orientation="Horizontal"
                           HorizontalAlignment="Right">
 
-                <!-- Bookmark Button -->
+                <!--Bookmark Button-->
                 <Button x:Name="Template_BookmarkButton"
                         Style="{StaticResource AppFontIconNormalButtonStyle}"
                         Content="{x:Bind Note.IsBookmarked, Converter={StaticResource BoolToBookmarkIconGlyphConverter}, Mode=OneWay}"
@@ -276,7 +647,7 @@
                         Visibility="Collapsed"
                         Command="{x:Bind BookmarkCommand}" />
 
-                <!-- More Button -->
+                <!--More Button-->
                 <Button x:Name="Template_MoreButton"
                         Style="{StaticResource AppFontIconNormalButtonStyle}"
                         Content="&#xE712;"
@@ -299,7 +670,8 @@
                                       Icon="{ui:FontIcon Glyph=&#xE8DE;}" />
                         <AppBarButton x:Name="Template_RenameTitleButton"
                                       Label="Rename title"
-                                      Icon="{ui:FontIcon Glyph=&#xE8AC;}" />
+                                      Icon="{ui:FontIcon Glyph=&#xE8AC;}"
+                                      Command="{x:Bind RenameTitleCommand}" />
                         <AppBarButton x:Name="Template_EditTagsButton"
                                       Label="Edit tags"
                                       Icon="{ui:FontIcon Glyph=&#xE932;}" />
@@ -314,7 +686,7 @@
             </Grid>
           </Grid>
 
-          <!-- Visual States -->
+          <!--Visual States-->
           <VisualStateManager.VisualStateGroups>
             <VisualStateGroup x:Name="HoverStates">
               <VisualState x:Name="HoverStateNormal" />
@@ -380,7 +752,8 @@
                                Icon="Add"
                                Content="New note"
                                Style="{StaticResource AppCommandBarButtonStyle}"
-                               Visibility="{x:Bind Navigation, Converter={StaticResource NavigationBoardToVisibilityConverter}}" />
+                               Visibility="{x:Bind Navigation, Converter={StaticResource NavigationBoardToVisibilityConverter}}"
+                               Command="{x:Bind ViewModel.AddNewNoteCommand}" />
       <!--#endregion-->
 
       <!--#region Search Button -->
@@ -388,7 +761,8 @@
         <Button x:Name="View_SearchButton"
                 HorizontalAlignment="Right"
                 Style="{StaticResource AppFontIconMediumButtonStyle}"
-                Content="&#xE721;">
+                Content="&#xE721;"
+                Click="View_SearchButton_Click">
         </Button>
         <AutoSuggestBox x:Name="View_SearchAutoSuggestBox"
                         Visibility="Collapsed"
@@ -396,7 +770,15 @@
                         QueryIcon="Find"
                         VerticalAlignment="Center"
                         Width="250"
-                        Margin="4,0">
+                        Margin="4,0"
+                        LostFocus="View_SearchAutoSuggestBox_LostFocus"
+                        LayoutUpdated="View_SearchAutoSuggestBox_LayoutUpdated">
+          <interactivity:Interaction.Behaviors>
+            <interactivity:EventTriggerBehavior EventName="QuerySubmitted">
+              <interactivity:InvokeCommandAction Command="{x:Bind ViewModel.SearchNotesCommand}"
+                                                 CommandParameter="{Binding ElementName=View_SearchAutoSuggestBox, Path=Text}" />
+            </interactivity:EventTriggerBehavior>
+          </interactivity:Interaction.Behaviors>
           <AutoSuggestBox.RenderTransform>
             <TranslateTransform x:Name="View_SearchAutoSuggestBox_TranslateTransform" />
           </AutoSuggestBox.RenderTransform>
@@ -424,7 +806,8 @@
             <!-- Rename Title -->
             <MenuFlyoutItem Text="Rename title"
                             Icon="Rename"
-                            Visibility="{x:Bind Navigation, Converter={StaticResource NavigationBoardToVisibilityConverter}}" />
+                            Visibility="{x:Bind Navigation, Converter={StaticResource NavigationBoardToVisibilityConverter}}"
+                            Command="{x:Bind ViewModel.ShowRenameBoardDialogCommand}" />
 
             <MenuFlyoutSeparator />
 
@@ -582,7 +965,8 @@
 
             <MenuFlyoutItem Text="Remove board"
                             Icon="Delete"
-                            Visibility="{x:Bind Navigation, Converter={StaticResource NavigationBoardToVisibilityConverter}}" />
+                            Visibility="{x:Bind Navigation, Converter={StaticResource NavigationBoardToVisibilityConverter}}"
+                            Command="{x:Bind ViewModel.ShowRemoveBoardDialogCommand}" />
           </MenuFlyout>
         </Button.Flyout>
       </Button>
@@ -593,7 +977,7 @@
     <!--#region Notes List GridView -->
     <GridView x:Name="View_NotesGridView"
               Grid.Row="1"
-              ItemsSource="{x:Bind ViewModel.NotesCollectionViewSource.View, Mode=OneWay}"
+              ItemsSource="{Binding Source={StaticResource NotesCollectionViewSource}}"
               ItemTemplate="{StaticResource GridViewItemTemplate_GridStyle}"
               ItemContainerStyle="{StaticResource AppGridViewItemContainerStyle210Moderate}"
               SelectionMode="None"
@@ -601,9 +985,106 @@
       <!--<GridView.ItemContainerTransitions>
         <TransitionCollection>
           <AddDeleteThemeTransition />
+          <ContentThemeTransition />
+          <ReorderThemeTransition />
+          <EntranceThemeTransition />
         </TransitionCollection>
       </GridView.ItemContainerTransitions>-->
     </GridView>
+    <!--#endregion-->
+
+    <!--#region VisualStateManager -->
+    <VisualStateManager.VisualStateGroups>
+      <VisualStateGroup x:Name="CanAddNoteStates">
+        <VisualState x:Name="CanAddNote" />
+        <VisualState x:Name="CannotAddNote">
+          <Storyboard>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="View_NewNoteButton"
+                                           Storyboard.TargetProperty="IsEnabled">
+              <DiscreteObjectKeyFrame KeyTime="0"
+                                      Value="False" />
+            </ObjectAnimationUsingKeyFrames>
+          </Storyboard>
+        </VisualState>
+      </VisualStateGroup>
+      <VisualStateGroup x:Name="SearchBoxStates">
+        <VisualState x:Name="SearchBoxSearching">
+          <Storyboard>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="View_SearchButton"
+                                           Storyboard.TargetProperty="Visibility">
+              <DiscreteObjectKeyFrame KeyTime="0"
+                                      Value="Collapsed" />
+            </ObjectAnimationUsingKeyFrames>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="View_SearchButton"
+                                           Storyboard.TargetProperty="Opacity">
+              <DiscreteObjectKeyFrame KeyTime="0"
+                                      Value="0" />
+            </ObjectAnimationUsingKeyFrames>
+
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="View_SearchAutoSuggestBox"
+                                           Storyboard.TargetProperty="Visibility">
+              <DiscreteObjectKeyFrame KeyTime="0"
+                                      Value="Visible" />
+            </ObjectAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="View_SearchAutoSuggestBox"
+                                           Storyboard.TargetProperty="Opacity">
+              <DiscreteDoubleKeyFrame KeyTime="0"
+                                      Value="0" />
+              <SplineDoubleKeyFrame KeyTime="0:0:0.25"
+                                    KeySpline="0.2,0 0,1"
+                                    Value="1" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="View_SearchAutoSuggestBox_TranslateTransform"
+                                           Storyboard.TargetProperty="X">
+              <DiscreteDoubleKeyFrame KeyTime="0"
+                                      Value="40" />
+              <SplineDoubleKeyFrame KeyTime="0:0:0.25"
+                                    KeySpline="0.2,0 0,1"
+                                    Value="0" />
+            </DoubleAnimationUsingKeyFrames>
+          </Storyboard>
+        </VisualState>
+        <VisualState x:Name="SearchBoxNormal">
+          <Storyboard>
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="View_SearchButton"
+                                           Storyboard.TargetProperty="Visibility">
+              <DiscreteObjectKeyFrame KeyTime="0:0:0.125"
+                                      Value="Visible" />
+            </ObjectAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="View_SearchButton"
+                                           Storyboard.TargetProperty="Opacity"
+                                           BeginTime="0:0:0.125">
+              <DiscreteDoubleKeyFrame KeyTime="0"
+                                      Value="0" />
+              <LinearDoubleKeyFrame KeyTime="0:0:0.25"
+                                    Value="1" />
+            </DoubleAnimationUsingKeyFrames>
+
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="View_SearchAutoSuggestBox"
+                                           Storyboard.TargetProperty="Visibility">
+              <DiscreteObjectKeyFrame KeyTime="0:0:0.25"
+                                      Value="Collapsed" />
+            </ObjectAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="View_SearchAutoSuggestBox"
+                                           Storyboard.TargetProperty="Opacity">
+              <DiscreteDoubleKeyFrame KeyTime="0"
+                                      Value="1" />
+              <SplineDoubleKeyFrame KeyTime="0:0:0.25"
+                                    KeySpline="0.1,0.9 0.2,1.0"
+                                    Value="0" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="View_SearchAutoSuggestBox_TranslateTransform"
+                                           Storyboard.TargetProperty="X">
+              <DiscreteDoubleKeyFrame KeyTime="0"
+                                      Value="0" />
+              <SplineDoubleKeyFrame KeyTime="0:0:0.25"
+                                    KeySpline="0.1,0.9 0.2,1.0"
+                                    Value="40" />
+            </DoubleAnimationUsingKeyFrames>
+          </Storyboard>
+        </VisualState>
+      </VisualStateGroup>
+    </VisualStateManager.VisualStateGroups>
     <!--#endregion-->
   </Grid>
 </Page>

@@ -1,3 +1,4 @@
+using MyNotes.Common.Messaging;
 using MyNotes.Core.Models;
 using MyNotes.Core.ViewModels;
 
@@ -8,12 +9,12 @@ public sealed partial class NoteBoardPage : Page
   public NoteBoardPage()
   {
     InitializeComponent();
-    ViewModel = App.Current.GetService<NoteBoardViewModel>();
 
     this.Unloaded += NoteBoardPage_Unloaded;
+    RegisterMessengers();
   }
 
-  public NoteBoardViewModel ViewModel { get; }
+  public NoteBoardViewModel ViewModel { get; private set; } = null!;
 
   public NavigationNotes Navigation { get; private set; } = null!;
 
@@ -21,12 +22,16 @@ public sealed partial class NoteBoardPage : Page
   {
     base.OnNavigatedTo(e);
     Navigation = (NavigationNotes)e.Parameter;
+    ViewModel = App.Current.GetService<NoteBoardViewModelFactory>().Create(Navigation);
+    NotesCollectionViewSource.Source = ViewModel.NoteViewModels;
     RegisterEvents();
   }
 
   private void NoteBoardPage_Unloaded(object sender, RoutedEventArgs e)
   {
+    NotesCollectionViewSource.Source = null;
     UnregisterEvents();
+    UnregisterMessengers();
     ViewModel.Dispose();
   }
 
@@ -50,13 +55,24 @@ public sealed partial class NoteBoardPage : Page
     => ChangeViewSize();
   #endregion
 
-  #region VisualStates
+  #region Change UI and VisualStates
   private void Template_RootUserControl_PointerEntered(object sender, PointerRoutedEventArgs e)
     => VisualStateManager.GoToState((Control)sender, "HoverStateHovering", false);
 
   private void Template_RootUserControl_PointerExited(object sender, PointerRoutedEventArgs e)
     => VisualStateManager.GoToState((Control)sender, "HoverStateNormal", false);
-  #endregion
+
+  private void View_SearchButton_Click(object sender, RoutedEventArgs e)
+  => VisualStateManager.GoToState(this, "SearchBoxSearching", false);
+
+  private void View_SearchAutoSuggestBox_LostFocus(object sender, RoutedEventArgs e)
+    => VisualStateManager.GoToState(this, "SearchBoxNormal", false);
+
+  private void View_SearchAutoSuggestBox_LayoutUpdated(object sender, object e)
+  {
+    if (View_SearchAutoSuggestBox.Visibility is Visibility.Visible)
+      View_SearchAutoSuggestBox.Focus(FocusState.Programmatic);
+  }
 
   #region Change View Style
   bool _isViewGridStyle = true;
@@ -78,7 +94,7 @@ public sealed partial class NoteBoardPage : Page
     ChangeViewSize();
     View_NotesGridView.UpdateLayout();
   }
-  
+
   double _styleSliderValue = 210;
   private void View_StyleSizeChangeSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
   {
@@ -128,6 +144,53 @@ public sealed partial class NoteBoardPage : Page
 
     View_NotesGridView.ItemContainerStyle = (Style)((App)Application.Current).Resources[styleName];
     View_NotesGridView.UpdateLayout();
+  }
+  #endregion
+  #endregion
+
+  #region Messengers
+  private void RegisterMessengers()
+  {
+    WeakReferenceMessenger.Default.Register<Message, string>(this, Tokens.ChangeSourceFiltered, new((recipient, message) =>
+    {
+      if (message.Sender == ViewModel)
+      {
+        NotesCollectionViewSource.Source = (IEnumerable<NoteViewModel>)message.Content!;
+        VisualStateManager.GoToState(this, "CannotAddNote", false);
+      }
+    }));
+
+    WeakReferenceMessenger.Default.Register<Message, string>(this, Tokens.ChangeSourceUnfiltered, new((recipient, message) =>
+    {
+      if (message.Sender == ViewModel)
+      {
+        NotesCollectionViewSource.Source = (IEnumerable<NoteViewModel>)message.Content!;
+        VisualStateManager.GoToState(this, "CanAddNote", false);
+      }
+    }));
+
+    WeakReferenceMessenger.Default.Register<Message, string>(this, Tokens.RefreshSource, new((recipient, message) =>
+    {
+      if (message.Sender == ViewModel)
+        NotesCollectionViewSource.Source = (IEnumerable<NoteViewModel>)message.Content!;
+    }));
+
+    WeakReferenceMessenger.Default.Register<Message, string>(this, Tokens.ChangeNoteBoardGridViewAlignment, new((recipient, message) =>
+    {
+      if (message.Sender == ViewModel)
+      {
+        switch ((string)message.Content!)
+        {
+          case "GridViewAlignCenter": View_NotesGridView.HorizontalAlignment = HorizontalAlignment.Center; break;
+          case "GridViewAlignStretch": View_NotesGridView.HorizontalAlignment = HorizontalAlignment.Stretch; break;
+        }
+      }
+    }));
+  }
+
+  private void UnregisterMessengers()
+  {
+    WeakReferenceMessenger.Default.UnregisterAll(this);
   }
   #endregion
 }

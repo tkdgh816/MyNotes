@@ -7,7 +7,7 @@ public sealed partial class TestPage : Page
   {
     InitializeComponent();
     WindowService = ((App)Application.Current).GetService<WindowService>();
-    WindowService.Pages.Add(new(this));
+    WindowService.PageReferences.Add(new(this));
   }
 
   public WindowService WindowService { get; }

@@ -89,9 +89,9 @@ public class NavigationTags : NavigationNotes
   }
 }
 
-public class NavigationTrash : NavigationItem
+public class NavigationTrash : NavigationNotes
 {
-  public NavigationTrash() : base(typeof(TrashPage), "Trash", IconLibrary.FindGlyph("\uE74D")) { }
+  public NavigationTrash() : base(typeof(NoteBoardPage), "Trash", IconLibrary.FindGlyph("\uE74D")) { }
 }
 
 public class NavigationSettings : NavigationItem
@@ -125,11 +125,11 @@ public class NavigationBoard : NavigationNotes
   {
     if (Parent is null)
       return null;
-    int index = Parent.Children.IndexOf(this);
-    if (index == Parent.Children.Count - 1)
+    int index = Parent.IndexOfChild(this);
+    if (index == Parent.ChildCount - 1)
       return null;
     else
-      return Parent.Children[index + 1];
+      return Parent.GetChild(index + 1);
   }
 }
 
@@ -137,24 +137,32 @@ public class NavigationBoardGroup : NavigationBoard
 {
   private readonly ObservableCollection<NavigationBoard> _children = new();
   public ReadOnlyObservableCollection<NavigationBoard> Children { get; }
+  public event NotifyCollectionChangedEventHandler? ChildrenChanged;
 
   public NavigationBoardGroup(string name, Icon icon, Guid id) : base(name, icon, id)
   {
     PageType = typeof(NoteBoardGroupPage);
     Children = new(_children);
+    _children.CollectionChanged += OnChildrenCollectionChanged;
   }
 
-  public void Add(params NavigationBoard[] items)
+  private void OnChildrenCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    => ChildrenChanged?.Invoke(this, e);
+
+  public void AddChild(NavigationBoard item)
+  {
+    item.Parent?.RemoveChild(item);
+    item.Parent = this;
+    _children.Add(item);
+  }
+
+  public void AddChildren(params NavigationBoard[] items)
   {
     foreach (NavigationBoard item in items)
-    {
-      item.Parent?.Remove(item);
-      item.Parent = this;
-      _children.Add(item);
-    }
+      AddChild(item);
   }
 
-  public void Insert(int index, NavigationBoard item)
+  public void InsertChild(int index, NavigationBoard item)
   {
     if (item.Parent == this)
     {
@@ -167,15 +175,23 @@ public class NavigationBoardGroup : NavigationBoard
     }
     else
     {
-      item.Parent?.Remove(item);
+      item.Parent?.RemoveChild(item);
       item.Parent = this;
       _children.Insert(index, item);
     }
   }
 
-  public bool Remove(NavigationBoard item) => _children.Contains(item) && _children.Remove(item);
+  public bool RemoveChild(NavigationBoard item) => _children.Contains(item) && _children.Remove(item);
 
-  public void RemoveAt(int index) => _children.RemoveAt(index);
+  public void RemoveChildAt(int index) => _children.RemoveAt(index);
+
+  public int IndexOfChild(NavigationBoard child) => _children.IndexOf(child);
+
+  public NavigationBoard GetChild(int index) => _children[index];
+
+  public bool ContainsChild(NavigationBoard item) => _children.Contains(item);
+
+  public int ChildCount => _children.Count;
 }
 
 public class NavigationBoardRootGroup : NavigationBoardGroup
@@ -183,3 +199,5 @@ public class NavigationBoardRootGroup : NavigationBoardGroup
   public NavigationBoardRootGroup() : base("Root", IconLibrary.FindGlyph("\uE82D"), Guid.Empty)
   { }
 }
+
+public enum TreeTraversalOrder { Pre, Post }

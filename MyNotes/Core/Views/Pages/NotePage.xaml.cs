@@ -1,8 +1,6 @@
 using CommunityToolkit.Mvvm.Messaging;
-using CommunityToolkit.Mvvm.Messaging.Messages;
 
 using MyNotes.Common.Messaging;
-using MyNotes.Core.Models;
 using MyNotes.Core.ViewModels;
 
 namespace MyNotes.Core.Views;

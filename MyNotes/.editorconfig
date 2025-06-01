@@ -4,12 +4,6 @@ root = true
 # C# 파일
 [*.cs]
 
-#### 사용자 정의 옵션 ####
-# 이름 간소화
-dotnet_diagnostic.IDE0001.severity = warning
-# 사용하지 않는 프라이빗 멤버 제거
-dotnet_diagnostic.IDE0051.severity = warning
-
 #### 코어 EditorConfig 옵션 ####
 
 # 들여쓰기 및 간격
@@ -34,7 +28,7 @@ dotnet_search_reference_assemblies = true
 #### .NET 코딩 규칙 ####
 
 # Using 구성
-dotnet_separate_import_directive_groups = true
+dotnet_separate_import_directive_groups = false
 dotnet_sort_system_directives_first = true
 file_header_template = unset
 
@@ -140,6 +134,7 @@ csharp_prefer_simple_default_expression = true
 csharp_style_deconstructed_variable_declaration = true
 csharp_style_implicit_object_creation_when_type_is_apparent = true
 csharp_style_inlined_variable_declaration = true
+csharp_style_prefer_implicitly_typed_lambda_expression = true
 csharp_style_prefer_index_operator = true
 csharp_style_prefer_local_over_anonymous_function = true
 csharp_style_prefer_null_check_over_type_check = true

@@ -73,6 +73,10 @@ public class SortedObervableCollection<T> : Collection<T>, INotifyCollectionChan
 
   protected override void ClearItems()
   {
+    foreach (T item in this)
+      if (item is INotifyPropertyChanged observableItem)
+        observableItem.PropertyChanged -= OnItemPropertyChanged;
+
     base.ClearItems();
     OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
   }
@@ -109,8 +113,8 @@ public class SortedObervableCollection<T> : Collection<T>, INotifyCollectionChan
     if (sender is T item && e.PropertyName is not null && SortKeys.Contains(e.PropertyName))
     {
       int oldIndex = IndexOf(item);
-      Debug.WriteLine("Move: " + CheckItemMove(oldIndex));
-      if (!CheckItemMove(oldIndex))
+      Debug.WriteLine($"{item}: {e.PropertyName}");
+      if (oldIndex < 0 || !CheckItemMove(oldIndex))
         return;
       base.RemoveItem(oldIndex);
       int newIndex = FindInsertIndex(BinarySearch(item));

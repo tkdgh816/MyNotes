@@ -11,7 +11,7 @@
                DefaultButton="Primary"
                Style="{StaticResource DefaultContentDialogStyle}">
   <TreeView x:Name="View_MoveToBoardTreeView"
-            ItemsSource="{x:Bind MainViewModel.BoardMenuItems}"
+            ItemsSource="{x:Bind MainViewModel.NavigationBoardMenus}"
             CanDragItems="False"
             CanReorderItems="False"
             MinWidth="300"

@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-
-using MyNotes.Common.Commands;
+﻿using MyNotes.Common.Commands;
 using MyNotes.Common.Messaging;
 using MyNotes.Core.Models;
 using MyNotes.Core.Services;
@@ -26,6 +24,7 @@ public class NoteViewModel : ViewModelBase
 
   ~NoteViewModel()
   {
+    //App.Current.GetService<NoteViewModelFactory>().Dispose(Note);
     UnregisterEvents();
   }
 
@@ -33,12 +32,13 @@ public class NoteViewModel : ViewModelBase
   public void RegisterEvents()
   {
     Note.PropertyChanged += OnNoteChanged;
-    _noteDebounceTimer.Elapsed += OnNoteDebounceTimerElapsed;
+    _noteDebounceTimer.Tick += OnNoteDebounceTimerTick;
   }
+
   public void UnregisterEvents()
   {
     Note.PropertyChanged -= OnNoteChanged;
-    _noteDebounceTimer.Elapsed -= OnNoteDebounceTimerElapsed;
+    _noteDebounceTimer.Tick -= OnNoteDebounceTimerTick;
   }
   #endregion
 
@@ -57,15 +57,20 @@ public class NoteViewModel : ViewModelBase
   #endregion
 
   #region Timers
-  Timer _noteDebounceTimer = new(TimeSpan.FromMilliseconds(500)) { AutoReset = false };
+  DispatcherTimer _noteDebounceTimer = new() { Interval = TimeSpan.FromMilliseconds(500) };
 
   private HashSet<string> _changedNoteProperties = new();
-  private void OnNoteDebounceTimerElapsed(object? sender, ElapsedEventArgs e)
+  private void OnNoteDebounceTimerTick(object? sender, object e)
   {
-    Debug.WriteLine(string.Join(", ", _changedNoteProperties));
+    Debug.WriteLine("ChangedProperties: " + string.Join(", ", _changedNoteProperties));
     foreach (string changedPropertyName in _changedNoteProperties)
-      DatabaseService.UpdateNote(Note, changedPropertyName, true);
+    {
+      if (changedPropertyName != nameof(Note.Modified))
+        DatabaseService.UpdateNote(Note, changedPropertyName, true);
+      OnPropertyChanged(changedPropertyName);
+    }
     ClearNotePropertyChangedFlags();
+    _noteDebounceTimer.Stop();
   }
   #endregion
 
@@ -73,13 +78,15 @@ public class NoteViewModel : ViewModelBase
   private void OnNoteChanged(object? sender, PropertyChangedEventArgs e)
   {
     string? propertyName = e.PropertyName;
-    this.OnPropertyChanged(e.PropertyName);
-    if (propertyName is null || propertyName == nameof(Note.Modified))
+    if (propertyName is null)
       return;
     _noteDebounceTimer.Stop();
     _changedNoteProperties.Add(propertyName);
     _noteDebounceTimer.Start();
   }
+
+  //TEST TOSTRING
+  public override string ToString() => Note.ToString();
 
   public bool IsBodyChanged = false;
   public void UpdateBody(string body) => Note.Body = body;
@@ -111,7 +118,7 @@ public class NoteViewModel : ViewModelBase
   #endregion
 
   #region Commands
-  public Command? CreateWindowCommand { get; private set; }
+  public Command<bool>? CreateWindowCommand { get; private set; }
   public Command? MinimizeWindowCommand { get; private set; }
   public Command? CloseWindowCommand { get; private set; }
   public Command? ToggleWindowPinCommand { get; private set; }
@@ -119,10 +126,16 @@ public class NoteViewModel : ViewModelBase
   public Command? BookmarkCommand { get; private set; }
   public Command? RemoveCommand { get; private set; }
   public Command<NoteViewModel>? MoveToBoardCommand { get; private set; }
+  public Command? RenameTitleCommand { get; private set; }
 
   private void SetCommands()
   {
-    CreateWindowCommand = new(() => WindowService.CreateNoteWindow(Note).Activate());
+    CreateWindowCommand = new((enabled) =>
+    {
+      if (enabled)
+        WindowService.CreateNoteWindow(Note).Activate();
+    });
+
     MinimizeWindowCommand = new(() => WindowService.MinimizeNoteWindow(Note));
     CloseWindowCommand = new(() => WindowService.CloseNoteWindow(Note));
     ToggleWindowPinCommand = new(() => WindowService.ToggleNoteWindowPin(Note, IsWindowAlwaysOnTop = !IsWindowAlwaysOnTop));
@@ -135,7 +148,7 @@ public class NoteViewModel : ViewModelBase
     BookmarkCommand = new(() =>
     {
       Note.IsBookmarked = !Note.IsBookmarked;
-      DatabaseService.UpdateNote(Note, nameof(Note.IsBookmarked), false);
+      //DatabaseService.UpdateNote(Note, nameof(Note.IsBookmarked), false);
       if (!Note.IsBookmarked)
         WeakReferenceMessenger.Default.Send(new Message(this), Tokens.RemoveUnbookmarkedNote);
     });
@@ -143,12 +156,23 @@ public class NoteViewModel : ViewModelBase
     RemoveCommand = new(() =>
     {
       Note.IsTrashed = true;
-      DatabaseService.UpdateNote(Note, nameof(Note.IsTrashed), false);
+      //DatabaseService.UpdateNote(Note, nameof(Note.IsTrashed), false);
     });
 
     MoveToBoardCommand = new((noteViewModel) =>
     {
       WeakReferenceMessenger.Default.Send(new DialogRequestMessage(noteViewModel), Tokens.MoveNoteToBoard);
+    });
+
+    RenameTitleCommand = new(async () =>
+    {
+      AsyncRequestMessage<string> message = new();
+      await WeakReferenceMessenger.Default.Send(message, Tokens.RenameNoteTitle);
+
+      string title = await message.Response;
+      title = title.Trim();
+      if (!string.IsNullOrWhiteSpace(title))
+        Note.Title = title;
     });
   }
   #endregion

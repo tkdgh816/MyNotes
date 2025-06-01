@@ -1,17 +1,11 @@
-﻿using System.Runtime.CompilerServices;
-
-using MyNotes.Core.Models;
+﻿using MyNotes.Core.Models;
 using MyNotes.Core.Services;
 
 namespace MyNotes.Core.ViewModels;
 
-internal class NoteViewModelFactory
+internal class NoteViewModelFactory : ViewModelFactoryBase<Note, NoteViewModel>
 {
-  public NoteViewModelFactory() { }
-
-  private readonly ConditionalWeakTable<Note, WeakReference<NoteViewModel>> _cache = new();
-
-  public NoteViewModel Create(Note note)
+  public override NoteViewModel Create(Note note)
   {
     if (_cache.TryGetValue(note, out WeakReference<NoteViewModel>? wr))
       if (wr.TryGetTarget(out NoteViewModel? noteViewModel))

@@ -1,6 +1,6 @@
 ﻿namespace MyNotes.Core.Models;
 
-public class Note : ObservableObject, IComparable<Note>
+public class Note : ObservableObject
 {
   public Note(Guid id, Guid boardId, string title, DateTimeOffset created, DateTimeOffset modified)
   {
@@ -13,20 +13,22 @@ public class Note : ObservableObject, IComparable<Note>
 
   public void Initialize()
   {
-    this.PropertyChanged += OnPropertyChanged;
+    PropertyChanged += OnPropertyChanged;
   }
 
+  ~Note()
+  {
+    PropertyChanged -= OnPropertyChanged;
+  }
+
+  //TEST TO STRING
+  public override string ToString() => Title;
+
+  static readonly HashSet<string> _propertiesAffectingModified = new() { nameof(Title), nameof(Body), nameof(Background), nameof(Backdrop), nameof(Size), nameof(Position) };
   private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
   {
-    if (e.PropertyName != nameof(Modified))
+    if (e.PropertyName is not null && _propertiesAffectingModified.Contains(e.PropertyName))
       Modified = DateTimeOffset.UtcNow;
-  }
-
-  public int CompareTo(Note? other)
-  {
-    if (other is null)
-      return 1;
-    return -Modified.CompareTo(other.Modified);
   }
 
   public Guid Id { get; private set; }

@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-
-using MyNotes.Common.Collections;
+﻿using MyNotes.Common.Collections;
 using MyNotes.Common.Commands;
 using MyNotes.Common.Messaging;
 using MyNotes.Core.Models;
@@ -10,11 +8,10 @@ namespace MyNotes.Core.ViewModels;
 
 public class NoteBoardViewModel : ViewModelBase
 {
-  public NoteBoardViewModel(DatabaseService databaseService, NavigationService navigationService)
+  public NoteBoardViewModel(NavigationNotes navigation, DatabaseService databaseService)
   {
     DatabaseService = databaseService;
-    NavigationService = navigationService;
-    Navigation = (NavigationNotes)NavigationService.CurrentNavigation!;
+    Navigation = navigation;
 
     if (Navigation is NavigationBoard navigationBoard)
     {
@@ -26,7 +23,11 @@ public class NoteBoardViewModel : ViewModelBase
       foreach (Note note in DatabaseService.GetBookmarkedNotes())
         NoteViewModels.Add(InitializeNoteViewModel(note));
     }
-    NotesCollectionViewSource.Source = NoteViewModels;
+    else if (Navigation is NavigationTrash navigationTrash)
+    {
+      foreach (Note note in DatabaseService.GetTrashedNotes())
+        NoteViewModels.Add(InitializeNoteViewModel(note));
+    }
 
     RegisterEvents();
     SetCommands();
@@ -36,11 +37,12 @@ public class NoteBoardViewModel : ViewModelBase
   public override void Dispose()
   {
     UnregisterEvents();
+    NoteViewModels.Clear();
+    //App.Current.GetService<NoteBoardViewModelFactory>().Dispose(Navigation);
     GC.SuppressFinalize(this);
   }
 
   private readonly DatabaseService DatabaseService;
-  private readonly NavigationService NavigationService;
 
   #region Handling Events
   private void RegisterEvents()
@@ -65,7 +67,6 @@ public class NoteBoardViewModel : ViewModelBase
 
   #region NoteViewModels: Notes Collection
   public SortedObervableCollection<NoteViewModel> NoteViewModels { get; } = new([new SortDescription<NoteViewModel>(func: vm => vm.Note.Modified, direction: SortDirection.Descending, keyPropertyName: "Modified")]);
-  public CollectionViewSource NotesCollectionViewSource { get; } = new();
 
   static NoteViewModel InitializeNoteViewModel(Note note)
   {
@@ -83,7 +84,7 @@ public class NoteBoardViewModel : ViewModelBase
   {
     SortDescription<NoteViewModel> sortDescription = SortKey switch
     {
-      NoteSortKey.Created => new(func: vm => vm.Note.Created, direction: SortDirection, keyPropertyName: "Created"),
+      NoteSortKey.Created => new(func: vm => vm.Note.Created, direction: SortDirection),
       NoteSortKey.Title => new(func: vm => vm.Note.Title, direction: SortDirection, keyPropertyName: "Title"),
       NoteSortKey.Modified or _ => new(func: vm => vm.Note.Modified, direction: SortDirection, keyPropertyName: "Modified"),
     };
@@ -92,15 +93,43 @@ public class NoteBoardViewModel : ViewModelBase
     NoteViewModels.SortDescriptions.Add(sortDescription);
     NoteViewModels.Refresh();
 
-    NotesCollectionViewSource.Source = NoteViewModels;
+    WeakReferenceMessenger.Default.Send(new Message(this, NoteViewModels), Tokens.RefreshSource);
   }
   #endregion
 
   #region Commands
+  public Command? AddNewNoteCommand { get; private set; }
+  public Command<string>? SearchNotesCommand { get; private set; }
   public Command<string>? ChangeSortKeyCommand { get; private set; }
   public Command<string>? ChangeSortDirectionCommand { get; private set; }
+  public Command? ShowRenameBoardDialogCommand { get; private set; }
+  public Command? ShowRemoveBoardDialogCommand { get; private set; }
+
   private void SetCommands()
   {
+    AddNewNoteCommand = new(() =>
+    {
+      DateTimeOffset creationTime = DateTimeOffset.UtcNow;
+      Note newNote = new(Guid.NewGuid(), ((NavigationBoard)Navigation).Id, "New note", creationTime, creationTime) { Background = Colors.LightGoldenrodYellow };
+      NoteViewModel noteViewModel = InitializeNoteViewModel(newNote);
+      NoteViewModels.Add(noteViewModel);
+      DatabaseService.AddNote(newNote);
+      noteViewModel.CreateWindow();
+    });
+
+    SearchNotesCommand = new((query) =>
+    {
+      if (string.IsNullOrEmpty(query))
+      {
+        WeakReferenceMessenger.Default.Send(new Message(this, NoteViewModels), Tokens.ChangeSourceUnfiltered);
+      }
+      else
+      {
+        var source = NoteViewModels.Where(vm => vm.Note.Title.Contains(query) || vm.Note.Body.Contains(query));
+        WeakReferenceMessenger.Default.Send(new Message(this, source), Tokens.ChangeSourceFiltered);
+      }
+    });
+
     ChangeSortKeyCommand = new((key) =>
     {
       if (Enum.TryParse<NoteSortKey>(key, out var sortKey))
@@ -117,6 +146,9 @@ public class NoteBoardViewModel : ViewModelBase
         SortNoteViewModels();
       }
     });
+
+    ShowRenameBoardDialogCommand = new(() => WeakReferenceMessenger.Default.Send(new Message(Navigation), Tokens.RenameBoardName));
+    ShowRemoveBoardDialogCommand = new(() => WeakReferenceMessenger.Default.Send(new Message(Navigation), Tokens.RemoveBoard));
   }
   #endregion
 

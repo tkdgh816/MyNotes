@@ -135,11 +135,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Core\Views\Pages\NoteHubPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
     <Page Update="Core\Views\Pages\SearchPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
