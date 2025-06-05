@@ -1,8 +1,8 @@
 ﻿#if DEBUG && !DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION
 using Microsoft.Extensions.DependencyInjection;
 
-using MyNotes.Core.Services;
-using MyNotes.Core.ViewModels;
+using MyNotes.Core.Service;
+using MyNotes.Core.ViewModel;
 
 namespace MyNotes;
 
@@ -28,12 +28,13 @@ public partial class App : Application
 
     // Services
     services.AddSingleton<WindowService>();
-    services.AddSingleton<DatabaseService>();
     services.AddSingleton<NavigationService>();
+    services.AddSingleton<DatabaseService>();
+    services.AddSingleton<NoteService>();
 
     // ViewModels
     services.AddSingleton<MainViewModel>();
-    services.AddSingleton<NoteBoardViewModelFactory>();
+    services.AddSingleton<BoardViewModelFactory>();
     services.AddSingleton<NoteViewModelFactory>();
     services.AddSingleton<TagsViewModel>();
 

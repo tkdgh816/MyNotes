@@ -13,6 +13,5 @@ internal static class Tokens
   public const string RenameBoardName = "RenameBoardName";
   public const string RenameNoteTitle = "RenameNoteTitle";
   public const string RemoveBoard = "RemoveBoard";
-  public const string GoToNavigationHome = "GoToNavigationHome";
-  public const string ChangeNavigationViewSelection = "ChangeNavigationViewSelection";
+  public const string IsValidNavigation = "IsValidNavigation";
 }

@@ -1,6 +1,6 @@
 ﻿namespace MyNotes.Common.Converters;
 
-public class BoolToVisibilityConverter : IValueConverter
+internal class BoolToVisibilityConverter : IValueConverter
 {
   public static Visibility Convert(object value)
     => (value is bool boolValue && boolValue) ? Visibility.Visible : Visibility.Collapsed;

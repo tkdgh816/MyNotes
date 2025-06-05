@@ -1,6 +1,6 @@
 ﻿namespace MyNotes.Common.Comparers;
 
-public class CompositeComparer<T> : IComparer<T>
+internal class CompositeComparer<T> : IComparer<T>
 {
   private readonly List<IComparer<T>> _comparers = new();
 

@@ -1,6 +1,6 @@
 ﻿namespace MyNotes.Common.Collections;
 
-public class SortDescription<T> : INotifyPropertyChanged
+internal class SortDescription<T> : INotifyPropertyChanged
 {
   public IComparer<T> Comparer { get; private set; }
 
@@ -56,4 +56,4 @@ public class SortDescription<T> : INotifyPropertyChanged
   public event PropertyChangedEventHandler? PropertyChanged;
 }
 
-public enum SortDirection { Ascending, Descending }
+internal enum SortDirection { Ascending, Descending }

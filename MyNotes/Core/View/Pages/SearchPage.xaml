@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page x:Class="MyNotes.Core.View.SearchPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition />
+    </Grid.RowDefinitions>
+
+    <Grid>
+      <TextBlock x:Name="View_TitleTextBlock"
+                 Style="{StaticResource TitleTextBlockStyle}" />
+    </Grid>
+
+    <ScrollViewer Grid.Row="1">
+
+    </ScrollViewer>
+  </Grid>
+</Page>

@@ -1,6 +1,6 @@
 ﻿namespace MyNotes.Common.Converters;
 
-public class EmptyStringToBoolConverter : IValueConverter
+internal class EmptyStringToBoolConverter : IValueConverter
 {
   public static bool Convert(object value)
     => value is string stringValue && !string.IsNullOrWhiteSpace(stringValue);

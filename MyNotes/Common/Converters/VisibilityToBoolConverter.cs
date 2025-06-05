@@ -1,6 +1,6 @@
 ﻿namespace MyNotes.Common.Converters;
 
-public class VisibilityToBoolConverter : IValueConverter
+internal class VisibilityToBoolConverter : IValueConverter
 {
   public static bool Convert(object value)
     => value is Visibility visibilityValue && visibilityValue == Visibility.Visible;

@@ -2,7 +2,7 @@
 
 namespace MyNotes.Common.Converters;
 
-public class BoolToObjectConverter : DependencyObject, IValueConverter
+internal class BoolToObjectConverter : DependencyObject, IValueConverter
 {
   public object Convert(object value, Type targetType, object parameter, string language)
   {

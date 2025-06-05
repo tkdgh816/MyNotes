@@ -1,5 +1,5 @@
 ﻿namespace MyNotes.Common.Converters;
-public class ColorToLayerBrushConverter : IValueConverter
+internal class ColorToLayerBrushConverter : IValueConverter
 {
   public static SolidColorBrush Convert(object value)
   {

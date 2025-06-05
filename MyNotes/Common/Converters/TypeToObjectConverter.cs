@@ -1,6 +1,6 @@
 ﻿namespace MyNotes.Common.Converters;
 
-public class TypeToObjectConverter : DependencyObject, IValueConverter
+internal class TypeToObjectConverter : DependencyObject, IValueConverter
 {
   public object Convert(object value, Type targetType, object parameter, string language)
   {

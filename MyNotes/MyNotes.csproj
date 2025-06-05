@@ -13,24 +13,29 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Content Remove="Assets\Test\Test.xaml" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="Assets\Square44x44Logo.targetsize-16.png" />
     <None Remove="Assets\Square44x44Logo.targetsize-24_altform-lightunplated.png" />
-    <None Remove="Core\Views\Controls\IconPicker.xaml" />
-    <None Remove="Core\Views\Dialogs\MoveNoteToBoardDialog.xaml" />
-    <None Remove="Core\Views\Dialogs\TestDialog.xaml" />
-    <None Remove="Core\Views\NoteWindow.xaml" />
-    <None Remove="Core\Views\Pages\BookmarksPage.xaml" />
-    <None Remove="Core\Views\Pages\HomePage.xaml" />
-    <None Remove="Core\Views\Pages\MainPage.xaml" />
-    <None Remove="Core\Views\Pages\NoteBoardPage.xaml" />
-    <None Remove="Core\Views\Pages\NotePage.xaml" />
-    <None Remove="Core\Views\Pages\SearchPage.xaml" />
-    <None Remove="Core\Views\Pages\SettingsPage.xaml" />
-    <None Remove="Core\Views\Pages\TagsPage.xaml" />
-    <None Remove="Core\Views\Pages\TestPage.xaml" />
-    <None Remove="Core\Views\Pages\TrashPage.xaml" />
-    <None Remove="Core\Views\Windows\TestWindow.xaml" />
+    <None Remove="Core\View\Controls\UserControls\IconPicker.xaml" />
+    <None Remove="Core\View\Dialogs\MoveNoteToBoardDialog.xaml" />
+    <None Remove="Core\View\Dialogs\TestDialog.xaml" />
+    <None Remove="Core\View\NoteWindow.xaml" />
+    <None Remove="Core\View\Pages\BookmarksPage.xaml" />
+    <None Remove="Core\View\Pages\HomePage.xaml" />
+    <None Remove="Core\View\Pages\MainPage.xaml" />
+    <None Remove="Core\View\Pages\NotePage.xaml" />
+    <None Remove="Core\View\Pages\SearchPage.xaml" />
+    <None Remove="Core\View\Pages\SettingsPage.xaml" />
+    <None Remove="Core\View\Pages\TagsPage.xaml" />
+    <None Remove="Core\View\Pages\TestPage.xaml" />
+    <None Remove="Core\View\Pages\TrashPage.xaml" />
+    <None Remove="Core\View\Windows\TestWindow.xaml" />
     <None Remove="Themes\Generic.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Remove="Assets\Test\Test.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -58,7 +63,6 @@
   <ItemGroup>
     <Folder Include="Common\Helpers\" />
     <Folder Include="Common\Extensions\" />
-    <Folder Include="Contracts\" />
     <Folder Include="Strings\ko-KR\" />
     <Folder Include="Strings\en-US\" />
   </ItemGroup>
@@ -75,7 +79,12 @@
     <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Core\Views\Pages\NoteBoardPage.xaml">
+    <None Update="Assets\Test\Test.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Core\Views\Pages\BoardPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
@@ -130,7 +139,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Core\Views\Pages\NoteBoardGroupPage.xaml">
+    <Page Update="Core\Views\Pages\UserGroupPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

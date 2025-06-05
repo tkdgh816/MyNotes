@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
 namespace MyNotes.Common.Messaging;
-internal readonly struct Token : IEquatable<Token>
+public readonly struct Token : IEquatable<Token>
 {
   public override bool Equals([NotNullWhen(true)] object? obj) => base.Equals(obj);
   public override int GetHashCode() => base.GetHashCode();

@@ -8,8 +8,8 @@
                     xmlns:controls2="using:CommunityToolkit.WinUI.Controls"
                     xmlns:ui="using:CommunityToolkit.WinUI"
                     xmlns:converters="using:MyNotes.Common.Converters"
-                    xmlns:views="using:MyNotes.Core.Views"
-                    xmlns:models="using:MyNotes.Core.Models">
+                    xmlns:view="using:MyNotes.Core.View"
+                    xmlns:model="using:MyNotes.Core.Model">
 
   <ResourceDictionary.ThemeDictionaries>
   </ResourceDictionary.ThemeDictionaries>
@@ -30,22 +30,22 @@
   <converters:StringWrapperConverter x:Key="StringWrapperConverter" />
   <converters:StringToUriConverter x:Key="StringToUriConverter" />
   <converters:TypeToObjectConverter x:Key="NavigationBookmarksToBoolConverter"
-                                    TargetType="models:NavigationBookmarks"
+                                    TargetType="model:NavigationBookmarks"
                                     MatchedValue="{StaticResource BooleanTrue}"
                                     FallbackValue="{StaticResource BooleanFalse}"
                                     AllowBaseType="True" />
-  <converters:TypeToObjectConverter x:Key="NavigationBoardToBoolConverter"
-                                    TargetType="models:NavigationBoard"
+  <converters:TypeToObjectConverter x:Key="NavigationUserBoardToBoolConverter"
+                                    TargetType="model:NavigationUserBoard"
                                     MatchedValue="{StaticResource BooleanTrue}"
                                     FallbackValue="{StaticResource BooleanFalse}"
                                     AllowBaseType="True" />
-  <converters:TypeToObjectConverter x:Key="NavigationBoardToVisibilityConverter"
-                                    TargetType="models:NavigationBoard"
+  <converters:TypeToObjectConverter x:Key="NavigationUserBoardToVisibilityConverter"
+                                    TargetType="model:NavigationUserBoard"
                                     MatchedValue="{StaticResource VisibilityVisible}"
                                     FallbackValue="{StaticResource VisibilityCollapsed}"
                                     AllowBaseType="False" />
-  <converters:TypeToObjectConverter x:Key="NavigationBoardGroupToBoolConverter"
-                                    TargetType="models:NavigationBoardGroup"
+  <converters:TypeToObjectConverter x:Key="NavigationUserGroupToBoolConverter"
+                                    TargetType="model:NavigationUserGroup"
                                     MatchedValue="{StaticResource BooleanTrue}"
                                     FallbackValue="{StaticResource BooleanFalse}"
                                     AllowBaseType="True" />
@@ -67,7 +67,7 @@
                                     TrueValue="{StaticResource IntersectIconSource}"
                                     FalseValue="{StaticResource UnionIconSource}" />
   <converters:IntToEnumConverter x:Key="IntToBackdropKindConverter"
-                                 EnumType="models:BackdropKind" />
+                                 EnumType="model:BackdropKind" />
   <!-- #endregion-->
 
   <!-- #region Resources -->
@@ -999,7 +999,7 @@
   <!--#endregion-->
 
   <!--#region SplitButton Style-->
-  <Style TargetType="views:AppSplitButton">
+  <Style TargetType="view:AppSplitButton">
     <Setter Property="Background"
             Value="{ThemeResource AppBasicButtonBackground}" />
     <Setter Property="BackgroundSizing"
@@ -1035,7 +1035,7 @@
 
     <Setter Property="Template">
       <Setter.Value>
-        <ControlTemplate TargetType="views:AppSplitButton">
+        <ControlTemplate TargetType="view:AppSplitButton">
           <Grid x:Name="RootGrid"
                 Background="{TemplateBinding Background}"
                 BackgroundSizing="{TemplateBinding BackgroundSizing}"
@@ -1165,7 +1165,7 @@
   </Style>
 
   <Style x:Key="AppFontIconLargeSplitButtonStyle"
-         TargetType="views:AppSplitButton">
+         TargetType="view:AppSplitButton">
     <Setter Property="Width"
             Value="48" />
     <Setter Property="Height"
@@ -1182,7 +1182,7 @@
   <!--#endregion-->
 
   <!--#region AppExtendedButton Style -->
-  <Style TargetType="views:AppCompoundButton">
+  <Style TargetType="view:AppCompoundButton">
     <Setter Property="Background"
             Value="{ThemeResource AppBasicButtonBackground}" />
     <Setter Property="BackgroundSizing"
@@ -1214,7 +1214,7 @@
 
     <Setter Property="Template">
       <Setter.Value>
-        <ControlTemplate TargetType="views:AppCompoundButton">
+        <ControlTemplate TargetType="view:AppCompoundButton">
           <Grid x:Name="RootGrid"
                 Background="{TemplateBinding Background}"
                 BackgroundSizing="{TemplateBinding BackgroundSizing}"
@@ -1348,7 +1348,7 @@
   </Style>
 
   <Style x:Key="AppNavigationButtonStyle"
-         TargetType="views:AppCompoundButton">
+         TargetType="view:AppCompoundButton">
     <Setter Property="BorderThickness"
             Value="0" />
     <Setter Property="CornerRadius"
@@ -1364,7 +1364,7 @@
   </Style>
 
   <Style x:Key="AppCommandBarButtonStyle"
-         TargetType="views:AppCompoundButton">
+         TargetType="view:AppCompoundButton">
     <Setter Property="BorderThickness"
             Value="0" />
     <Setter Property="Height"
@@ -1381,7 +1381,7 @@
   <!--#endregion-->
 
   <!--#region AppTagButton Style -->
-  <Style TargetType="views:AppTagButton">
+  <Style TargetType="view:AppTagButton">
     <Setter Property="Background"
             Value="{ThemeResource SubtleFillColorTertiaryBrush}" />
     <Setter Property="BackgroundSizing"
@@ -1415,7 +1415,7 @@
 
     <Setter Property="Template">
       <Setter.Value>
-        <ControlTemplate TargetType="views:AppTagButton">
+        <ControlTemplate TargetType="view:AppTagButton">
           <Grid x:Name="RootGrid"
                 Background="{TemplateBinding Background}"
                 BackgroundSizing="{TemplateBinding BackgroundSizing}"
@@ -1534,7 +1534,7 @@
   <!--#endregion-->
 
   <!--#region AppNavigationViewItem Style -->
-  <Style TargetType="views:AppNavigationViewItem">
+  <Style TargetType="view:AppNavigationViewItem">
     <Setter Property="Foreground"
             Value="{ThemeResource NavigationViewItemForeground}" />
     <Setter Property="Background"
@@ -2810,10 +2810,10 @@
   <!--#endregion-->
 
   <!--#region AppScrollView Style-->
-  <Style TargetType="views:AppScrollView">
+  <Style TargetType="view:AppScrollView">
     <Setter Property="Template">
       <Setter.Value>
-        <ControlTemplate TargetType="views:AppScrollView">
+        <ControlTemplate TargetType="view:AppScrollView">
           <Grid Background="{TemplateBinding Background}"
                 BorderBrush="{TemplateBinding BorderBrush}"
                 BorderThickness="{TemplateBinding BorderThickness}"
@@ -2923,10 +2923,10 @@
   <!--#endregion-->
 
   <!--#region AppScrollViewer Style-->
-  <Style TargetType="views:AppScrollViewer">
+  <Style TargetType="view:AppScrollViewer">
     <Setter Property="Template">
       <Setter.Value>
-        <ControlTemplate TargetType="views:AppScrollViewer">
+        <ControlTemplate TargetType="view:AppScrollViewer">
           <Grid Background="{TemplateBinding Background}"
                 BorderBrush="{TemplateBinding BorderBrush}"
                 BorderThickness="{TemplateBinding BorderThickness}"
@@ -3036,7 +3036,7 @@
   <!--#endregion-->
 
   <!--#region AppMenuFlyoutItem Style -->
-  <Style TargetType="views:AppMenuFlyoutItem">
+  <Style TargetType="view:AppMenuFlyoutItem">
     <Setter Property="Background"
             Value="{ThemeResource MenuFlyoutItemBackground}" />
     <Setter Property="BorderBrush"
@@ -3061,7 +3061,7 @@
             Value="{ThemeResource ControlCornerRadius}" />
     <Setter Property="Template">
       <Setter.Value>
-        <ControlTemplate TargetType="views:AppMenuFlyoutItem">
+        <ControlTemplate TargetType="view:AppMenuFlyoutItem">
           <ContentPresenter x:Name="LayoutRoot"
                             Content="{TemplateBinding Content}"
                             Padding="{TemplateBinding Padding}"

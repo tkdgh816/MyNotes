@@ -1,6 +1,6 @@
 ﻿namespace MyNotes.Common.Converters;
 
-public class BoolNegationConverter : IValueConverter
+internal class BoolNegationConverter : IValueConverter
 {
   public static bool Convert(object value) => !(value is bool boolValue && boolValue);
 

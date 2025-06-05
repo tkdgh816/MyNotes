@@ -2,7 +2,7 @@
 
 namespace MyNotes.Common.Commands;
 
-public class Command : ICommand
+internal class Command : ICommand
 {
   private readonly Action? _executeNoParams;
   private readonly Action<object>? _execute;
@@ -48,7 +48,7 @@ public class Command : ICommand
   }
 }
 
-public class Command<T> : ICommand
+internal class Command<T> : ICommand
 {
   private readonly Action<T>? _execute;
   private readonly Predicate<T>? _canExecute;

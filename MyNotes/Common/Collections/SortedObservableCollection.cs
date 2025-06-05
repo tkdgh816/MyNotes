@@ -2,9 +2,9 @@
 
 namespace MyNotes.Common.Collections;
 
-public class SortedObervableCollection<T> : Collection<T>, INotifyCollectionChanged
+internal class SortedObservableCollection<T> : Collection<T>, INotifyCollectionChanged
 {
-  public SortedObervableCollection() : base(new List<T>())
+  public SortedObservableCollection() : base(new List<T>())
   {
     SortDescriptions = new();
     SortDescriptions.CollectionChanged += OnSortDescripTionChanged;
@@ -12,14 +12,14 @@ public class SortedObervableCollection<T> : Collection<T>, INotifyCollectionChan
       _comparers.Add(Comparer<T>.Default);
   }
 
-  public SortedObervableCollection(IEnumerable<SortDescription<T>> sortDescriptions) : this()
+  public SortedObservableCollection(IEnumerable<SortDescription<T>> sortDescriptions) : this()
   {
     SortDescriptions = new(sortDescriptions);
     SortDescriptions.CollectionChanged += OnSortDescripTionChanged;
     InitializeComparer();
   }
 
-  public SortedObervableCollection(IEnumerable<T> items, IEnumerable<SortDescription<T>>? sortDescriptions = null) : this()
+  public SortedObservableCollection(IEnumerable<T> items, IEnumerable<SortDescription<T>>? sortDescriptions = null) : this()
   {
     if (sortDescriptions is not null)
     {
@@ -33,6 +33,11 @@ public class SortedObervableCollection<T> : Collection<T>, INotifyCollectionChan
         _comparers.Add(Comparer<T>.Default);
     }
     AddRange(items);
+  }
+
+  ~SortedObservableCollection()
+  {
+    SortDescriptions.CollectionChanged -= OnSortDescripTionChanged;
   }
 
   public ObservableCollection<SortDescription<T>> SortDescriptions { get; }

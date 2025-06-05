@@ -1,5 +1,5 @@
 ﻿namespace MyNotes.Common.Converters;
-public class NullToBoolConverter : IValueConverter
+internal class NullToBoolConverter : IValueConverter
 {
   public static bool Convert(object value)
     => value is null;

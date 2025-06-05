@@ -2,7 +2,7 @@
 
 namespace MyNotes.Common.Collections;
 
-public class IncrementalObservableCollection<T> : ObservableCollection<T>, ISupportIncrementalLoading
+internal class IncrementalObservableCollection<T> : ObservableCollection<T>, ISupportIncrementalLoading
 {
   private readonly Func<uint, Task<T[]>> _loadDataFunc;
   private readonly uint _pageSize;

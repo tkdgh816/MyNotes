@@ -1,6 +1,6 @@
 ﻿namespace MyNotes.Common.Converters;
 
-public class ColorToBrushConverter : IValueConverter
+internal class ColorToBrushConverter : IValueConverter
 {
   public static SolidColorBrush Convert(object value)
     => value is Color color ? new SolidColorBrush(color) : new SolidColorBrush(Colors.Transparent);

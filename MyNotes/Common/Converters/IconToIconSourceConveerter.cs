@@ -1,8 +1,8 @@
-﻿using MyNotes.Core.Models;
+﻿using MyNotes.Core.Model;
 
 namespace MyNotes.Common.Converters;
 
-public class IconToIconSourceConveerter : IValueConverter
+internal class IconToIconSourceConveerter : IValueConverter
 {
   public static IconSource? Convert(object value)
   {

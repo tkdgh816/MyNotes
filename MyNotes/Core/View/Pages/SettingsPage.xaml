@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page x:Class="MyNotes.Core.View.SettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="using:CommunityToolkit.WinUI"
+      xmlns:controls="using:CommunityToolkit.WinUI.Controls">
+
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition />
+    </Grid.RowDefinitions>
+
+    <StackPanel Orientation="Horizontal"
+                Spacing="8">
+      <TextBlock Text="Settings"
+                 Style="{StaticResource TitleTextBlockStyle}" />
+    </StackPanel>
+
+    <ScrollViewer x:Name="View_ScrollViewer"
+                  Grid.Row="1">
+      <StackPanel Padding="0,0,18,12"
+                  Spacing="12">
+        <!--#region Appearence -->
+        <StackPanel Spacing="4">
+          <TextBlock Text="Appearence"
+                     Padding="4"
+                     Style="{StaticResource BaseTextBlockStyle}" />
+
+          <!-- App Theme -->
+          <controls:SettingsCard Header="App theme"
+                                 HeaderIcon="{ui:FontIcon Glyph=&#xE790;}"
+                                 Description="Select which app theme to display">
+            <ComboBox>
+              <ComboBoxItem Content="Use System Settings"
+                            Tag="Default" />
+              <ComboBoxItem Content="Light"
+                            Tag="Light" />
+              <ComboBoxItem Content="Dark"
+                            Tag="Dark" />
+            </ComboBox>
+          </controls:SettingsCard>
+
+          <!-- Language -->
+          <controls:SettingsCard Header="Language (requires relaunch)"
+                                 HeaderIcon="{ui:FontIcon Glyph=&#xF2B7;}">
+            <controls:SettingsCard.Description>
+              <StackPanel Spacing="4">
+                <TextBlock Text="Selects a display language for this app" />
+                <InfoBar x:Name="LanguageInfoBar"
+                         IsOpen="True"
+                         Severity="Warning"
+                         Message="App need to be relaunced in order to apply your new display language"
+                         IsClosable="False"
+                         Visibility="Visible">
+                  <InfoBar.ActionButton>
+                    <Button Content="Relaunch" />
+                  </InfoBar.ActionButton>
+                </InfoBar>
+              </StackPanel>
+            </controls:SettingsCard.Description>
+            <ComboBox>
+              <ComboBoxItem Content="Use System Default"
+                            Tag="system" />
+              <ComboBoxItem Content="English"
+                            Tag="en-US" />
+              <ComboBoxItem Content="한국어"
+                            Tag="ko-KR" />
+            </ComboBox>
+          </controls:SettingsCard>
+
+          <!-- NavigationView PaneDisplayMode -->
+          <controls:SettingsCard Header="NavigationView PaneDisplayMode"
+                                 HeaderIcon="{ui:FontIcon Glyph=&#xE7C4;}"
+                                 Description="NavigationView PaneDisplayMode">
+            <ComboBox>
+              <ComboBoxItem Content="Auto" />
+              <ComboBoxItem Content="Left" />
+              <ComboBoxItem Content="Top"
+                            Visibility="Collapsed" />
+              <ComboBoxItem Content="Compact" />
+              <ComboBoxItem Content="Minimal" />
+            </ComboBox>
+          </controls:SettingsCard>
+
+          <!-- Bookmarked Note To Top -->
+          <controls:SettingsCard Header="Move bookmarked notes to top"
+                                 HeaderIcon="{ui:FontIcon Glyph=&#xE8A4;}"
+                                 Description="Pin bookmarked notes to the top of each list page">
+            <ToggleSwitch IsOn="True" />
+          </controls:SettingsCard>
+        </StackPanel>
+        <!--#endregion-->
+
+        <!--#region General -->
+        <StackPanel Spacing="4">
+          <TextBlock x:Uid="Settings_General_TextBlock"
+                     Text="General"
+                     Padding="4"
+                     Style="{ThemeResource BaseTextBlockStyle}" />
+
+          <!-- Confirm Deletion -->
+          <controls:SettingsCard Header="Confirm before deleting"
+                                 HeaderIcon="Accept"
+                                 Description="Display a confirmation dialog before deleting a note">
+            <ToggleSwitch IsOn="True" />
+          </controls:SettingsCard>
+
+          <!-- Use Trash -->
+          <controls:SettingsCard Header="Use trash"
+                                 HeaderIcon="Delete"
+                                 Description="Move notes to trash when removed">
+            <ToggleSwitch IsOn="True" />
+          </controls:SettingsCard>
+
+          <!-- Always On Top -->
+          <controls:SettingsCard Header="Always on top"
+                                 HeaderIcon="{ui:FontIcon Glyph=&#xE7C4;}"
+                                 Description="App will always be the topmost window on the desktop">
+            <ToggleSwitch IsOn="True" />
+          </controls:SettingsCard>
+
+          <!-- Pin To Taskbar -->
+          <controls:SettingsCard Header="Pin to taskbar"
+                                 HeaderIcon="{ui:FontIcon Glyph=&#xE718;}"
+                                 Description="Pin this app to the taskbar for quick access">
+            <Button Content="Pin to taskbar"
+                    Style="{ThemeResource AccentButtonStyle}" />
+          </controls:SettingsCard>
+
+          <!-- Startup -->
+          <controls:SettingsCard Header="Run app at system startup"
+                                 HeaderIcon="{ui:FontIcon Glyph=&#xE7C4;}"
+                                 Description="Run app at system startup">
+            <Button Content="Register for startup"
+                    Style="{ThemeResource AccentButtonStyle}" />
+          </controls:SettingsCard>
+        </StackPanel>
+        <!--#endregion-->
+
+        <!--#region Note -->
+        <StackPanel Spacing="4">
+          <TextBlock Text="Note"
+                     Padding="4"
+                     Style="{ThemeResource BaseTextBlockStyle}" />
+          <!-- Default Note Background -->
+          <controls:SettingsCard Header="Background"
+                                 HeaderIcon="{ui:FontIcon Glyph=&#xE790;}"
+                                 Description="Change the background color of a new note">
+            <SplitButton>
+              <Border Background="LightGoldenrodYellow"
+                      Width="24"
+                      Height="24"
+                      CornerRadius="{ThemeResource ControlCornerRadius}" />
+              <SplitButton.Flyout>
+                <Flyout Placement="Bottom"
+                        ShouldConstrainToRootBounds="False">
+                  <StackPanel>
+                    <ColorPicker Color="LightGoldenrodYellow"
+                                 IsAlphaEnabled="True"
+                                 IsMoreButtonVisible="True" />
+                  </StackPanel>
+                </Flyout>
+              </SplitButton.Flyout>
+            </SplitButton>
+          </controls:SettingsCard>
+
+          <!-- Default Note Backdrop -->
+          <controls:SettingsCard Header="Backdrop"
+                                 HeaderIcon="{ui:FontIcon Glyph=&#xF4A5;}"
+                                 Description="Change the backdrop effect of a new note">
+            <ComboBox>
+              <ComboBoxItem Content="Acrylic" />
+              <ComboBoxItem Content="Mica" />
+              <ComboBoxItem Content="None" />
+            </ComboBox>
+          </controls:SettingsCard>
+
+          <!-- Default Note Size -->
+          <controls:SettingsCard Header="Size"
+                                 HeaderIcon="{ui:FontIcon Glyph=&#xE9A6;}"
+                                 Description="Change the size of a new note (width ⨉ height)">
+            <StackPanel x:Name="NumberBoxPanel"
+                        Orientation="Horizontal"
+                        Spacing="8">
+              <NumberBox SpinButtonPlacementMode="Compact"
+                         Value="500"
+                         Minimum="300"
+                         Maximum="1000"
+                         SmallChange="10" />
+              <TextBlock Text="⨉"
+                         VerticalAlignment="Center" />
+              <NumberBox SpinButtonPlacementMode="Compact"
+                         Value="400"
+                         Minimum="200"
+                         Maximum="1000"
+                         SmallChange="10" />
+            </StackPanel>
+          </controls:SettingsCard>
+        </StackPanel>
+        <!--#endregion-->
+
+        <!--#region Others -->
+        <StackPanel Spacing="4">
+          <TextBlock Text="Others"
+                     Padding="4"
+                     Style="{ThemeResource BaseTextBlockStyle}" />
+          <controls:SettingsCard Header="Read Settings">
+            <Button Content="Read Settings" />
+          </controls:SettingsCard>
+          <controls:SettingsCard Header="Clear All Settings">
+            <Button Content="Clear All Settings" />
+          </controls:SettingsCard>
+          <controls:SettingsCard Header="Read Lists Database">
+            <Button Content="Read Lists Database" />
+          </controls:SettingsCard>
+          <controls:SettingsCard Header="Read Notes Database">
+            <Button Content="Read Notes Database" />
+          </controls:SettingsCard>
+        </StackPanel>
+
+        <!--#region About -->
+        <StackPanel Spacing="4">
+          <TextBlock Text="About"
+                     Padding="4"
+                     Style="{ThemeResource BaseTextBlockStyle}" />
+          <controls:SettingsExpander Header="MyNotes"
+                                     HeaderIcon="{ui:BitmapIcon Source=ms-appx:///Assets/icons/app/AppIcon_48.png, ShowAsMonochrome=False}"
+                                     Description="© 2024. All rights reserved.">
+            <TextBlock Text="Version 1.0.0" />
+            <controls:SettingsExpander.Items>
+              <controls:SettingsCard Header="Clear All Settings">
+                <Button Content="Clear All Settings" />
+              </controls:SettingsCard>
+              <controls:SettingsCard Header="Read Settings">
+                <Button Content="Read Settings" />
+              </controls:SettingsCard>
+            </controls:SettingsExpander.Items>
+          </controls:SettingsExpander>
+        </StackPanel>
+        <!--#endregion-->
+
+      </StackPanel>
+    </ScrollViewer>
+  </Grid>
+</Page>

@@ -1,5 +1,5 @@
 ﻿namespace MyNotes.Common.Converters;
-public class ObjectToVisibilityConverter : DependencyObject, IValueConverter
+internal class ObjectToVisibilityConverter : DependencyObject, IValueConverter
 {
   public object Convert(object value, Type targetType, object parameter, string language)
   => (value is not null && ObjectType.IsAssignableFrom(value.GetType()) && TargetValue.Equals(value)) ? Visibility.Visible : Visibility.Collapsed;
