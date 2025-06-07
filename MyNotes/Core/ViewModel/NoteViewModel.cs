@@ -26,6 +26,14 @@ internal class NoteViewModel : ViewModelBase
   private readonly NoteService _noteService;
   public Note Note { get; private set; }
 
+  private bool _isWindowActive = true;
+  public bool IsWindowActive
+  {
+    get => _isWindowActive;
+    set => SetProperty(ref _isWindowActive, value);
+  }
+
+  public void Print() => Debug.WriteLine("Print");
   public bool IsNoteInBoard()
   {
     if (_navigationService.CurrentNavigation is NavigationBoard navigationBoard)
@@ -131,7 +139,6 @@ internal class NoteViewModel : ViewModelBase
   public void ForceUpdateNoteProperties()
   {
     _noteService.UpdateNote(Note, NoteUpdateFields.All);
-    //_databaseService.UpdateNote(Note, _changedNoteProperties.Count > 0 || IsBodyChanged);
     ClearNotePropertyChangedFlags();
   }
 
@@ -183,7 +190,6 @@ internal class NoteViewModel : ViewModelBase
     BookmarkCommand = new(() =>
     {
       Note.IsBookmarked = !Note.IsBookmarked;
-      //DatabaseService.UpdateNote(Note, nameof(Note.IsBookmarked), false);
       if (!Note.IsBookmarked)
         WeakReferenceMessenger.Default.Send(new Message(this), Tokens.RemoveUnbookmarkedNote);
     });
@@ -191,7 +197,6 @@ internal class NoteViewModel : ViewModelBase
     RemoveCommand = new(() =>
     {
       Note.IsTrashed = true;
-      //DatabaseService.UpdateNote(Note, nameof(Note.IsTrashed), false);
     });
 
     MoveToBoardCommand = new((noteViewModel) =>

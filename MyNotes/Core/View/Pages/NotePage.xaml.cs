@@ -46,19 +46,6 @@ internal sealed partial class NotePage : Page
   #endregion
 
   static double _dpi = 1.25;
-  private void NoteWindow_Activated(object sender, WindowActivatedEventArgs args)
-  {
-    switch (args.WindowActivationState)
-    {
-      case WindowActivationState.Deactivated:
-        View_TitleBarGrid.Focus(FocusState.Programmatic);
-        VisualStateManager.GoToState(this, "WindowDeactivated", false);
-        break;
-      default:
-        VisualStateManager.GoToState(this, "WindowActivated", false);
-        break;
-    }
-  }
 
   private void View_TextEditorRichEditBox_Loaded(object sender, RoutedEventArgs e)
   {

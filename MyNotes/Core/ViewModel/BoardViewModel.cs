@@ -8,16 +8,14 @@ namespace MyNotes.Core.ViewModel;
 
 internal class BoardViewModel : ViewModelBase
 {
-  public BoardViewModel(NavigationBoard navigation, WindowService windowService, DatabaseService databaseService, NoteService noteService)
+  public BoardViewModel(NavigationBoard navigation, WindowService windowService, NoteService noteService)
   {
     Navigation = navigation;
     _windowService = windowService;
-    _databaseService = databaseService;
     _noteService = noteService;
 
     NoteViewModels = noteService.GetNoteViewModels(navigation);
     NoteViewModels.SortDescriptions.Add(new SortDescription<NoteViewModel>(func: vm => vm.Note.Modified, direction: SortDirection.Descending, keyPropertyName: "Modified"));
-    RegisterEvents();
     SetCommands();
     RegisterMessengers();
   }
@@ -31,7 +29,6 @@ internal class BoardViewModel : ViewModelBase
         if (!_windowService.IsNoteWindowActive(noteViewModel.Note))
           noteViewModel.Dispose(); 
       }
-      UnregisterEvents();
       UnregisterMessengers();
       App.Current.GetService<BoardViewModelFactory>().Close(Navigation);
     }
@@ -40,29 +37,9 @@ internal class BoardViewModel : ViewModelBase
   }
 
   private readonly WindowService _windowService;
-  private readonly DatabaseService _databaseService;
   private readonly NoteService _noteService;
 
-  #region Handling Events
-  private void RegisterEvents()
-  {
-    Navigation.PropertyChanged += OnNavigationPropertyChanged;
-  }
-
-  private void UnregisterEvents()
-  {
-    Navigation.PropertyChanged -= OnNavigationPropertyChanged;
-  }
-  #endregion
-
-  #region Navigation
   public NavigationBoard Navigation { get; }
-  private void OnNavigationPropertyChanged(object? sender, PropertyChangedEventArgs e)
-  {
-    if (e.PropertyName == "Icon")
-      _databaseService.UpdateBoard((NavigationUserBoard)Navigation, "Icon");
-  }
-  #endregion
 
   #region NoteViewModels: Notes Collection
   public SortedObservableCollection<NoteViewModel> NoteViewModels { get; } = null!;

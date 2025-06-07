@@ -5,8 +5,6 @@ using Microsoft.Data.Sqlite;
 using MyNotes.Core.Dto;
 using MyNotes.Core.Model;
 
-using ToolkitColorHelper = CommunityToolkit.WinUI.Helpers.ColorHelper;
-
 namespace MyNotes.Core.Service;
 
 internal class DatabaseService
@@ -34,129 +32,141 @@ internal class DatabaseService
       command.ExecuteNonQuery();
   }
 
-  #region Board
-  public void AddBoard(NavigationUserBoard navigation)
+  #region Board DTO
+  public void AddBoard(BoardDbInsertDto dto)
   {
-    NavigationUserGroup parent = navigation.Parent!;
-    NavigationUserBoard? previous, next;
-    int navigationIndex = parent.IndexOfChild(navigation);
-    if (parent.ChildCount <= 1)
-    {
-      previous = null;
-      next = null;
-    }
-    else if (navigationIndex == parent.ChildCount - 1)
-    {
-      previous = parent.GetChild(navigationIndex - 1);
-      next = null;
-    }
-    else
-    {
-      previous = parent.GetChild(navigationIndex - 1);
-      next = parent.GetChild(navigationIndex + 1);
-    }
-
-    object? nextId = next is null ? DBNull.Value : next.Id;
-
     using SqliteConnection connection = new(_connectionString);
     connection.Open();
-    using SqliteCommand command0 = new(Queries.Insert.Boards, connection);
-    command0.Parameters.AddWithValue("@id", navigation.Id);
-    command0.Parameters.AddWithValue("@grouped", navigation is NavigationUserGroup);
-    command0.Parameters.AddWithValue("@parent", parent.Id);
-    command0.Parameters.AddWithValue("@next", nextId);
-    command0.Parameters.AddWithValue("@name", navigation.Name);
-    command0.Parameters.AddWithValue("@icon_type", (int)navigation.Icon.IconType);
-    command0.Parameters.AddWithValue("@icon_value", GetIconValue(navigation.Icon));
-    command0.ExecuteNonQuery();
 
-    if (previous is not null)
+    object previous = dto.Previous is null ? DBNull.Value : dto.Previous;
+
+    if (dto.Next is not null)
     {
-      using SqliteCommand command1 = new(Queries.Update.Board_Next, connection);
-      command1.Parameters.AddWithValue("@id", previous.Id);
-      command1.Parameters.AddWithValue("@next", navigation.Id);
-      command1.ExecuteNonQuery();
+      string updateNextQuery = @"UPDATE Boards SET previous = @previous WHERE id = @id";
+      using SqliteCommand updateNextCommand = new(updateNextQuery, connection);
+      updateNextCommand.Parameters.AddWithValue("@id", dto.Next);
+      updateNextCommand.Parameters.AddWithValue("@previous", dto.Id);
+      updateNextCommand.ExecuteNonQuery();
     }
+
+    using SqliteCommand insertBoardCommand = new(Queries.Insert.Boards, connection);
+    insertBoardCommand.Parameters.AddWithValue("@id", dto.Id);
+    insertBoardCommand.Parameters.AddWithValue("@grouped", dto.Grouped);
+    insertBoardCommand.Parameters.AddWithValue("@parent", dto.Parent);
+    insertBoardCommand.Parameters.AddWithValue("@previous", previous);
+    insertBoardCommand.Parameters.AddWithValue("@name", dto.Name);
+    insertBoardCommand.Parameters.AddWithValue("@icon_type", dto.IconType);
+    insertBoardCommand.Parameters.AddWithValue("@icon_value", dto.IconValue);
+    insertBoardCommand.ExecuteNonQuery();
   }
 
-  public void UpdateBoard(NavigationUserBoard navigation, string updateProperty)
+  public async Task<IEnumerable<BoardDbDto>> GetBoards()
   {
-    using SqliteConnection connection = new(_connectionString);
-    connection.Open();
-    if (updateProperty == "Name")
+    List<BoardDbDto> boards = new();
+    await using SqliteConnection connection = new(_connectionString);
+    await connection.OpenAsync();
+
+    string query = @"SELECT * FROM Boards";
+    await using SqliteCommand command = new(query, connection);
+    await using SqliteDataReader reader = command.ExecuteReader();
+    while (await reader.ReadAsync())
     {
-      using SqliteCommand command = new(Queries.Update.Board_Name, connection);
-      command.Parameters.AddWithValue("@id", navigation.Id);
-      command.Parameters.AddWithValue("@name", navigation.Name);
-      command.ExecuteNonQuery();
+      Guid id = GetReaderValue<Guid>(reader, "id")!;
+      bool grouped = GetReaderValue<bool>(reader, "grouped")!;
+      Guid parent = GetReaderValue<Guid>(reader, "parent")!;
+      Guid previous = GetReaderValue<Guid>(reader, "previous")!;
+      string name = GetReaderValue<string>(reader, "name")!;
+      int iconType = GetReaderValue<int>(reader, "icon_type");
+      int iconValue = GetReaderValue<int>(reader, "icon_value");
+      boards.Add(new BoardDbDto() { Id = id, Grouped = grouped, Parent = parent, Previous = previous, Name = name, IconType = iconType, IconValue = iconValue });
     }
-    else if (updateProperty == "Icon")
-    {
-      using SqliteCommand command = new(Queries.Update.Board_Icon, connection);
-      command.Parameters.AddWithValue("@id", navigation.Id);
-      command.Parameters.AddWithValue("@icon_type", (int)navigation.Icon.IconType);
-      command.Parameters.AddWithValue("@icon_value", GetIconValue(navigation.Icon));
-      command.ExecuteNonQuery();
-    }
+
+    return boards;
   }
 
-  public void UpdateBoardHierarchy(NavigationUserBoard navigation, NavigationUserBoard? next)
+  private Dictionary<string, object> GetBoardUpdateFieldValue(BoardDbUpdateDto dto)
   {
+    Dictionary<string, object> fields = new();
+    var updateFields = dto.UpdateFields;
+    if (updateFields == BoardUpdateFields.None)
+      return fields;
+
+    if (updateFields.HasFlag(BoardUpdateFields.Parent) && dto.Parent is not null)
+      fields.Add("parent", dto.Parent);
+    if (updateFields.HasFlag(BoardUpdateFields.Previous) && dto.Previous is not null)
+      fields.Add("previous", dto.Previous);
+    if (updateFields.HasFlag(BoardUpdateFields.Name) && dto.Name is not null)
+      fields.Add("name", dto.Name);
+    if (updateFields.HasFlag(BoardUpdateFields.IconType) && dto.IconType is not null)
+      fields.Add("icon_type", dto.IconType);
+    if (updateFields.HasFlag(BoardUpdateFields.IconValue) && dto.IconValue is not null)
+      fields.Add("icon_value", dto.IconValue);
+    return fields;
+  }
+
+  public void UpdateBoard(BoardDbUpdateDto dto)
+  {
+    Dictionary<string, object> fields = GetBoardUpdateFieldValue(dto);
+
+    if (fields.Count == 0)
+      return;
+
+    string setClause = string.Join(", ", fields.Select(field => $"{field.Key} = @{field.Key}"));
+    string query = @$"UPDATE Boards SET {setClause} WHERE id = @id";
+
     using SqliteConnection connection = new(_connectionString);
     connection.Open();
-    string query = @"UPDATE boards SET parent = @parent, next = @next WHERE id = @id";
     using SqliteCommand command = new(query, connection);
-    command.Parameters.AddWithValue("@id", navigation.Id);
-    command.Parameters.AddWithValue("@parent", navigation.Parent!.Id);
-    if (next is null)
-      command.Parameters.AddWithValue("@next", DBNull.Value);
-    else
-      command.Parameters.AddWithValue("@next", next.Id);
+    command.Parameters.AddWithValue("@id", dto.Id);
+    foreach (var field in fields)
+      command.Parameters.AddWithValue($"@{field.Key}", field.Value);
     command.ExecuteNonQuery();
   }
 
-  public void DeleteBoard(NavigationUserBoard navigation)
+  public void DeleteBoard(BoardDbDeleteDto dto)
   {
-    Guid previous = Guid.Empty;
-    Guid next = Guid.Empty;
     using SqliteConnection connection = new(_connectionString);
     connection.Open();
 
-    string query1 = @"SELECT id from boards WHERE parent = @parent AND next = @next";
-    using SqliteCommand command1 = new(query1, connection);
-    command1.Parameters.AddWithValue("@parent", navigation.Parent!.Id);
-    command1.Parameters.AddWithValue("@next", navigation.Id);
-    using SqliteDataReader reader1 = command1.ExecuteReader();
-    if (reader1.Read())
-      previous = GetReaderValue<Guid>(reader1, "id");
+    object? previous = null;
+    object? next = null;
 
-    string query2 = @"SELECT next from boards WHERE id = @id";
-    using SqliteCommand command2 = new(query2, connection);
-    command2.Parameters.AddWithValue("@id", navigation.Id);
-    using SqliteDataReader reader2 = command2.ExecuteReader();
-    if (reader2.Read())
-      next = GetReaderValue<Guid>(reader2, "next");
-
-    string query3 = @"DELETE from boards WHERE id = @id";
-    using SqliteCommand command3 = new(query3, connection);
-    command3.Parameters.AddWithValue("@id", navigation.Id);
-
-    if (command3.ExecuteNonQuery() > 0)
+    string getPreviousQuery = @"SELECT previous from boards WHERE id = @id";
+    using SqliteCommand getPreviousCommand = new(getPreviousQuery, connection);
+    getPreviousCommand.Parameters.AddWithValue("@id", dto.Id);
+    using SqliteDataReader getPreviousReader = getPreviousCommand.ExecuteReader();
+    if (getPreviousReader.Read())
     {
-      if (previous != Guid.Empty)
+      Guid dbPrevious = GetReaderValue<Guid>(getPreviousReader, "previous");
+      previous = dbPrevious == Guid.Empty ? null : dbPrevious;
+    }
+
+    string getNextQuery = @"SELECT id from boards WHERE previous = @previous";
+    using SqliteCommand getNextCommand = new(getNextQuery, connection);
+    getNextCommand.Parameters.AddWithValue("@previous", dto.Id);
+    using SqliteDataReader getNextReader = getNextCommand.ExecuteReader();
+    if (getNextReader.Read())
+      next = GetReaderValue<Guid>(getNextReader, "id");
+
+    string deleteBoardQuery = @"DELETE from Boards WHERE id = @id";
+    using SqliteCommand deleteBoardCommand = new(deleteBoardQuery, connection);
+    deleteBoardCommand.Parameters.AddWithValue("@id", dto.Id);
+    if (deleteBoardCommand.ExecuteNonQuery() > 0)
+    {
+      previous = previous is null ? DBNull.Value : previous;
+      if (next is not null)
       {
-        object newNext = (next == Guid.Empty) ? DBNull.Value : next;
-        string query4 = @"UPDATE boards SET next = @next WHERE id = @id";
-        using SqliteCommand command4 = new(query4, connection);
-        command4.Parameters.AddWithValue("@next", newNext);
-        command4.Parameters.AddWithValue("@id", previous);
-        command4.ExecuteNonQuery();
+        string updateNextQuery = @"UPDATE Boards SET previous = @previous WHERE id = @id";
+        using SqliteCommand updateNextCommand = new(updateNextQuery, connection);
+        updateNextCommand.Parameters.AddWithValue("@id", next);
+        updateNextCommand.Parameters.AddWithValue("@previous", previous);
+        updateNextCommand.ExecuteNonQuery();
       }
-      // Remove notes
-      string query5 = @"UPDATE notes SET trashed = 1 WHERE parent = @parent";
-      using SqliteCommand command5 = new(query5, connection);
-      command5.Parameters.AddWithValue("@parent", navigation.Id);
-      command5.ExecuteNonQuery();
+
+      string removeNotesQuery = @"UPDATE Notes SET trashed = 1 WHERE parent = @parent";
+      using SqliteCommand removeNotesCommand = new(removeNotesQuery, connection);
+      removeNotesCommand.Parameters.AddWithValue("@parent", dto.Id);
+      removeNotesCommand.ExecuteNonQuery();
     }
   }
   #endregion
@@ -227,7 +237,7 @@ internal class DatabaseService
       return;
 
     string setClause = string.Join(", ", fields.Select(field => $"{field.Key} = @{field.Key}"));
-    string query = @$"UPDATE notes SET {setClause} WHERE id = @id";
+    string query = @$"UPDATE Notes SET {setClause} WHERE id = @id";
 
     using SqliteConnection connection = new(_connectionString);
     connection.Open();
@@ -238,44 +248,56 @@ internal class DatabaseService
     command.ExecuteNonQuery();
   }
 
-  public IEnumerable<NoteDbDto> GetNotes(NavigationUserBoard navigation)
+  public async Task<IEnumerable<NoteDbDto>> GetNotes(NavigationUserBoard navigation)
   {
-    using SqliteConnection connection = new(_connectionString);
-    connection.Open();
+    List<NoteDbDto> notes = new();
+    await using SqliteConnection connection = new(_connectionString);
+    await connection.OpenAsync();
 
     string query = "SELECT * FROM Notes WHERE parent = @parent AND trashed = 0";
-    using SqliteCommand command = new(query, connection);
+    await using SqliteCommand command = new(query, connection);
     command.Parameters.AddWithValue("@parent", navigation.Id);
-    using SqliteDataReader reader = command.ExecuteReader();
-    while (reader.Read())
-      yield return CreateDto(reader);
+
+    await using SqliteDataReader reader = command.ExecuteReader();
+    while (await reader.ReadAsync())
+      notes.Add(CreateNoteDto(reader));
+
+    return notes;
   }
 
-  public IEnumerable<NoteDbDto> GetBookmarkedNotes()
+  public async Task<IEnumerable<NoteDbDto>> GetBookmarkedNotes()
   {
-    using SqliteConnection connection = new(_connectionString);
-    connection.Open();
+    List<NoteDbDto> notes = new();
+    await using SqliteConnection connection = new(_connectionString);
+    await connection.OpenAsync();
 
     string query = "SELECT * FROM Notes WHERE bookmarked = 1 AND trashed = 0";
-    using SqliteCommand command = new(query, connection);
-    using SqliteDataReader reader = command.ExecuteReader();
-    while (reader.Read())
-      yield return CreateDto(reader);
+    await using SqliteCommand command = new(query, connection);
+
+    await using SqliteDataReader reader = command.ExecuteReader();
+    while (await reader.ReadAsync())
+      notes.Add(CreateNoteDto(reader));
+
+    return notes;
   }
 
-  public IEnumerable<NoteDbDto> GetTrashedNotes()
+  public async Task<IEnumerable<NoteDbDto>> GetTrashedNotes()
   {
-    using SqliteConnection connection = new(_connectionString);
-    connection.Open();
+    List<NoteDbDto> notes = new();
+    await using SqliteConnection connection = new(_connectionString);
+    await connection.OpenAsync();
 
     string query = "SELECT * FROM Notes WHERE trashed = 1";
-    using SqliteCommand command = new(query, connection);
-    using SqliteDataReader reader = command.ExecuteReader();
-    while (reader.Read())
-      yield return CreateDto(reader);
+    await using SqliteCommand command = new(query, connection);
+
+    await using SqliteDataReader reader = command.ExecuteReader();
+    while (await reader.ReadAsync())
+      notes.Add(CreateNoteDto(reader));
+
+    return notes;
   }
 
-  private NoteDbDto CreateDto(SqliteDataReader reader)
+  private NoteDbDto CreateNoteDto(SqliteDataReader reader)
   {
     var id = new Guid(GetReaderValue<string>(reader, "id")!);
     var parent = new Guid(GetReaderValue<string>(reader, "parent")!);
@@ -291,7 +313,7 @@ internal class DatabaseService
     var positionY = GetReaderValue<int>(reader, "position_y");
     var bookmarked = GetReaderValue<bool>(reader, "bookmarked");
     var trashed = GetReaderValue<bool>(reader, "trashed");
-    ImmutableList<string> tags = [.. GetTags(id)];
+    ImmutableList<string> tags = [.. GetTags(id).Result];
 
     NoteDbDto noteDbDto = new() { Id = id, Parent = parent, Created = created, Modified = modified, Title = title, Body = body, Background = background, Backdrop = backdrop, Width = width, Height = height, PositionX = positionX, PositionY = positionY, Bookmarked = bookmarked, Trashed = trashed, Tags = tags };
     return noteDbDto;
@@ -299,43 +321,54 @@ internal class DatabaseService
   #endregion
 
   #region Tags
-  public IEnumerable<string> GetTagsAll()
+  public async Task<IEnumerable<string>> GetTagsAll()
   {
-    using SqliteConnection connection = new(_connectionString);
-    connection.Open();
+    List<string> tags = new();
+    await using SqliteConnection connection = new(_connectionString);
+    await connection.OpenAsync();
 
     string query = "SELECT * FROM Tags";
-    using SqliteCommand command = new(query, connection);
+    await using SqliteCommand command = new(query, connection);
 
-    using SqliteDataReader reader = command.ExecuteReader();
-    while (reader.Read())
-      yield return GetReaderValue<string>(reader, "tag")!;
+    await using SqliteDataReader reader = command.ExecuteReader();
+    while (await reader.ReadAsync())
+      tags.Add(GetReaderValue<string>(reader, "tag")!);
+
+    return tags;
   }
 
-  public IEnumerable<string> GetTags(Note note)
+  public async Task<IEnumerable<string>> GetTags(Note note)
   {
-    using SqliteConnection connection = new(_connectionString);
-    connection.Open();
+    List<string> tags = new();
+    await using SqliteConnection connection = new(_connectionString);
+    await connection.OpenAsync();
     string query = "SELECT tag FROM NotesTags WHERE id = @id ORDER BY tag ASC";
-    using SqliteCommand command = new(query, connection);
+    
+    await using SqliteCommand command = new(query, connection);
     command.Parameters.AddWithValue("@id", note.Id);
 
-    using SqliteDataReader reader = command.ExecuteReader();
-    while (reader.Read())
-      yield return GetReaderValue<string>(reader, "tag")!;
+    await using SqliteDataReader reader = command.ExecuteReader();
+    while (await reader.ReadAsync())
+      tags.Add(GetReaderValue<string>(reader, "tag")!);
+    
+    return tags;
   }
 
-  public IEnumerable<string> GetTags(Guid id)
+  public async Task<IEnumerable<string>> GetTags(Guid id)
   {
-    using SqliteConnection connection = new(_connectionString);
-    connection.Open();
+    List<string> tags = new();
+    await using SqliteConnection connection = new(_connectionString);
+    await connection.OpenAsync();
     string query = "SELECT tag FROM NotesTags WHERE id = @id ORDER BY tag ASC";
-    using SqliteCommand command = new(query, connection);
+
+    await using SqliteCommand command = new(query, connection);
     command.Parameters.AddWithValue("@id", id);
 
-    using SqliteDataReader reader = command.ExecuteReader();
-    while (reader.Read())
-      yield return GetReaderValue<string>(reader, "tag")!;
+    await using SqliteDataReader reader = command.ExecuteReader();
+    while (await reader.ReadAsync())
+      tags.Add(GetReaderValue<string>(reader, "tag")!);
+
+    return tags;
   }
 
   public bool AddTag(string tag)
@@ -373,81 +406,25 @@ SELECT @id, tag FROM Tags WHERE tag = @tag";
   #endregion
 
   #region Helpers
-  private static int GetIconValue(Icon icon)
-    => icon.IconType switch
-    {
-      IconType.Glyph => char.ConvertToUtf32(icon.Code, 0),
-      IconType.Emoji => ((Emoji)icon).Index,
-      _ => 0
-    };
-
-  public static Icon GetIcon(IconType iconType, int iconValue)
-    => iconType switch
-    {
-      IconType.Glyph => IconLibrary.FindGlyph(iconValue),
-      IconType.Emoji => IconLibrary.FindEmoji(iconValue),
-      _ => IconLibrary.FindEmoji(0)
-    };
-
-  public static T? GetReaderValue<T>(SqliteDataReader reader, string fieldName, T? nullValue = default)
+  public static T? GetReaderValue<T>(SqliteDataReader reader, string fieldName, T? nullValue = default) where T : notnull
   {
     int ordinal = reader.GetOrdinal(fieldName);
-    if (reader.IsDBNull(ordinal))
-      return nullValue;
-    return typeof(T) switch
-    {
-      Type t when t == typeof(bool) => (T)(object)reader.GetBoolean(ordinal),
-      Type t when t == typeof(byte) => (T)(object)reader.GetByte(ordinal),
-      Type t when t == typeof(short) => (T)(object)reader.GetInt16(ordinal),
-      Type t when t == typeof(int) => (T)(object)reader.GetInt32(ordinal),
-      Type t when t == typeof(long) => (T)(object)reader.GetInt64(ordinal),
-      Type t when t == typeof(DateTime) => (T)(object)reader.GetDateTime(ordinal),
-      Type t when t == typeof(DateTimeOffset) => (T)(object)reader.GetDateTimeOffset(ordinal),
-      Type t when t == typeof(Guid) => (T)(object)new Guid(reader.GetString(ordinal)),
-      Type t when t == typeof(string) => (T)(object)reader.GetString(ordinal),
-      Type t when t == typeof(double) => (T)(object)reader.GetDouble(ordinal),
-      _ => (T)reader[ordinal]
-    };
-  }
-
-  public void BuildNavigationBoardTree(NavigationUserGroup group)
-  {
-    Guid? next = Guid.Empty;
-    while (next is not null)
-    {
-      using SqliteConnection connection = new(_connectionString);
-      connection.Open();
-
-      string query = (next == Guid.Empty)
-        ? "SELECT * FROM Boards WHERE parent = @parent AND next IS NULL"
-        : "SELECT * FROM Boards WHERE parent = @parent AND next = @next";
-      using SqliteCommand command = new(query, connection);
-      command.Parameters.AddWithValue("@parent", group.Id);
-      command.Parameters.AddWithValue("@next", next);
-      using SqliteDataReader reader = command.ExecuteReader();
-
-      NavigationUserBoard? item = null;
-      if (reader.Read())
+    return reader.IsDBNull(ordinal)
+      ? nullValue
+      : typeof(T) switch
       {
-        Guid id = new(GetReaderValue<string>(reader, "id")!);
-        bool grouped = GetReaderValue<bool>(reader, "grouped")!;
-        string name = GetReaderValue<string>(reader, "name")!;
-        int iconType = GetReaderValue<int>(reader, "icon_type");
-        int iconValue = GetReaderValue<int>(reader, "icon_value");
-        Icon icon = GetIcon((IconType)iconType, iconValue);
-        if (grouped)
-        {
-          item = new NavigationUserGroup(name, icon, id);
-          BuildNavigationBoardTree((NavigationUserGroup)item);
-        }
-        else
-          item = new NavigationUserBoard(name, icon, id);
-        group.InsertChild(0, item);
-        next = id;
-      }
-      else
-        next = null;
-    }
+        Type t when t == typeof(bool) => (T)(object)reader.GetBoolean(ordinal),
+        Type t when t == typeof(byte) => (T)(object)reader.GetByte(ordinal),
+        Type t when t == typeof(short) => (T)(object)reader.GetInt16(ordinal),
+        Type t when t == typeof(int) => (T)(object)reader.GetInt32(ordinal),
+        Type t when t == typeof(long) => (T)(object)reader.GetInt64(ordinal),
+        Type t when t == typeof(DateTime) => (T)(object)reader.GetDateTime(ordinal),
+        Type t when t == typeof(DateTimeOffset) => (T)(object)reader.GetDateTimeOffset(ordinal),
+        Type t when t == typeof(Guid) => (T)(object)new Guid(reader.GetString(ordinal)),
+        Type t when t == typeof(string) => (T)(object)reader.GetString(ordinal),
+        Type t when t == typeof(double) => (T)(object)reader.GetDouble(ordinal),
+        _ => (T)reader[ordinal]
+      };
   }
   #endregion
 
@@ -471,7 +448,7 @@ SELECT @id, tag FROM Tags WHERE tag = @tag";
 id || {reader["id"]}
 grouped || {reader["grouped"]}
 parent || {reader["parent"]}
-next || {reader["next"]}
+previous || {reader["previous"]}
 name || {reader["name"]}
 icon_type || {reader["icon_type"]}
 icon_value || {reader["icon_value"]}
@@ -588,8 +565,8 @@ trashed || {reader["trashed"]}
 (
 id              TEXT PRIMARY KEY NOT NULL,
 grouped         INTEGER NOT NULL DEFAULT 0,
-parent          TEXT NULL,
-next            TEXT NULL,
+parent          TEXT NULL NOT NULL,
+previous        TEXT NULL,
 name            TEXT NOT NULL DEFAULT '',
 icon_type       INTEGER NOT NULL,
 icon_value      INTEGER NOT NULL
@@ -632,9 +609,9 @@ FOREIGN KEY (tag) REFERENCES Tags(tag) ON DELETE CASCADE ON UPDATE CASCADE
     {
       public const string Boards =
   @"INSERT OR IGNORE INTO Boards
-(id, grouped, parent, next, name, icon_type, icon_value)
+(id, grouped, parent, previous, name, icon_type, icon_value)
 VALUES
-(@id, @grouped, @parent, @next, @name, @icon_type, @icon_value)
+(@id, @grouped, @parent, @previous, @name, @icon_type, @icon_value)
 ";
 
       public const string Notes =
@@ -652,9 +629,14 @@ VALUES
 SET icon_type = @icon_type, icon_value = @icon_value
 WHERE id = @id";
 
-      public const string Board_Next =
+      public const string Board_Previous =
   @"UPDATE Boards
-SET next = @next
+SET previous = @previous
+WHERE id = @id";
+
+      public const string Board_Parent =
+@"UPDATE Boards
+SET parent = @parent
 WHERE id = @id";
 
       public const string Board_Name =

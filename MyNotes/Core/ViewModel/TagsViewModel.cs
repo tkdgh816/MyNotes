@@ -7,13 +7,13 @@ internal class TagsViewModel : ViewModelBase
 {
   public TagsViewModel(DatabaseService databaseService)
   {
-    DatabaseService = databaseService;
-    foreach (string tag in DatabaseService.GetTagsAll())
+    _databaseService = databaseService;
+    foreach (string tag in _databaseService.GetTagsAll().Result)
       TagGroup.AddItem(tag);
     TagsCollectionViewSource.Source = TagGroup;
   }
 
-  private readonly DatabaseService DatabaseService;
+  private readonly DatabaseService _databaseService;
   public CollectionViewSource TagsCollectionViewSource { get; } = new() { IsSourceGrouped = true };
   public TagGroup TagGroup { get; } = new();
 
@@ -22,14 +22,14 @@ internal class TagsViewModel : ViewModelBase
     tag = tag.Trim();
     if (string.IsNullOrWhiteSpace(tag) || TagGroup.Contains(tag))
       return;
-    else if(DatabaseService.AddTag(tag))
+    else if(_databaseService.AddTag(tag))
       TagGroup.AddItem(tag);
   }
 
   public void DeleteTag(string tag)
   {
     if (TagGroup.RemoveItem(tag))
-      DatabaseService.DeleteTag(tag);
+      _databaseService.DeleteTag(tag);
   }
 
   private bool _isInclusionModeIntersect = true;

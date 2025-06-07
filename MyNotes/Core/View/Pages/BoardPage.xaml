@@ -387,12 +387,12 @@
 
       <!--#region New Note Button -->
       <view:AppCompoundButton x:Name="View_NewNoteButton"
-                               Grid.Column="2"
-                               Icon="Add"
-                               Content="New note"
-                               Style="{StaticResource AppCommandBarButtonStyle}"
-                               Visibility="{x:Bind Navigation, Converter={StaticResource NavigationUserBoardToVisibilityConverter}}"
-                               Command="{x:Bind ViewModel.AddNewNoteCommand}" />
+                              Grid.Column="2"
+                              Icon="Add"
+                              Content="New note"
+                              Style="{StaticResource AppCommandBarButtonStyle}"
+                              Visibility="{x:Bind Navigation, Converter={StaticResource NavigationUserBoardToVisibilityConverter}}"
+                              Command="{x:Bind ViewModel.AddNewNoteCommand}" />
       <!--#endregion-->
 
       <!--#region Search Button -->

@@ -2,6 +2,7 @@
 
 using MyNotes.Common.Commands;
 using MyNotes.Common.Messaging;
+using MyNotes.Core.Dto;
 using MyNotes.Core.Model;
 using MyNotes.Core.Service;
 
@@ -9,10 +10,9 @@ namespace MyNotes.Core.ViewModel;
 
 internal class MainViewModel : ViewModelBase
 {
-  public MainViewModel(NavigationService navigationService, DatabaseService databaseService)
+  public MainViewModel(NavigationService navigationService)
   {
     _navigationService = navigationService;
-    _databaseService = databaseService;
 
     InitializeNavigationsFromDatabase();
 
@@ -27,6 +27,7 @@ internal class MainViewModel : ViewModelBase
   {
     TraverseNavigationBoardMenusAll(UserRootGroup, (navigation) =>
     {
+      navigation.PropertyChanged -= OnNavigationPropertyChanged;
       if (navigation is NavigationUserGroup group)
         group.ChildrenChanged -= OnNavigationBoardGroupChanged;
     });
@@ -34,7 +35,6 @@ internal class MainViewModel : ViewModelBase
   }
 
   private readonly NavigationService _navigationService;
-  private readonly DatabaseService _databaseService;
 
   public NavigationUserBoard? TargetNavigation { get; set; }
 
@@ -59,12 +59,20 @@ internal class MainViewModel : ViewModelBase
 
   private void InitializeNavigationsFromDatabase()
   {
-    _databaseService.BuildNavigationBoardTree(UserRootGroup);
+    //_databaseService.BuildNavigationBoardTree(UserRootGroup);
+    _navigationService.BuildNavigationTree(UserRootGroup);
     TraverseNavigationBoardMenusAll(UserRootGroup, (navigation) =>
     {
+      navigation.PropertyChanged += OnNavigationPropertyChanged;
       if (navigation is NavigationUserGroup group)
         group.ChildrenChanged += OnNavigationBoardGroupChanged;
     });
+  }
+
+  private void OnNavigationPropertyChanged(object? sender, PropertyChangedEventArgs e)
+  {
+    if (e.PropertyName == "Icon")
+      _navigationService.UpdateBoard((NavigationUserBoard)sender!, BoardUpdateFields.IconType | BoardUpdateFields.IconValue);
   }
 
   private bool _isEditMode = false;
@@ -87,7 +95,7 @@ internal class MainViewModel : ViewModelBase
         {
           if (newItem is NavigationUserGroup newGroup)
             newGroup.ChildrenChanged += OnNavigationBoardGroupChanged;
-          _databaseService.AddBoard(newItem);
+          _navigationService.AddBoard(newItem);
         }
         break;
       case NotifyCollectionChangedAction.Remove:
@@ -95,7 +103,7 @@ internal class MainViewModel : ViewModelBase
         {
           if (oldItem is NavigationUserGroup oldGroup)
             oldGroup.ChildrenChanged -= OnNavigationBoardGroupChanged;
-          _databaseService.DeleteBoard(oldItem);
+          _navigationService.DeleteBoard(oldItem);
         }
         break;
       case NotifyCollectionChangedAction.Replace:
@@ -181,10 +189,10 @@ internal class MainViewModel : ViewModelBase
     return TraverseNavigationBoardMenusAny(rootGroup, (item) => item == navigation);
   }
 
-  public void ResetNavigation()
+  public void RefreshNavigation()
   {
     foreach (NavigationUserBoard child in UserRootGroup.Children)
-      TraverseNavigationBoardMenusAll(child, item => _databaseService.UpdateBoardHierarchy(item, item.GetNext()));
+      TraverseNavigationBoardMenusAll(child, item => _navigationService.UpdateBoard(item, BoardUpdateFields.Parent | BoardUpdateFields.Previous));
   }
 
   public void MoveNavigationBoardMenu(NavigationUserBoard source, NavigationUserBoard target, NavigationBoardItemPosition position)
@@ -255,7 +263,7 @@ internal class MainViewModel : ViewModelBase
     if (string.IsNullOrEmpty(newName) || navigation.Name == newName)
       return;
     navigation.Name = newName;
-    _databaseService.UpdateBoard(navigation, "Name");
+    _navigationService.UpdateBoard(navigation, BoardUpdateFields.Name);
   }
   #endregion
 
@@ -264,15 +272,7 @@ internal class MainViewModel : ViewModelBase
   {
     if (_navigationService.CurrentNavigation == navigation)
       _navigationService.Navigate((NavigationItem)CoreMenus[0]);
-    TraverseNavigationBoardMenusAny(UserRootGroup, (item) =>
-    {
-      if (item == navigation)
-      {
-        TraverseNavigationBoardMenusAll(item, (board) => board.Parent?.RemoveChild(board), TreeTraversalOrder.Post);
-        return true;
-      }
-      return false;
-    });
+    TraverseNavigationBoardMenusAll(navigation, (board) => board.Parent?.RemoveChild(board), TreeTraversalOrder.Post);
   }
   #endregion
 
@@ -332,7 +332,7 @@ internal class MainViewModel : ViewModelBase
         TraverseNavigationBoardMenusAll(item, x => x.IsEditable = IsEditMode);
 
       if (!IsEditMode)
-        ResetNavigation();
+        RefreshNavigation();
 
       _navigationService.ChangeNavigationViewSelectionWithoutNavigation(IsEditMode ? null : _navigationService.CurrentNavigation);
     });

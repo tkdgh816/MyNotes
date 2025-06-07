@@ -13,9 +13,8 @@ internal class BoardViewModelFactory : ViewModelFactoryBase<NavigationBoard, Boa
         return viewModel;
 
     WindowService windowService = App.Current.GetService<WindowService>();
-    DatabaseService databaseService = App.Current.GetService<DatabaseService>();
     NoteService noteService = App.Current.GetService<NoteService>();
-    BoardViewModel newViewModel = new(navigation, windowService, databaseService, noteService);
+    BoardViewModel newViewModel = new(navigation, windowService, noteService);
     _cache.Remove(navigation);
     _cache.Add(navigation, new(newViewModel));
     ReferenceTracker.BoardViewModelReferences.Add(new(newViewModel));

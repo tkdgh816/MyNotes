@@ -10,7 +10,7 @@ internal sealed partial class TagsEditor : UserControl
   public TagsEditor()
   {
     this.InitializeComponent();
-    ViewModel = ((App)Application.Current).GetService<TagsViewModel>();
+    ViewModel = App.Current.GetService<TagsViewModel>();
   }
 
   public TagsViewModel ViewModel { get; }

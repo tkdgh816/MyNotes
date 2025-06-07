@@ -68,11 +68,3 @@ internal class TagGroup : SortedObservableCollection<Tags>
         yield return tag;
   }
 }
-
-#region Tags
-//["Apple", "Apricot", "Banana", "Blackberry", "Blueberry", "Cherry",
-//"Grapefruit", "Grapes", "Kiwi", "Mango", "Peach", "Melon",
-//"Bear", "Dog", "Cat", "Goat", "Camel", "Donkey", "Horse", "Cow",
-//"Rabbit", "Ant", "Elephant", "Mouse", "Whale", "Dolphin", "Eagle",
-//"Parrot", "Swan", "Owl", "Chicken", "Lizard", "Frog", "Snake",]
-#endregion

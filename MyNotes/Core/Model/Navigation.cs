@@ -112,10 +112,15 @@ internal class NavigationUserBoard : NavigationBoard
     if (Parent is null)
       return null;
     int index = Parent.IndexOfChild(this);
-    if (index == Parent.ChildCount - 1)
+    return index == Parent.ChildCount - 1 ? null : Parent.GetChild(index + 1);
+  }
+
+  public NavigationUserBoard? GetPrevious()
+  {
+    if (Parent is null)
       return null;
-    else
-      return Parent.GetChild(index + 1);
+    int index = Parent.IndexOfChild(this);
+    return index <= 0 ? null : Parent.GetChild(index - 1);
   }
 }
 

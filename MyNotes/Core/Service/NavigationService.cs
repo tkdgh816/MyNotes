@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 
 using MyNotes.Common.Messaging;
+using MyNotes.Core.Dto;
 using MyNotes.Core.Model;
 using MyNotes.Debugging;
 
@@ -8,23 +9,87 @@ namespace MyNotes.Core.Service;
 
 internal class NavigationService
 {
-  public NavigationService(DatabaseService databaseService) 
+  public NavigationService(DatabaseService databaseService)
   {
     _databaseService = databaseService;
-    _databaseService.BuildNavigationBoardTree(UserRootGroup);
+    //BuildNavigationTree();
     UserBoards = UserRootGroup.Children;
   }
 
-  private void BuildNavigationTree()
+  public void AddBoard(NavigationUserBoard board)
   {
-    Queue queue = new();
-    queue.Enqueue(UserRootGroup);
-    while(queue.Count > 0)
+    var icon = GetIconTypeAndValue(board.Icon);
+    BoardDbInsertDto dto = new() { Id = board.Id, Grouped = board is NavigationUserGroup, Parent = board.Parent!.Id, Previous = board.GetPrevious()?.Id, Next = board.GetNext()?.Id, Name = board.Name, IconType = icon.IconType, IconValue = icon.IconValue };
+    _databaseService.AddBoard(dto);
+  }
+
+  public void DeleteBoard(NavigationUserBoard board)
+  {
+    BoardDbDeleteDto dto = new() { Id = board.Id };
+    _databaseService.DeleteBoard(dto);
+  }
+
+  public void UpdateBoard(NavigationUserBoard board, BoardUpdateFields updateFields)
+  {
+    if (updateFields == BoardUpdateFields.None)
+      return;
+
+    var icon = GetIconTypeAndValue(board.Icon);
+    BoardDbUpdateDto dto = new()
     {
-      // "SELECT * FROM Boards WHERE parent = @parent AND next IS NULL"
-      // "SELECT * FROM Boards WHERE parent = @parent AND next = @next";
+      UpdateFields = updateFields,
+      Id = board.Id,
+      Parent = updateFields.HasFlag(BoardUpdateFields.Parent) ? board.Parent?.Id : null,
+      Previous = updateFields.HasFlag(BoardUpdateFields.Previous) ? board.GetPrevious()?.Id : null,
+      Name = updateFields.HasFlag(BoardUpdateFields.Name) ? board.Name : null,
+      IconType = updateFields.HasFlag(BoardUpdateFields.IconType) ? icon.IconType : null,
+      IconValue = updateFields.HasFlag(BoardUpdateFields.IconValue) ? icon.IconValue : null,
+    };
+    _databaseService.UpdateBoard(dto);
+  }
+
+  public void BuildNavigationTree(NavigationUserRootGroup root)
+  {
+    var boards = _databaseService.GetBoards().Result;
+    Queue<NavigationUserBoard> queue = new();
+    queue.Enqueue(root);
+    while (queue.Count > 0)
+    {
+      NavigationUserBoard navigation = queue.Dequeue();
+      if (navigation is NavigationUserGroup navigationGroup)
+      {
+        var children = boards.Where(dto => dto.Parent == navigation.Id);
+        Guid previous = Guid.Empty;
+        BoardDbDto? child;
+        while ((child = children.FirstOrDefault(dto => dto.Previous == previous)) is not null)
+        {
+          NavigationUserBoard newNavigation;
+          newNavigation = child.Grouped
+            ? new NavigationUserGroup(child.Name, GetIcon((IconType)child.IconType, child.IconValue), child.Id)
+            : new NavigationUserBoard(child.Name, GetIcon((IconType)child.IconType, child.IconValue), child.Id);
+          navigationGroup.AddChild(newNavigation);
+          queue.Enqueue(newNavigation);
+          previous = child.Id;
+        }
+      }
     }
   }
+
+  private Icon GetIcon(IconType iconType, int iconValue)
+  => iconType switch
+  {
+    IconType.Glyph => IconLibrary.FindGlyph(iconValue),
+    IconType.Emoji => IconLibrary.FindEmoji(iconValue),
+    _ => IconLibrary.FindEmoji(0)
+  };
+
+  private (int IconType, int IconValue) GetIconTypeAndValue(Icon icon)
+  => ((int)icon.IconType, icon.IconType switch
+  {
+    IconType.Glyph => char.ConvertToUtf32(icon.Code, 0),
+    IconType.Emoji => ((Emoji)icon).Index,
+    _ => 0
+  });
 
   private readonly DatabaseService _databaseService;
 
@@ -54,7 +119,7 @@ internal class NavigationService
 
   public void DetachView()
   {
-    if(_frame is not null)
+    if (_frame is not null)
       _frame.Navigated -= OnNavigated;
     _navigationView = null;
     _frame = null;

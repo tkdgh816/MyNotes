@@ -56,11 +56,11 @@ internal class NoteService
     return (newNote, noteViewModel);
   }
   public IEnumerable<Note> GetNotes(NavigationUserBoard navigation)
-    => _databaseService.GetNotes(navigation).Select(ToNote);
+    => _databaseService.GetNotes(navigation).Result.Select(ToNote);
   public IEnumerable<Note> GetBookmarkedNotes()
-    => _databaseService.GetBookmarkedNotes().Select(ToNote);
+    => _databaseService.GetBookmarkedNotes().Result.Select(ToNote);
   public IEnumerable<Note> GetTrashedNotes()
-    => _databaseService.GetTrashedNotes().Select(ToNote);
+    => _databaseService.GetTrashedNotes().Result.Select(ToNote);
 
   public void UpdateNote(Note note, NoteUpdateFields updateFields)
   {
