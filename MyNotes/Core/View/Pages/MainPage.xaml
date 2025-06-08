@@ -8,6 +8,10 @@
       xmlns:interactivity="using:Microsoft.Xaml.Interactivity">
 
   <Page.Resources>
+    <CollectionViewSource x:Name="NavigationMenuItemsCollectionViewSource"
+                          Source="{x:Bind ViewModel.MenuItems}" 
+                          IsSourceGrouped="True" />
+
     <SolidColorBrush x:Key="NavigationViewContentBackground"
                      Color="Transparent" />
     <Thickness x:Key="NavigationViewContentGridBorderThickness">0</Thickness>
@@ -15,6 +19,7 @@
     <SolidColorBrush x:Key="TitleBarBackButtonBackgroundDisabled"
                      Color="{ThemeResource SubtleFillColorDisabled}" />
     <x:Double x:Key="TitleBarCompactHeight">40</x:Double>
+    
     <view:MainNavigationViewMenuItemTemplateSelector x:Key="MainNavigationViewMenuItemTemplateSelector">
       <!--#region MenuItemTemplate: Menu Item-->
       <view:MainNavigationViewMenuItemTemplateSelector.MenuItemTemplate>
@@ -208,7 +213,7 @@
                     IsPaneToggleButtonVisible="False"
                     IsSettingsVisible="False"
                     MenuItemTemplateSelector="{StaticResource MainNavigationViewMenuItemTemplateSelector}"
-                    MenuItemsSource="{x:Bind ViewModel.MenuItems.View}"
+                    MenuItemsSource="{Binding Source={StaticResource NavigationMenuItemsCollectionViewSource}}"
                     FooterMenuItemsSource="{x:Bind ViewModel.FooterMenus}"
                     SelectedItem="{x:Bind ViewModel.CoreMenus[0]}"
                     SelectionChanged="View_NavigationView_SelectionChanged"

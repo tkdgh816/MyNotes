@@ -17,13 +17,38 @@ internal sealed partial class MainPage : Page
   {
     this.InitializeComponent();
     ViewModel = App.Current.GetService<MainViewModel>();
-    var navigationService = App.Current.GetService<NavigationService>();
-    navigationService.AttachView(View_NavigationView, View_NavigationContent_RootFrame);
-    SetTimer();
+    _navigationService = App.Current.GetService<NavigationService>();
+    _navigationService.AttachView(View_NavigationView, View_NavigationContent_RootFrame);
+
+    RegisterEvents();
     RegisterMessengers();
+    this.Unloaded += MainPage_Unloaded;
+  }
+
+  private void MainPage_Unloaded(object sender, RoutedEventArgs e)
+  {
+    _navigationService.DetachView();
+
+    ViewModel.Dispose();
+    UnegisterEvents();
+    UnregisterMessengers();
   }
 
   public MainViewModel ViewModel { get; }
+  private readonly NavigationService _navigationService;
+
+  #region Handling Events
+  private void RegisterEvents()
+  {
+    _navigationHoldingTimer.Interval = TimeSpan.FromMilliseconds(TimerIntervalMilliseconds);
+    _navigationHoldingTimer.Tick += OnTimerTick;
+  }
+
+  private void UnegisterEvents()
+  {
+    _navigationHoldingTimer.Tick -= OnTimerTick;
+  }
+  #endregion
 
   private void View_TitleBar_PaneToggleRequested(TitleBar sender, object args)
     => View_NavigationView.IsPaneOpen = !View_NavigationView.IsPaneOpen;
@@ -112,6 +137,17 @@ internal sealed partial class MainPage : Page
     }
   }
 
+  #region Timers
+  private readonly DispatcherTimer _navigationHoldingTimer = new();
+  private const int TimerIntervalMilliseconds = 200;
+  private void OnTimerTick(object? sender, object e)
+  {
+    _navigationHoldingTimer.Stop();
+    if (_hoveredGroup != null)
+      _hoveredGroup.IsExpanded = _isInsertingIntoHoveredGroup;
+  }
+  #endregion
+
   #region NavigationView MenuItems >> Drag and Drop 
   private NavigationUserBoard? _draggingSource;
   private NavigationViewItem? _draggingItem;
@@ -122,9 +158,6 @@ internal sealed partial class MainPage : Page
 
   private const double HoveredItemUpperPosition = 10.0;
   private const double HoveredItemLowerPostion = 25.0;
-
-  private readonly DispatcherTimer _timer = new();
-  private const int TimerIntervalMilliseconds = 200;
 
   private async void NavigationViewItem_DragStarting(UIElement sender, DragStartingEventArgs args)
   {
@@ -205,21 +238,10 @@ internal sealed partial class MainPage : Page
     e.Handled = true;
   }
 
-  private void SetTimer()
-  {
-    _timer.Interval = TimeSpan.FromMilliseconds(TimerIntervalMilliseconds);
-    _timer.Tick += (s, e) =>
-    {
-      _timer.Stop();
-      if (_hoveredGroup != null)
-        _hoveredGroup.IsExpanded = _isInsertingIntoHoveredGroup;
-    };
-  }
-
   private void StartTimer(bool isExpanded)
   {
     _isInsertingIntoHoveredGroup = isExpanded;
-    _timer.Start();
+    _navigationHoldingTimer.Start();
   }
 
   private void ItemNavigationViewItem_DragOver(object sender, DragEventArgs e)
@@ -244,7 +266,7 @@ internal sealed partial class MainPage : Page
 
   private void NavigationViewItem_DragLeave(object sender, DragEventArgs e)
   {
-    _timer.Stop();
+    _navigationHoldingTimer.Stop();
   }
   #endregion
 
@@ -266,6 +288,8 @@ internal sealed partial class MainPage : Page
       message.Reply(t());
     }));
   }
+
+  private void UnregisterMessengers() => WeakReferenceMessenger.Default.UnregisterAll(this);
   #endregion
 
   //TEST: View Windows And Pages

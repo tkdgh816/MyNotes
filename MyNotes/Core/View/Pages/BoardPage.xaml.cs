@@ -24,7 +24,6 @@ internal sealed partial class BoardPage : Page
     Navigation = (NavigationBoard)e.Parameter;
     ViewModel = App.Current.GetService<BoardViewModelFactory>().Create(Navigation);
     this.DataContext = ViewModel;
-    NotesCollectionViewSource.Source = ViewModel.NoteViewModels;
     RegisterEvents();
   }
 

@@ -93,8 +93,8 @@ internal class DatabaseService
 
     if (updateFields.HasFlag(BoardUpdateFields.Parent) && dto.Parent is not null)
       fields.Add("parent", dto.Parent);
-    if (updateFields.HasFlag(BoardUpdateFields.Previous) && dto.Previous is not null)
-      fields.Add("previous", dto.Previous);
+    if (updateFields.HasFlag(BoardUpdateFields.Previous))
+      fields.Add("previous", dto.Previous is null ? DBNull.Value : dto.Previous);
     if (updateFields.HasFlag(BoardUpdateFields.Name) && dto.Name is not null)
       fields.Add("name", dto.Name);
     if (updateFields.HasFlag(BoardUpdateFields.IconType) && dto.IconType is not null)
@@ -343,14 +343,14 @@ internal class DatabaseService
     await using SqliteConnection connection = new(_connectionString);
     await connection.OpenAsync();
     string query = "SELECT tag FROM NotesTags WHERE id = @id ORDER BY tag ASC";
-    
+
     await using SqliteCommand command = new(query, connection);
     command.Parameters.AddWithValue("@id", note.Id);
 
     await using SqliteDataReader reader = command.ExecuteReader();
     while (await reader.ReadAsync())
       tags.Add(GetReaderValue<string>(reader, "tag")!);
-    
+
     return tags;
   }
 

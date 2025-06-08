@@ -11,7 +11,8 @@
 
   <Page.Resources>
     <!--#region CollectionViewSource -->
-    <CollectionViewSource x:Name="NotesCollectionViewSource" />
+    <CollectionViewSource x:Name="NotesCollectionViewSource" 
+                          Source="{x:Bind ViewModel.NoteViewModels}"/>
     <!--#endregion -->
 
     <!--#region GridView ItemTemplate: Grid Style-->
@@ -87,7 +88,9 @@
                 <CommandBarFlyout Placement="Bottom"
                                   AlwaysExpanded="True">
                   <AppBarButton Label="View"
-                                Icon="{ui:FontIcon Glyph=&#xE8AD;}" />
+                                Icon="{ui:FontIcon Glyph=&#xE8AD;}" 
+                                Command="{x:Bind OpenWindowCommand}"
+                                CommandParameter="{StaticResource BooleanTrue}"/>
                   <AppBarButton Label="Share"
                                 Icon="Share" />
                   <AppBarButton x:Name="Template_RemoveNoteButton"

@@ -14,35 +14,31 @@ internal class MainViewModel : ViewModelBase
   {
     _navigationService = navigationService;
 
-    InitializeNavigationsFromDatabase();
-
-    _navigationService.CurrentNavigation = (NavigationItem)CoreMenus[0];
+    _navigationService.BuildNavigationTree(UserRootGroup);
+    _navigationService.SetCurrentNavigation((NavigationItem)CoreMenus[0]);
     UserBoards = UserRootGroup.Children;
-    MenuItems.Source = new List<IList>() { CoreMenus, UserBoards };
+    MenuItems = [CoreMenus, UserBoards];
+
     SetCommands();
+    RegisterEvents();
     RegisterMessengers();
   }
 
-  ~MainViewModel()
+  protected override void Dispose(bool disposing)
   {
-    TraverseNavigationBoardMenusAll(UserRootGroup, (navigation) =>
+    if(disposing)
     {
-      navigation.PropertyChanged -= OnNavigationPropertyChanged;
-      if (navigation is NavigationUserGroup group)
-        group.ChildrenChanged -= OnNavigationBoardGroupChanged;
-    });
-    UnregisterMessengers();
+      UnregisterEvents();
+      UnregisterMessengers();
+    }
+    base.Dispose(disposing); 
   }
 
   private readonly NavigationService _navigationService;
 
-  public NavigationUserBoard? TargetNavigation { get; set; }
-
-  public CollectionViewSource MenuItems { get; } = new() { IsSourceGrouped = true };
-
   public ImmutableList<Navigation> CoreMenus { get; } =
-  [
-    new NavigationHome(),
+   [
+     new NavigationHome(),
     new NavigationBookmarks(),
     new NavigationTags(),
     new NavigationSeparator(),
@@ -57,10 +53,11 @@ internal class MainViewModel : ViewModelBase
     new NavigationSettings()
   ];
 
-  private void InitializeNavigationsFromDatabase()
+  public List<IList> MenuItems { get; }
+
+  #region Handling Events
+  private void RegisterEvents()
   {
-    //_databaseService.BuildNavigationBoardTree(UserRootGroup);
-    _navigationService.BuildNavigationTree(UserRootGroup);
     TraverseNavigationBoardMenusAll(UserRootGroup, (navigation) =>
     {
       navigation.PropertyChanged += OnNavigationPropertyChanged;
@@ -69,17 +66,20 @@ internal class MainViewModel : ViewModelBase
     });
   }
 
+  private void UnregisterEvents()
+  {
+    TraverseNavigationBoardMenusAll(UserRootGroup, (navigation) =>
+    {
+      navigation.PropertyChanged -= OnNavigationPropertyChanged;
+      if (navigation is NavigationUserGroup group)
+        group.ChildrenChanged -= OnNavigationBoardGroupChanged;
+    });
+  }
+
   private void OnNavigationPropertyChanged(object? sender, PropertyChangedEventArgs e)
   {
     if (e.PropertyName == "Icon")
       _navigationService.UpdateBoard((NavigationUserBoard)sender!, BoardUpdateFields.IconType | BoardUpdateFields.IconValue);
-  }
-
-  private bool _isEditMode = false;
-  public bool IsEditMode
-  {
-    get => _isEditMode;
-    set => SetProperty(ref _isEditMode, value);
   }
 
   private void OnNavigationBoardGroupChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -113,6 +113,14 @@ internal class MainViewModel : ViewModelBase
       case NotifyCollectionChangedAction.Reset:
         break;
     }
+  }
+  #endregion
+
+  private bool _isEditMode = false;
+  public bool IsEditMode
+  {
+    get => _isEditMode;
+    set => SetProperty(ref _isEditMode, value);
   }
 
   public void TraverseNavigationBoardMenusAll(NavigationUserBoard root, Action<NavigationUserBoard> action, TreeTraversalOrder traversalOrder = TreeTraversalOrder.Pre)

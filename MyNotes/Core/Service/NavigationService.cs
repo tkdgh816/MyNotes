@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-
-using MyNotes.Common.Messaging;
+﻿using MyNotes.Common.Messaging;
 using MyNotes.Core.Dto;
 using MyNotes.Core.Model;
 using MyNotes.Debugging;
@@ -12,10 +10,12 @@ internal class NavigationService
   public NavigationService(DatabaseService databaseService)
   {
     _databaseService = databaseService;
-    //BuildNavigationTree();
-    UserBoards = UserRootGroup.Children;
   }
 
+  private readonly DatabaseService _databaseService;
+
+  #region Manage Navigation Boards from DatabaseService
+  // BoardDbDto <-> NavigationBoard
   public void AddBoard(NavigationUserBoard board)
   {
     var icon = GetIconTypeAndValue(board.Icon);
@@ -90,25 +90,7 @@ internal class NavigationService
     IconType.Emoji => ((Emoji)icon).Index,
     _ => 0
   });
-
-  private readonly DatabaseService _databaseService;
-
-  public ImmutableList<Navigation> CoreMenus { get; } =
-  [
-    new NavigationHome(),
-    new NavigationBookmarks(),
-    new NavigationTags(),
-    new NavigationSeparator(),
-  ];
-
-  public NavigationUserRootGroup UserRootGroup { get; } = new();
-  public ReadOnlyObservableCollection<NavigationUserBoard> UserBoards { get; }
-
-  public ImmutableList<Navigation> FooterMenus { get; } =
-  [
-    new NavigationTrash(),
-    new NavigationSettings()
-  ];
+  #endregion
 
   public void AttachView(NavigationView navigationView, Frame frame)
   {
@@ -121,14 +103,14 @@ internal class NavigationService
   {
     if (_frame is not null)
       _frame.Navigated -= OnNavigated;
-    _navigationView = null;
-    _frame = null;
   }
 
   private NavigationView? _navigationView;
   private Frame? _frame;
 
-  public NavigationItem? CurrentNavigation { get; set; }
+  public NavigationItem? CurrentNavigation { get; private set; }
+  public void SetCurrentNavigation(NavigationItem navigation) => CurrentNavigation = navigation;
+
   private bool _preventNavigation = false;
 
   public void Navigate(NavigationItem navigation)
