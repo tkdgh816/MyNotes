@@ -12,11 +12,11 @@ internal class NoteViewModelFactory : ViewModelFactoryBase<Note, NoteViewModel>
       if (wr.TryGetTarget(out NoteViewModel? noteViewModel))
         return noteViewModel;
 
-    WindowService windowService = App.Current.GetService<WindowService>();
-    NavigationService navigationService = App.Current.GetService<NavigationService>();
-    DatabaseService databaseService = App.Current.GetService<DatabaseService>();
-    NoteService noteService = App.Current.GetService<NoteService>();
-    NoteViewModel newViewModel = new(note, windowService, navigationService, databaseService, noteService);
+    var windowService = App.Current.GetService<WindowService>();
+    var databaseService = App.Current.GetService<DatabaseService>();
+    var noteService = App.Current.GetService<NoteService>();
+
+    NoteViewModel newViewModel = new(note, windowService,databaseService, noteService);
     _cache.Remove(note);
     _cache.Add(note, new(newViewModel));
     ReferenceTracker.NoteViewModelReferences.Add(new(newViewModel));

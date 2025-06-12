@@ -19,7 +19,6 @@
     <None Remove="Assets\Square44x44Logo.targetsize-16.png" />
     <None Remove="Assets\Square44x44Logo.targetsize-24_altform-lightunplated.png" />
     <None Remove="Core\View\Controls\UserControls\IconPicker.xaml" />
-    <None Remove="Core\View\Dialogs\MoveNoteToBoardDialog.xaml" />
     <None Remove="Core\View\Dialogs\TestDialog.xaml" />
     <None Remove="Core\View\NoteWindow.xaml" />
     <None Remove="Core\View\Pages\BookmarksPage.xaml" />

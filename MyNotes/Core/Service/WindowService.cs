@@ -3,25 +3,54 @@ using MyNotes.Core.Model;
 using MyNotes.Core.View;
 using MyNotes.Debugging;
 
+using static MyNotes.Common.Interop.NativeMethods;
+
 namespace MyNotes.Core.Service;
 
 internal class WindowService
 {
-  public MainWindow? MainWindow { get; private set; } = new();
-  public Dictionary<Note, NoteWindow> NoteWindows { get; } = new();
-
   public WindowService()
   {
-
   }
 
-  public MainWindow GetMainWindow() => MainWindow ??= new MainWindow();
-  public void DestroyMainWindow() => MainWindow = null;
+  #region MainWindow
+  public MainWindow? MainWindow { get; private set; } = null;
 
-  public NoteWindow CreateNoteWindow(Note note)
+  public MainWindow GetMainWindow()
   {
-    NoteWindow? window = GetNoteWindow(note);
-    if (window is not null)
+    if (MainWindow != null)
+      return MainWindow;
+
+    MainWindow window = new();
+    var hWnd = GetWindowHandle(window);
+    var presenter = (OverlappedPresenter)window.AppWindow.Presenter;
+    double dpiScale = GetWindowScaleFactor(hWnd);
+
+    window.ExtendsContentIntoTitleBar = true;
+    presenter.PreferredMinimumWidth = (int)(400 * dpiScale);
+    presenter.PreferredMinimumHeight = (int)(600 * dpiScale);
+    window.Closed += OnMainWindowClosed;
+
+    ReferenceTracker.WindowReferences.Add(new(window));
+
+    MainWindow = window;
+    return MainWindow;
+  }
+
+  private void OnMainWindowClosed(object sender, WindowEventArgs args)
+  {
+    MainWindow = null;
+  }
+  #endregion
+
+  #region NoteWindows
+  public Dictionary<Note, NoteWindow> NoteWindows { get; } = new();
+
+  public bool IsNoteWindowActive(Note note) => NoteWindows.TryGetValue(note, out var _);
+
+  public NoteWindow GetNoteWindow(Note note)
+  {
+    if (NoteWindows.TryGetValue(note, out NoteWindow? window))
       return window;
     else
     {
@@ -34,77 +63,94 @@ internal class WindowService
     }
   }
 
-  private double _dpi = 1.25;
+  public bool CloseNoteWindow(Note note)
+  {
+    if (NoteWindows.TryGetValue(note, out NoteWindow? window))
+    {
+      window.Close();
+      return true;
+    }
+    return false;
+  }
+
   private void InitializeNoteWindow(Note note, NoteWindow noteWindow)
   {
-    var presenter = (OverlappedPresenter)noteWindow.AppWindow.Presenter;
-    presenter.PreferredMinimumWidth = (int)(350 * _dpi);
-    presenter.PreferredMinimumHeight = (int)(350 * _dpi);
+    var hWnd = GetWindowHandle(noteWindow);
+    var dpiScale = GetWindowScaleFactor(hWnd);
+    var appWindow = noteWindow.AppWindow;
+    var presenter = (OverlappedPresenter)appWindow.Presenter;
+    var displayArea = DisplayArea.GetFromWindowId(appWindow.Id, DisplayAreaFallback.Nearest);
+
+    // Presenter: Minimum size, Set TitleBar
+    presenter.PreferredMinimumWidth = (int)(350 * dpiScale);
+    presenter.PreferredMinimumHeight = (int)(350 * dpiScale);
     presenter.SetBorderAndTitleBar(true, false);
 
+    // Move and Resize
+    var size = note.Size;
+    var position = note.Position;
+
+    if (position.X == -1 && position.Y == -1)
+      appWindow.Resize(new SizeInt32()
+      {
+        Width = (int)(size.Width * dpiScale),
+        Height = (int)(size.Height * dpiScale)
+      });
+    else
+    {
+      var workArea = displayArea.WorkArea;
+      appWindow.MoveAndResize(new RectInt32()
+      {
+        X = Math.Clamp(position.X, workArea.X, workArea.Width),
+        Y = Math.Clamp(position.Y, workArea.Y, workArea.Height),
+        Width = (int)(size.Width * dpiScale),
+        Height = (int)(size.Height * dpiScale)
+      });
+    }
+
+    // Register Events
     var windowActivatedEventHandler = CreateNoteWindowActivatedEventHandler(note);
     var appWindowChangedEventHandler = CreateNoteAppWindowChangedEventHandler(note);
 
     noteWindow.Activated += windowActivatedEventHandler;
-    noteWindow.AppWindow.Changed += appWindowChangedEventHandler;
+    appWindow.Changed += appWindowChangedEventHandler;
 
     noteWindow.Closed += (sender, args) =>
     {
       var window = (NoteWindow)sender;
+      NoteWindows.Remove(note);
       window.Activated -= windowActivatedEventHandler;
-      window.AppWindow.Changed -= appWindowChangedEventHandler;
+      appWindow.Changed -= appWindowChangedEventHandler;
     };
   }
 
   private TypedEventHandler<object, WindowActivatedEventArgs> CreateNoteWindowActivatedEventHandler(Note note)
-  {
-    return (sender, args) =>
+    => (sender, args) =>
     {
       switch (args.WindowActivationState)
       {
         case WindowActivationState.Deactivated:
-          WeakReferenceMessenger.Default.Send(new Message(note, false), Tokens.ToggleNoteWindowActivation);
+          WeakReferenceMessenger.Default.Send(new Message<bool>(false, note), Tokens.ToggleNoteWindowActivation);
           break;
         default:
-          WeakReferenceMessenger.Default.Send(new Message(note, true), Tokens.ToggleNoteWindowActivation);
+          WeakReferenceMessenger.Default.Send(new Message<bool>(true, note), Tokens.ToggleNoteWindowActivation);
           break;
       }
     };
-  }
   private TypedEventHandler<AppWindow, AppWindowChangedEventArgs> CreateNoteAppWindowChangedEventHandler(Note note)
-  {
-    return (appWindow, args) =>
+    => (appWindow, args) =>
     {
       if (args.DidSizeChange)
-        WeakReferenceMessenger.Default.Send(new Message(note, appWindow.ClientSize), Tokens.ResizeNoteWindow);
+        WeakReferenceMessenger.Default.Send(new Message<SizeInt32>(appWindow.ClientSize, note), Tokens.ResizeNoteWindow);
       if (args.DidPositionChange)
-        WeakReferenceMessenger.Default.Send(new Message(note, appWindow.Position), Tokens.MoveNoteWindow);
+        WeakReferenceMessenger.Default.Send(new Message<PointInt32>(appWindow.Position, note), Tokens.MoveNoteWindow);
     };
-  }
 
   public void ActivateNoteWindow(Note note)
   {
     NoteWindow newWindow = new(note);
     newWindow.Activate();
     ReferenceTracker.WindowReferences.Add(new(newWindow));
-  }
-
-  public NoteWindow? GetNoteWindow(Note note)
-  {
-    NoteWindows.TryGetValue(note, out NoteWindow? window);
-    return window;
-  }
-
-  public bool IsNoteWindowActive(Note note) => NoteWindows.TryGetValue(note, out var _);
-
-  public bool CloseNoteWindow(Note note)
-  {
-    if (NoteWindows.TryGetValue(note, out NoteWindow? window))
-    {
-      window.Close();
-      return NoteWindows.Remove(note);
-    }
-    return false;
   }
 
   public void SetNoteWindowTitleBar(Note note, UIElement titleBar)
@@ -146,4 +192,5 @@ internal class WindowService
       };
     }
   }
+  #endregion
 }

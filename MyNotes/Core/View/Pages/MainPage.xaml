@@ -9,7 +9,7 @@
 
   <Page.Resources>
     <CollectionViewSource x:Name="NavigationMenuItemsCollectionViewSource"
-                          Source="{x:Bind ViewModel.MenuItems}" 
+                          Source="{x:Bind ViewModel.MenuItems}"
                           IsSourceGrouped="True" />
 
     <SolidColorBrush x:Key="NavigationViewContentBackground"
@@ -19,7 +19,7 @@
     <SolidColorBrush x:Key="TitleBarBackButtonBackgroundDisabled"
                      Color="{ThemeResource SubtleFillColorDisabled}" />
     <x:Double x:Key="TitleBarCompactHeight">40</x:Double>
-    
+
     <view:MainNavigationViewMenuItemTemplateSelector x:Key="MainNavigationViewMenuItemTemplateSelector">
       <!--#region MenuItemTemplate: Menu Item-->
       <view:MainNavigationViewMenuItemTemplateSelector.MenuItemTemplate>
@@ -48,16 +48,16 @@
       <view:MainNavigationViewMenuItemTemplateSelector.UserGroupMenuItemTemplate>
         <DataTemplate x:DataType="model:NavigationUserGroup">
           <view:AppNavigationViewItem DataContext="{x:Bind}"
-                                       MenuItemsSource="{x:Bind Children}"
-                                       IsExpanded="False"
-                                       CanDrag="{x:Bind IsEditable, Mode=OneWay}"
-                                       PresenterDragStarting="NavigationViewItem_DragStarting"
-                                       PresenterDropCompleted="NavigationViewItem_DropCompleted"
-                                       AllowDrop="{x:Bind IsEditable, Mode=OneWay}"
-                                       DragOver="GroupNavigationViewItem_DragOver"
-                                       DragLeave="NavigationViewItem_DragLeave"
-                                       Drop="NavigationViewItem_DragLeave"
-                                       SelectsOnInvoked="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
+                                      MenuItemsSource="{x:Bind Children}"
+                                      IsExpanded="False"
+                                      CanDrag="{x:Bind IsEditable, Mode=OneWay}"
+                                      PresenterDragStarting="NavigationViewItem_DragStarting"
+                                      PresenterDropCompleted="NavigationViewItem_DropCompleted"
+                                      AllowDrop="{x:Bind IsEditable, Mode=OneWay}"
+                                      DragOver="GroupNavigationViewItem_DragOver"
+                                      DragLeave="NavigationViewItem_DragLeave"
+                                      Drop="NavigationViewItem_DragLeave"
+                                      SelectsOnInvoked="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
             <view:AppNavigationViewItem.Resources>
               <x:Double x:Key="NavigationViewItemOnLeftMinHeight">32</x:Double>
             </view:AppNavigationViewItem.Resources>
@@ -119,13 +119,13 @@
       <view:MainNavigationViewMenuItemTemplateSelector.UserBoardMenuItemTemplate>
         <DataTemplate x:DataType="model:NavigationBoard">
           <view:AppNavigationViewItem DataContext="{x:Bind}"
-                                       CanDrag="{x:Bind IsEditable, Mode=OneWay}"
-                                       PresenterDragStarting="NavigationViewItem_DragStarting"
-                                       PresenterDropCompleted="NavigationViewItem_DropCompleted"
-                                       AllowDrop="{x:Bind IsEditable, Mode=OneWay}"
-                                       DragOver="ItemNavigationViewItem_DragOver"
-                                       DragLeave="NavigationViewItem_DragLeave"
-                                       SelectsOnInvoked="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
+                                      CanDrag="{x:Bind IsEditable, Mode=OneWay}"
+                                      PresenterDragStarting="NavigationViewItem_DragStarting"
+                                      PresenterDropCompleted="NavigationViewItem_DropCompleted"
+                                      AllowDrop="{x:Bind IsEditable, Mode=OneWay}"
+                                      DragOver="ItemNavigationViewItem_DragOver"
+                                      DragLeave="NavigationViewItem_DragLeave"
+                                      SelectsOnInvoked="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
             <view:AppNavigationViewItem.Resources>
               <x:Double x:Key="NavigationViewItemOnLeftMinHeight">32</x:Double>
             </view:AppNavigationViewItem.Resources>
@@ -252,25 +252,25 @@
               <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <view:AppCompoundButton x:Name="View_NavigationViewFooter_NewGroupButton"
-                                     Grid.Column="0"
-                                     Content="New group"
-                                     Icon="{ui:FontIcon Glyph=&#xE82E;}"
-                                     IsEnabled="{x:Bind ViewModel.IsEditMode, Converter={StaticResource BoolNegationConverter}, Mode=OneWay}"
-                                     Style="{StaticResource AppNavigationButtonStyle}"
-                                     Click="View_NavigationViewFooter_NewGroupButton_Click" />
+                                    Grid.Column="0"
+                                    Content="New group"
+                                    Icon="{ui:FontIcon Glyph=&#xE82E;}"
+                                    IsEnabled="{x:Bind ViewModel.IsEditMode, Converter={StaticResource BoolNegationConverter}, Mode=OneWay}"
+                                    Style="{StaticResource AppNavigationButtonStyle}"
+                                    Click="View_NavigationViewFooter_NewGroupButton_Click" />
             <view:AppCompoundButton x:Name="View_NavigationViewFooter_NewBoardButton"
-                                     Grid.Column="1"
-                                     Content="New board"
-                                     IsEnabled="{x:Bind ViewModel.IsEditMode, Converter={StaticResource BoolNegationConverter}, Mode=OneWay}"
-                                     Icon="{ui:FontIcon Glyph=&#xED0E;}"
-                                     Style="{StaticResource AppNavigationButtonStyle}"
-                                     Click="View_NavigationViewFooter_NewBoardButton_Click" />
+                                    Grid.Column="1"
+                                    Content="New board"
+                                    IsEnabled="{x:Bind ViewModel.IsEditMode, Converter={StaticResource BoolNegationConverter}, Mode=OneWay}"
+                                    Icon="{ui:FontIcon Glyph=&#xED0E;}"
+                                    Style="{StaticResource AppNavigationButtonStyle}"
+                                    Click="View_NavigationViewFooter_NewBoardButton_Click" />
             <view:AppCompoundButton x:Name="View_NavigationViewFooter_EditNavigationViewItem"
-                                     Grid.Column="2"
-                                     Icon="{ui:FontIcon Glyph=&#xE932;}"
-                                     Style="{StaticResource AppNavigationButtonStyle}"
-                                     ToolTipService.ToolTip="Edit"
-                                     Command="{x:Bind ViewModel.SetNavigationEditModeCommand}" />
+                                    Grid.Column="2"
+                                    Icon="{ui:FontIcon Glyph=&#xE932;}"
+                                    Style="{StaticResource AppNavigationButtonStyle}"
+                                    ToolTipService.ToolTip="Edit"
+                                    Command="{x:Bind ViewModel.SetNavigationEditModeCommand}" />
           </Grid>
           <NavigationViewItemSeparator />
         </StackPanel>
@@ -404,6 +404,102 @@
                    CloseButtonText="Cancel"
                    DefaultButton="Close">
       <TextBlock Text="All subboards and notes will be removed" />
+    </ContentDialog>
+    <!--#endregion -->
+
+    <!--#region Move Note to Board ContentDialog -->
+    <ContentDialog x:Name="View_MoveNoteToBoardContentDialog"
+                   Title="Move to board"
+                   PrimaryButtonText="Move"
+                   IsPrimaryButtonEnabled="{Binding ElementName=View_MoveNoteToBoardTreeView, Path=SelectedItem, Converter={StaticResource NotNullToBoolConverter}}"
+                   CloseButtonText="Close"
+                   DefaultButton="Primary">
+      <TreeView x:Name="View_MoveNoteToBoardTreeView"
+                ItemsSource="{x:Bind ViewModel.UserBoards}">
+        <TreeView.Resources>
+          <Thickness x:Key="TreeViewItemPresenterMargin">0,2</Thickness>
+          <Thickness x:Key="TreeViewItemPresenterPadding">0,2</Thickness>
+        </TreeView.Resources>
+        <TreeView.ItemTemplateSelector>
+          <view:NavigationUserBoardTreeViewItemTemplateSelector>
+            <view:NavigationUserBoardTreeViewItemTemplateSelector.UserGroupTemplate>
+              <DataTemplate x:DataType="model:NavigationUserGroup">
+                <TreeViewItem ItemsSource="{x:Bind Children}"
+                              IsEnabled="False"
+                              IsExpanded="True">
+                  <Grid ColumnSpacing="8"
+                        Height="24">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="24" />
+                      <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <IconSourceElement Grid.Column="0"
+                                       IconSource="{x:Bind Icon, Converter={StaticResource IconToIconSourceConverter}}"
+                                       VerticalAlignment="Center" />
+                    <Border Grid.Column="0"
+                            Background="{StaticResource LayerFillColorDefault}" />
+                    <TextBlock Grid.Column="1"
+                               Text="{x:Bind Name}"
+                               VerticalAlignment="Center"
+                               Foreground="{StaticResource TextFillColorDisabled}" />
+                  </Grid>
+                </TreeViewItem>
+              </DataTemplate>
+            </view:NavigationUserBoardTreeViewItemTemplateSelector.UserGroupTemplate>
+
+            <view:NavigationUserBoardTreeViewItemTemplateSelector.UserBoardTemplate>
+              <DataTemplate x:DataType="model:NavigationBoard">
+                <TreeViewItem VerticalContentAlignment="Center">
+                  <Grid ColumnSpacing="12"
+                        Height="24">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="24" />
+                      <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <IconSourceElement Grid.Column="0"
+                                       IconSource="{x:Bind Icon, Converter={StaticResource IconToIconSourceConverter}}"
+                                       VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1"
+                               VerticalAlignment="Center"
+                               Text="{x:Bind Name}"
+                               Style="{StaticResource BodyStrongTextBlockStyle}" />
+                  </Grid>
+                </TreeViewItem>
+              </DataTemplate>
+            </view:NavigationUserBoardTreeViewItemTemplateSelector.UserBoardTemplate>
+          </view:NavigationUserBoardTreeViewItemTemplateSelector>
+        </TreeView.ItemTemplateSelector>
+      </TreeView>
+    </ContentDialog>
+    <!--#endregion -->
+
+    <!--#region Edit Note Tags ContentDiaolg-->
+    <ContentDialog x:Name="View_EditNoteTagsContentDialog"
+                   Title="Remove"
+                   CloseButtonText="Cancel"
+                   DefaultButton="Close">
+      <StackPanel>
+        <ScrollViewer HorizontalScrollMode="Enabled"
+                      VerticalScrollMode="Disabled"
+                      HorizontalScrollBarVisibility="Hidden"
+                      VerticalScrollBarVisibility="Disabled">
+          <ItemsRepeater x:Name="View_EditNoteTagsItemsRepeater"
+                         Margin="4">
+            <ItemsRepeater.Layout>
+              <StackLayout Orientation="Horizontal"
+                           Spacing="4" />
+            </ItemsRepeater.Layout>
+            <ItemsRepeater.ItemTemplate>
+              <DataTemplate x:DataType="x:String">
+                <view:AppTagButton RemoveButtonVisible="Visible">
+                  <TextBlock Text="{x:Bind}"
+                             TextTrimming="CharacterEllipsis" />
+                </view:AppTagButton>
+              </DataTemplate>
+            </ItemsRepeater.ItemTemplate>
+          </ItemsRepeater>
+        </ScrollViewer>
+      </StackPanel>
     </ContentDialog>
     <!--#endregion -->
     <!--#endregion-->

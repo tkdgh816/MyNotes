@@ -23,7 +23,6 @@ internal sealed partial class NotePage : Page
 
   private void NotePage_Unloaded(object sender, RoutedEventArgs e)
   {
-    Debug.WriteLine("Unloaded");
     UnRegisterEvents();
     UnregisterMessengers();
     UpdateBodyText();
@@ -273,11 +272,11 @@ internal sealed partial class NotePage : Page
   #region Messengers
   private void RegisterMessengers()
   {
-    WeakReferenceMessenger.Default.Register<Message, string>(this, Tokens.ToggleNoteWindowActivation, new((recipient, message) =>
+    WeakReferenceMessenger.Default.Register<Message<bool>, string>(this, Tokens.ToggleNoteWindowActivation, new((recipient, message) =>
     {
       if (message.Sender == ViewModel.Note)
       {
-        if ((bool)message.Content!)
+        if (message.Content)
           VisualStateManager.GoToState(this, "WindowActivated", false);
         else
         {

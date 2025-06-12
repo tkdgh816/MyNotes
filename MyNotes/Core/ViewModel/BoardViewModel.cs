@@ -8,14 +8,14 @@ namespace MyNotes.Core.ViewModel;
 
 internal class BoardViewModel : ViewModelBase
 {
-  public BoardViewModel(NavigationBoard navigation, WindowService windowService, NoteService noteService)
+  public BoardViewModel(NavigationBoard navigation, WindowService windowService, NoteService noteService, NoteViewModelFactory noteViewModelFactory)
   {
     Navigation = navigation;
     _windowService = windowService;
     _noteService = noteService;
+    _noteViewModelFactory = noteViewModelFactory;
 
-    NoteViewModels = noteService.GetNoteViewModels(navigation);
-    NoteViewModels.SortDescriptions.Add(new SortDescription<NoteViewModel>(func: vm => vm.Note.Modified, direction: SortDirection.Descending, keyPropertyName: "Modified"));
+    GetNoteViewModels();
     SetCommands();
     RegisterMessengers();
   }
@@ -38,11 +38,25 @@ internal class BoardViewModel : ViewModelBase
 
   private readonly WindowService _windowService;
   private readonly NoteService _noteService;
+  private readonly NoteViewModelFactory _noteViewModelFactory;
+
+  private void GetNoteViewModels()
+  {
+    NoteViewModels = Navigation switch
+    {
+      NavigationUserBoard userBoard => new(_noteService.GetNotes(userBoard).Select(_noteViewModelFactory.Create)),
+      NavigationBookmarks => new(_noteService.GetBookmarkedNotes().Select(_noteViewModelFactory.Create)),
+      NavigationTrash => new(_noteService.GetTrashedNotes().Select(_noteViewModelFactory.Create)),
+      _ => new(),
+    };
+
+    NoteViewModels.SortDescriptions.Add(new SortDescription<NoteViewModel>(func: vm => vm.Note.Modified, direction: SortDirection.Descending, keyPropertyName: "Modified"));
+  }
 
   public NavigationBoard Navigation { get; }
 
   #region NoteViewModels: Notes Collection
-  public SortedObservableCollection<NoteViewModel> NoteViewModels { get; } = null!;
+  public SortedObservableCollection<NoteViewModel> NoteViewModels { get; private set; } = null!;
 
   #endregion
 
@@ -63,7 +77,7 @@ internal class BoardViewModel : ViewModelBase
     NoteViewModels.SortDescriptions.Add(sortDescription);
     NoteViewModels.Refresh();
 
-    WeakReferenceMessenger.Default.Send(new Message(this, NoteViewModels), Tokens.RefreshSource);
+    WeakReferenceMessenger.Default.Send(new Message<IEnumerable<NoteViewModel>>(NoteViewModels, this), Tokens.RefreshSource);
   }
   #endregion
 
@@ -80,20 +94,22 @@ internal class BoardViewModel : ViewModelBase
   {
     AddNewNoteCommand = new(() =>
     {
-      var newNote = _noteService.CreateNote((NavigationUserBoard)Navigation);
-      newNote.NoteViewModel.CreateWindow();
+      Note newNote = _noteService.CreateNote((NavigationUserBoard)Navigation);
+      NoteViewModel noteViewModel = _noteViewModelFactory.Create(newNote);
+      NoteViewModels.Add(noteViewModel);
+      noteViewModel.CreateWindow();
     });
 
     SearchNotesCommand = new((query) =>
     {
       if (string.IsNullOrEmpty(query))
       {
-        WeakReferenceMessenger.Default.Send(new Message(this, NoteViewModels), Tokens.ChangeSourceUnfiltered);
+        WeakReferenceMessenger.Default.Send(new Message<IEnumerable<NoteViewModel>>(NoteViewModels, this), Tokens.ChangeSourceUnfiltered);
       }
       else
       {
         var source = NoteViewModels.Where(vm => vm.Note.Title.Contains(query) || vm.Note.Body.Contains(query));
-        WeakReferenceMessenger.Default.Send(new Message(this, source), Tokens.ChangeSourceFiltered);
+        WeakReferenceMessenger.Default.Send(new Message<IEnumerable<NoteViewModel>>(source, this), Tokens.ChangeSourceFiltered);
       }
     });
 
@@ -114,8 +130,8 @@ internal class BoardViewModel : ViewModelBase
       }
     });
 
-    ShowRenameBoardDialogCommand = new(() => WeakReferenceMessenger.Default.Send(new Message(Navigation), Tokens.RenameBoardName));
-    ShowRemoveBoardDialogCommand = new(() => WeakReferenceMessenger.Default.Send(new Message(Navigation), Tokens.RemoveBoard));
+    ShowRenameBoardDialogCommand = new(() => WeakReferenceMessenger.Default.Send(new Message<NavigationUserBoard>((NavigationUserBoard)Navigation), Tokens.RenameBoardName));
+    ShowRemoveBoardDialogCommand = new(() => WeakReferenceMessenger.Default.Send(new Message<NavigationUserBoard>((NavigationUserBoard)Navigation), Tokens.RemoveBoard));
 
     ChangeIconCommand = new((icon) => Navigation.Icon = icon);
   }
@@ -124,12 +140,20 @@ internal class BoardViewModel : ViewModelBase
   #region Messengers
   private void RegisterMessengers()
   {
-    WeakReferenceMessenger.Default.Register<Message, string>(this, Tokens.RemoveUnbookmarkedNote, new((recipient, message) =>
+    WeakReferenceMessenger.Default.Register<Message<NoteViewModel>, string>(this, Tokens.RemoveNoteFromBookmarks, new((recipient, message) =>
     {
-      var noteViewModel = (NoteViewModel)message.Sender!;
+      var noteViewModel = message.Content;
       if (Navigation is NavigationBookmarks)
         NoteViewModels.Remove(noteViewModel);
     }));
+
+    WeakReferenceMessenger.Default.Register<Message<NoteViewModel>, string>(this, Tokens.RemoveNoteFromBoard, new((recipient, message) =>
+    {
+      var noteViewModel = message.Content;
+      NoteViewModels.Remove(noteViewModel);
+    }));
+
+    WeakReferenceMessenger.Default.Register<ExtendedRequestMessage<NoteViewModel, bool>, string>(this, Tokens.IsNoteInBoard, new((recipient, message) => message.Reply(!Disposed && NoteViewModels.Contains(message.Request))));
   }
 
   private void UnregisterMessengers()

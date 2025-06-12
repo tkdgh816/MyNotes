@@ -100,7 +100,8 @@
                   <CommandBarFlyout.SecondaryCommands>
                     <AppBarButton x:Name="Template_MoveToBoardButton"
                                   Label="Move to board"
-                                  Icon="{ui:FontIcon Glyph=&#xE8DE;}" />
+                                  Icon="{ui:FontIcon Glyph=&#xE8DE;}" 
+                                  Command="{x:Bind MoveToBoardCommand}"/>
                     <AppBarButton x:Name="Template_RenameTitleButton"
                                   Label="Rename title"
                                   Icon="{ui:FontIcon Glyph=&#xE8AC;}"
@@ -308,7 +309,8 @@
                       <CommandBarFlyout.SecondaryCommands>
                         <AppBarButton x:Name="Template_MoveToBoardButton"
                                       Label="Move to board"
-                                      Icon="{ui:FontIcon Glyph=&#xE8DE;}" />
+                                      Icon="{ui:FontIcon Glyph=&#xE8DE;}" 
+                                      Command="{x:Bind MoveToBoardCommand}"/>
                         <AppBarButton x:Name="Template_RenameTitleButton"
                                       Label="Rename title"
                                       Icon="{ui:FontIcon Glyph=&#xE8AC;}"

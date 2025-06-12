@@ -232,7 +232,6 @@ internal class DatabaseService
   {
     Dictionary<string, object> fields = GetNoteUpdateFieldValue(dto);
 
-    Debug.WriteLine("DBUpdate: " + dto.UpdateFields);
     if (fields.Count == 0)
       return;
 
@@ -244,7 +243,10 @@ internal class DatabaseService
     using SqliteCommand command = new(query, connection);
     command.Parameters.AddWithValue("@id", dto.Id);
     foreach (var field in fields)
+    {
       command.Parameters.AddWithValue($"@{field.Key}", field.Value);
+      //Debug.WriteLine($"DBUpdate: [ {field.Key}, {field.Value} ]");
+    }
     command.ExecuteNonQuery();
   }
 

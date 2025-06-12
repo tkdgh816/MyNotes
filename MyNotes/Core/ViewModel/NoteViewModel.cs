@@ -8,11 +8,10 @@ namespace MyNotes.Core.ViewModel;
 
 internal class NoteViewModel : ViewModelBase
 {
-  public NoteViewModel(Note note, WindowService windowService, NavigationService navigationService, DatabaseService databaseService, NoteService noteService)
+  public NoteViewModel(Note note, WindowService windowService, DatabaseService databaseService, NoteService noteService)
   {
     Note = note;
     _windowService = windowService;
-    _navigationService = navigationService;
     _databaseService = databaseService;
     _noteService = noteService;
     RegisterEvents();
@@ -21,7 +20,6 @@ internal class NoteViewModel : ViewModelBase
   }
 
   private readonly WindowService _windowService;
-  private readonly NavigationService _navigationService;
   private readonly DatabaseService _databaseService;
   private readonly NoteService _noteService;
   public Note Note { get; private set; }
@@ -33,24 +31,17 @@ internal class NoteViewModel : ViewModelBase
     set => SetProperty(ref _isWindowActive, value);
   }
 
-  public void Print() => Debug.WriteLine("Print");
   public bool IsNoteInBoard()
   {
-    if (_navigationService.CurrentNavigation is NavigationBoard navigationBoard)
-    {
-      var boardViewModel = App.Current.GetService<BoardViewModelFactory>().Get(navigationBoard);
-      if (boardViewModel is not null && boardViewModel.NoteViewModels.Contains(this))
-        return true;
-    }
-
-    return false;
+    ExtendedRequestMessage<NoteViewModel, bool> message = new(this, false);
+    WeakReferenceMessenger.Default.Send(message, Tokens.IsNoteInBoard);
+    return message.Response;
   }
 
   protected override void Dispose(bool disposing)
   {
     if (disposing)
     {
-      Debug.WriteLine("Disposing... | " + Note.Title);
       UnregisterEvents();
       UnregisterMessengers();
       App.Current.GetService<NoteViewModelFactory>().Close(Note);
@@ -76,7 +67,7 @@ internal class NoteViewModel : ViewModelBase
 
   #region Windows
   public void GetMainWindow() => _windowService.GetMainWindow().Activate();
-  public void CreateWindow() => _windowService.CreateNoteWindow(Note).Activate();
+  public void CreateWindow() => _windowService.GetNoteWindow(Note).Activate();
   public void SetWindowTitlebar(UIElement titleBar) => _windowService.SetNoteWindowTitleBar(Note, titleBar);
   private bool _isWindowAlwaysOnTop = false;
   public bool IsWindowAlwaysOnTop
@@ -109,8 +100,6 @@ internal class NoteViewModel : ViewModelBase
 
   private void OnNoteDebounceTimerTick(object? sender, object e)
   {
-    Debug.WriteLine("ChangedProperties: " + string.Join(", ", _changedNoteProperties));
-    Debug.WriteLine("UpdateNotesFields: " + _noteUpdateFields);
     _noteService.UpdateNote(Note, _noteUpdateFields);
     foreach (string changedPropertyName in _changedNoteProperties)
       OnPropertyChanged(changedPropertyName);
@@ -167,7 +156,7 @@ internal class NoteViewModel : ViewModelBase
   public Command<int>? SetWindowBackdropCommand { get; private set; }
   public Command? BookmarkCommand { get; private set; }
   public Command? RemoveCommand { get; private set; }
-  public Command<NoteViewModel>? MoveToBoardCommand { get; private set; }
+  public Command? MoveToBoardCommand { get; private set; }
   public Command? RenameTitleCommand { get; private set; }
 
   private void SetCommands()
@@ -175,7 +164,7 @@ internal class NoteViewModel : ViewModelBase
     OpenWindowCommand = new((enabled) =>
     {
       if (enabled)
-        _windowService.CreateNoteWindow(Note).Activate();
+        _windowService.GetNoteWindow(Note).Activate();
     });
 
     MinimizeWindowCommand = new(() => _windowService.MinimizeNoteWindow(Note));
@@ -191,17 +180,27 @@ internal class NoteViewModel : ViewModelBase
     {
       Note.IsBookmarked = !Note.IsBookmarked;
       if (!Note.IsBookmarked)
-        WeakReferenceMessenger.Default.Send(new Message(this), Tokens.RemoveUnbookmarkedNote);
+        WeakReferenceMessenger.Default.Send(new Message<NoteViewModel>(this), Tokens.RemoveNoteFromBookmarks);
     });
 
     RemoveCommand = new(() =>
     {
       Note.IsTrashed = true;
+      WeakReferenceMessenger.Default.Send(new Message<NoteViewModel>(this), Tokens.RemoveNoteFromBoard);
     });
 
-    MoveToBoardCommand = new((noteViewModel) =>
+    MoveToBoardCommand = new(async () =>
     {
-      WeakReferenceMessenger.Default.Send(new DialogRequestMessage(noteViewModel), Tokens.MoveNoteToBoard);
+      AsyncRequestMessage<Guid?> message = new();
+      await WeakReferenceMessenger.Default.Send(message, Tokens.MoveNoteToBoard);
+      Guid? boardId = await message.Response;
+
+      if (boardId is not null && Note.BoardId != boardId)
+      {
+        Note.BoardId = (Guid)boardId;
+        _noteService.UpdateNote(Note, NoteUpdateFields.Parent);
+        WeakReferenceMessenger.Default.Send(new Message<NoteViewModel>(this), Tokens.RemoveNoteFromBoard);
+      }
     });
 
     RenameTitleCommand = new(async () =>
@@ -220,23 +219,23 @@ internal class NoteViewModel : ViewModelBase
   #region Messengers
   private void RegisterMessengers()
   {
-    WeakReferenceMessenger.Default.Register<Message, string>(this, Tokens.ResizeNoteWindow, new((recipient, message) =>
+    WeakReferenceMessenger.Default.Register<Message<SizeInt32>, string>(this, Tokens.ResizeNoteWindow, new((recipient, message) =>
     {
       if (message.Sender == Note)
       {
-        var size = (SizeInt32)message.Content!;
+        var size = message.Content;
         if (size.Width > 0 && size.Height > 0)
           Note.Size = size;
       }
     }));
 
-    WeakReferenceMessenger.Default.Register<Message, string>(this, Tokens.MoveNoteWindow, new((recipient, message) =>
+    WeakReferenceMessenger.Default.Register<Message<PointInt32>, string>(this, Tokens.MoveNoteWindow, new((recipient, message) =>
     {
       if (message.Sender == Note)
       {
-        var position = (PointInt32)message.Content!;
-        if (position.X >= 0 && position.Y >= 0)
-          Note.Position = position;
+        var position = message.Content;
+        //if (position.X >= 0 && position.Y >= 0)
+        Note.Position = position;
       }
     }));
   }

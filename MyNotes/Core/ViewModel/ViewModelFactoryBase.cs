@@ -4,7 +4,7 @@ namespace MyNotes.Core.ViewModel;
 
 internal abstract class ViewModelFactoryBase<TModel, TViewModel> : IViewModelFactory<TViewModel> where TModel : class where TViewModel : class, IViewModel
 {
-  public readonly Dictionary<TModel, WeakReference<TViewModel>> _cache = new();
+  protected readonly Dictionary<TModel, WeakReference<TViewModel>> _cache = new();
 
   public abstract TViewModel Create(TModel model);
 

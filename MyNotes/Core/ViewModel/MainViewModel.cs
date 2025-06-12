@@ -26,19 +26,19 @@ internal class MainViewModel : ViewModelBase
 
   protected override void Dispose(bool disposing)
   {
-    if(disposing)
+    if (disposing)
     {
       UnregisterEvents();
       UnregisterMessengers();
     }
-    base.Dispose(disposing); 
+    base.Dispose(disposing);
   }
 
   private readonly NavigationService _navigationService;
 
   public ImmutableList<Navigation> CoreMenus { get; } =
-   [
-     new NavigationHome(),
+  [
+    new NavigationHome(),
     new NavigationBookmarks(),
     new NavigationTags(),
     new NavigationSeparator(),
@@ -292,6 +292,7 @@ internal class MainViewModel : ViewModelBase
   public Command? AddNavigationBoardCommand { get; private set; }
   public Command? AddNavigationBoardGroupCommand { get; private set; }
   public Command? SetNavigationEditModeCommand { get; private set; }
+  public Command<NavigationUserBoard>? MoveNoteToBoardCommand { get; private set; }
 
   public void SetCommands()
   {
@@ -310,9 +311,9 @@ internal class MainViewModel : ViewModelBase
       {
         BoardViewModel viewModel = App.Current.GetService<BoardViewModelFactory>().Create(navigation);
         if (mode == NavigationViewDisplayMode.Minimal)
-          WeakReferenceMessenger.Default.Send(new Message(viewModel, "GridViewAlignCenter"), Tokens.ChangeNoteBoardGridViewAlignment);
+          WeakReferenceMessenger.Default.Send(new Message<string>("GridViewAlignCenter", viewModel), Tokens.ChangeNoteBoardGridViewAlignment);
         else
-          WeakReferenceMessenger.Default.Send(new Message(viewModel, "GridViewAlignStretch"), Tokens.ChangeNoteBoardGridViewAlignment);
+          WeakReferenceMessenger.Default.Send(new Message<string>("GridViewAlignStretch", viewModel), Tokens.ChangeNoteBoardGridViewAlignment);
       }
     });
 
@@ -344,14 +345,19 @@ internal class MainViewModel : ViewModelBase
 
       _navigationService.ChangeNavigationViewSelectionWithoutNavigation(IsEditMode ? null : _navigationService.CurrentNavigation);
     });
+
+    MoveNoteToBoardCommand = new((board) =>
+    {
+      Debug.WriteLine(board.Name);
+    });
   }
   #endregion
 
   private void RegisterMessengers()
   {
-    WeakReferenceMessenger.Default.Register<ExtendedRequestMessage<bool>, string>(this, Tokens.IsValidNavigation, new((recipient, message) =>
+    WeakReferenceMessenger.Default.Register<ExtendedRequestMessage<NavigationUserBoard, bool>, string>(this, Tokens.IsValidNavigation, new((recipient, message) =>
     {
-      message.Reply(ContainsBoard((NavigationUserBoard)message.Content));
+      message.Reply(ContainsBoard(message.Request));
     }));
   }
 

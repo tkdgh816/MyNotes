@@ -12,9 +12,11 @@ internal class BoardViewModelFactory : ViewModelFactoryBase<NavigationBoard, Boa
       if (wr.TryGetTarget(out BoardViewModel? viewModel))
         return viewModel;
 
-    WindowService windowService = App.Current.GetService<WindowService>();
-    NoteService noteService = App.Current.GetService<NoteService>();
-    BoardViewModel newViewModel = new(navigation, windowService, noteService);
+    var windowService = App.Current.GetService<WindowService>();
+    var noteService = App.Current.GetService<NoteService>();
+    var noteViewModelFactory = App.Current.GetService<NoteViewModelFactory>();
+
+    BoardViewModel newViewModel = new(navigation, windowService, noteService, noteViewModelFactory);
     _cache.Remove(navigation);
     _cache.Add(navigation, new(newViewModel));
     ReferenceTracker.BoardViewModelReferences.Add(new(newViewModel));

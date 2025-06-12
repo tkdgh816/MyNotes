@@ -1,5 +1,4 @@
-﻿#if DEBUG && !DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 using MyNotes.Core.Service;
 using MyNotes.Core.ViewModel;
@@ -15,7 +14,7 @@ public partial class App : Application
 
   protected override void OnLaunched(LaunchActivatedEventArgs args)
   {
-    GetService<WindowService>().MainWindow?.Activate();
+    GetService<WindowService>().GetMainWindow().Activate();
   }
 
   public static new readonly App Current = (App)Application.Current;
@@ -44,4 +43,3 @@ public partial class App : Application
   public T GetService<T>() => (T)Services.GetRequiredService(typeof(T));
   #endregion
 }
-#endif

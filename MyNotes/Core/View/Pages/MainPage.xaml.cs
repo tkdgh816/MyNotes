@@ -93,7 +93,6 @@ internal sealed partial class MainPage : Page
   {
     ViewModel.NewBoardGroupName = "";
     ViewModel.NavigationGroupToAdd = group;
-    Debug.WriteLine(group.Name);
     await View_NewGroupContentDialog.ShowAsync();
   }
 
@@ -101,7 +100,6 @@ internal sealed partial class MainPage : Page
   {
     ViewModel.NewBoardName = "";
     ViewModel.NavigationGroupToAdd = group;
-    Debug.WriteLine(group.Name);
     await View_NewBoardContentDialog.ShowAsync();
   }
   #endregion
@@ -273,22 +271,34 @@ internal sealed partial class MainPage : Page
   #region Messengers
   private void RegisterMessengers()
   {
-    WeakReferenceMessenger.Default.Register<Message, string>(this, Tokens.RenameBoardName, new((recipient, message) => ShowRenameBoardContentDialog((NavigationUserBoard)message.Sender!)));
-    WeakReferenceMessenger.Default.Register<Message, string>(this, Tokens.RemoveBoard, new((recipient, message) => ShowRemoveBoardContentDialog((NavigationUserBoard)message.Sender!)));
+    WeakReferenceMessenger.Default.Register<Message<NavigationUserBoard>, string>(this, Tokens.RenameBoardName, new((recipient, message) => ShowRenameBoardContentDialog(message.Content)));
+    WeakReferenceMessenger.Default.Register<Message<NavigationUserBoard>, string>(this, Tokens.RemoveBoard, new((recipient, message) => ShowRemoveBoardContentDialog(message.Content)));
 
     WeakReferenceMessenger.Default.Register<AsyncRequestMessage<string>, string>(this, Tokens.RenameNoteTitle, new((recipient, message) =>
     {
       async Task<string> t()
       {
-        if (await View_RenameNoteTitleContentDialog.ShowAsync() == ContentDialogResult.Primary)
-          return ViewModel.NoteTitleToRename;
-        else
-          return "";
+        return await View_RenameNoteTitleContentDialog.ShowAsync() == ContentDialogResult.Primary ? ViewModel.NoteTitleToRename : "";
       }
       message.Reply(t());
     }));
-  }
 
+    WeakReferenceMessenger.Default.Register<AsyncRequestMessage<Guid?>, string>(this, Tokens.MoveNoteToBoard, new((recipient, message) =>
+    {
+      async Task<Guid?> t()
+      {
+        if (await View_MoveNoteToBoardContentDialog.ShowAsync() == ContentDialogResult.Primary)
+        {
+          if (View_MoveNoteToBoardTreeView.SelectedItem is NavigationUserBoard navigation)
+            return navigation.Id;
+        }
+        return null;
+      }
+      
+      message.Reply(t());
+    }));
+  }
+   
   private void UnregisterMessengers() => WeakReferenceMessenger.Default.UnregisterAll(this);
   #endregion
 
@@ -317,6 +327,18 @@ internal class MainNavigationViewMenuItemTemplateSelector : DataTemplateSelector
     NavigationUserBoard => UserBoardMenuItemTemplate,
     NavigationItem => MenuItemTemplate,
     NavigationSeparator => SeparatorTemplate,
+    _ => throw new ArgumentException("")
+  };
+}
+
+internal class NavigationUserBoardTreeViewItemTemplateSelector : DataTemplateSelector
+{
+  public DataTemplate? UserGroupTemplate { get; set; }
+  public DataTemplate? UserBoardTemplate { get; set; }
+  protected override DataTemplate? SelectTemplateCore(object item) => item switch
+  {
+    NavigationUserGroup => UserGroupTemplate,
+    NavigationUserBoard => UserBoardTemplate,
     _ => throw new ArgumentException("")
   };
 }

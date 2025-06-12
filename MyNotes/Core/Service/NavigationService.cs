@@ -103,13 +103,16 @@ internal class NavigationService
   {
     if (_frame is not null)
       _frame.Navigated -= OnNavigated;
+
+    _navigationView = null;
+    _frame = null;
   }
 
   private NavigationView? _navigationView;
   private Frame? _frame;
 
   public NavigationItem? CurrentNavigation { get; private set; }
-  public void SetCurrentNavigation(NavigationItem navigation) => CurrentNavigation = navigation;
+  public void SetCurrentNavigation(NavigationItem? navigation) => CurrentNavigation = navigation;
 
   private bool _preventNavigation = false;
 
@@ -137,7 +140,7 @@ internal class NavigationService
 
       if (backStack[^1].Parameter is NavigationUserBoard userBoard)
       {
-        if (!WeakReferenceMessenger.Default.Send(new ExtendedRequestMessage<bool>(userBoard), Tokens.IsValidNavigation).Response)
+        if (!WeakReferenceMessenger.Default.Send(new ExtendedRequestMessage<NavigationUserBoard, bool>(userBoard), Tokens.IsValidNavigation).Response)
         {
           backStack.RemoveAt(backStack.Count - 1);
           continue;

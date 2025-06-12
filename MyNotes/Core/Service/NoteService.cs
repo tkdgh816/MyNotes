@@ -1,7 +1,5 @@
-﻿using MyNotes.Common.Collections;
-using MyNotes.Core.Dto;
+﻿using MyNotes.Core.Dto;
 using MyNotes.Core.Model;
-using MyNotes.Core.ViewModel;
 using MyNotes.Debugging;
 
 using ToolkitColorHelper = CommunityToolkit.WinUI.Helpers.ColorHelper;
@@ -10,14 +8,12 @@ namespace MyNotes.Core.Service;
 
 internal class NoteService
 {
-  public NoteService(DatabaseService databaseService, NoteViewModelFactory noteViewModelFactory)
+  public NoteService(DatabaseService databaseService)
   {
     _databaseService = databaseService;
-    _noteViewModelFactory = noteViewModelFactory;
   }
 
   private readonly DatabaseService _databaseService;
-  private readonly NoteViewModelFactory _noteViewModelFactory;
   private readonly Dictionary<Guid, Note> _notes = new();
 
   public void RemoveNoteCache(Note note) => _notes.Remove(note.Id);
@@ -45,15 +41,13 @@ internal class NoteService
   }
   private NoteDbDto ToDto(Note note) => new() { Id = note.Id, Parent = note.BoardId, Created = note.Created, Modified = note.Modified, Title = note.Title, Body = note.Body, Background = note.Background.ToString(), Backdrop = (int)note.Backdrop, Width = note.Size.Width, Height = note.Size.Height, PositionX = note.Position.X, PositionY = note.Position.Y, Bookmarked = note.IsBookmarked, Trashed = note.IsTrashed, Tags = [.. note.Tags] };
 
-  public (Note Note, NoteViewModel NoteViewModel) CreateNote(NavigationUserBoard navigation)
+  public Note CreateNote(NavigationUserBoard navigation)
   {
     DateTimeOffset creationTime = DateTimeOffset.UtcNow;
-    Note newNote = new(Guid.NewGuid(), navigation.Id, "New note", creationTime, creationTime) { Background = Colors.LightGoldenrodYellow };
+    Note newNote = new(Guid.NewGuid(), navigation.Id, "New note", creationTime, creationTime) { Background = Colors.LightGoldenrodYellow, Position = new(-1, -1) };
     _databaseService.AddNote(ToDto(newNote));
     _notes.Add(newNote.Id, newNote);
-    NoteViewModel noteViewModel = _noteViewModelFactory.Create(newNote);
-    _currentNoteViewModels?.Add(noteViewModel);
-    return (newNote, noteViewModel);
+    return newNote;
   }
   public IEnumerable<Note> GetNotes(NavigationUserBoard navigation)
     => _databaseService.GetNotes(navigation).Result.Select(ToNote);
@@ -85,20 +79,5 @@ internal class NoteService
       Trashed = updateFields.HasFlag(NoteUpdateFields.Trashed) ? note.IsTrashed : null
     };
     _databaseService.UpdateNote(dto);
-  }
-
-  private SortedObservableCollection<NoteViewModel>? _currentNoteViewModels;
-
-  public SortedObservableCollection<NoteViewModel> GetNoteViewModels(NavigationBoard navigation)
-  {
-    SortedObservableCollection<NoteViewModel> noteViewModels = navigation switch
-    {
-      NavigationUserBoard userBoard => new(GetNotes(userBoard).Select(_noteViewModelFactory.Create)),
-      NavigationBookmarks => new(GetBookmarkedNotes().Select(_noteViewModelFactory.Create)),
-      NavigationTrash => new(GetTrashedNotes().Select(_noteViewModelFactory.Create)),
-      _ => new(),
-    };
-    _currentNoteViewModels = noteViewModels;
-    return noteViewModels;
   }
 }

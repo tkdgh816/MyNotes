@@ -29,10 +29,6 @@ internal abstract class NavigationItem : Navigation
     PageType = pageType;
     Name = name;
     Icon = icon;
-    PropertyChanged += (s, e) =>
-    {
-      Debug.WriteLine($"{Name}: {e.PropertyName}");
-    };
   }
 
   public Type PageType { get; protected set; }

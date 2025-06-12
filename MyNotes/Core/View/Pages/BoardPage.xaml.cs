@@ -10,7 +10,7 @@ internal sealed partial class BoardPage : Page
   {
     InitializeComponent();
 
-    this.Unloaded += NoteBoardPage_Unloaded;
+    this.Unloaded += BoardPage_Unloaded;
     RegisterMessengers();
   }
 
@@ -27,7 +27,7 @@ internal sealed partial class BoardPage : Page
     RegisterEvents();
   }
 
-  private void NoteBoardPage_Unloaded(object sender, RoutedEventArgs e)
+  private void BoardPage_Unloaded(object sender, RoutedEventArgs e)
   {
     UnregisterEvents();
     UnregisterMessengers();
@@ -154,35 +154,35 @@ internal sealed partial class BoardPage : Page
   #region Messengers
   private void RegisterMessengers()
   {
-    WeakReferenceMessenger.Default.Register<Message, string>(this, Tokens.ChangeSourceFiltered, new((recipient, message) =>
+    WeakReferenceMessenger.Default.Register<Message<IEnumerable<NoteViewModel>>, string>(this, Tokens.ChangeSourceFiltered, new((recipient, message) =>
     {
       if (message.Sender == ViewModel)
       {
-        NotesCollectionViewSource.Source = (IEnumerable<NoteViewModel>)message.Content!;
+        NotesCollectionViewSource.Source = message.Content;
         VisualStateManager.GoToState(this, "CannotAddNote", false);
       }
     }));
 
-    WeakReferenceMessenger.Default.Register<Message, string>(this, Tokens.ChangeSourceUnfiltered, new((recipient, message) =>
+    WeakReferenceMessenger.Default.Register<Message<IEnumerable<NoteViewModel>>, string>(this, Tokens.ChangeSourceUnfiltered, new((recipient, message) =>
     {
       if (message.Sender == ViewModel)
       {
-        NotesCollectionViewSource.Source = (IEnumerable<NoteViewModel>)message.Content!;
+        NotesCollectionViewSource.Source = message.Content;
         VisualStateManager.GoToState(this, "CanAddNote", false);
       }
     }));
 
-    WeakReferenceMessenger.Default.Register<Message, string>(this, Tokens.RefreshSource, new((recipient, message) =>
+    WeakReferenceMessenger.Default.Register<Message<IEnumerable<NoteViewModel>>, string>(this, Tokens.RefreshSource, new((recipient, message) =>
     {
       if (message.Sender == ViewModel)
-        NotesCollectionViewSource.Source = (IEnumerable<NoteViewModel>)message.Content!;
+        NotesCollectionViewSource.Source = message.Content;
     }));
 
-    WeakReferenceMessenger.Default.Register<Message, string>(this, Tokens.ChangeNoteBoardGridViewAlignment, new((recipient, message) =>
+    WeakReferenceMessenger.Default.Register<Message<string>, string>(this, Tokens.ChangeNoteBoardGridViewAlignment, new((recipient, message) =>
     {
       if (message.Sender == ViewModel)
       {
-        switch ((string)message.Content!)
+        switch (message.Content)
         {
           case "GridViewAlignCenter": View_NotesGridView.HorizontalAlignment = HorizontalAlignment.Center; break;
           case "GridViewAlignStretch": View_NotesGridView.HorizontalAlignment = HorizontalAlignment.Stretch; break;

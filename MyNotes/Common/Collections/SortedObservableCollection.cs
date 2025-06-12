@@ -118,7 +118,6 @@ internal class SortedObservableCollection<T> : Collection<T>, INotifyCollectionC
     if (sender is T item && e.PropertyName is not null && SortKeys.Contains(e.PropertyName))
     {
       int oldIndex = IndexOf(item);
-      Debug.WriteLine($"{item}: {e.PropertyName}");
       if (oldIndex < 0 || !CheckItemMove(oldIndex))
         return;
       base.RemoveItem(oldIndex);
