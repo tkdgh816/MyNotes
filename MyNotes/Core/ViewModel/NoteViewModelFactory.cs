@@ -15,8 +15,9 @@ internal class NoteViewModelFactory : ViewModelFactoryBase<Note, NoteViewModel>
     var windowService = App.Current.GetService<WindowService>();
     var dialogService = App.Current.GetService<DialogService>();
     var noteService = App.Current.GetService<NoteService>();
+    var tagService = App.Current.GetService<TagService>();
 
-    NoteViewModel newViewModel = new(note, windowService, dialogService, noteService);
+    NoteViewModel newViewModel = new(note, windowService, dialogService, noteService, tagService);
     _cache.Remove(note);
     _cache.Add(note, new(newViewModel));
     ReferenceTracker.NoteViewModelReferences.Add(new(newViewModel));

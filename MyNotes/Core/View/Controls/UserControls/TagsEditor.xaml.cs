@@ -11,6 +11,7 @@ internal sealed partial class TagsEditor : UserControl
   {
     this.InitializeComponent();
     ViewModel = App.Current.GetService<TagsViewModel>();
+    ViewModel.RefreshView();
   }
 
   public TagsViewModel ViewModel { get; }

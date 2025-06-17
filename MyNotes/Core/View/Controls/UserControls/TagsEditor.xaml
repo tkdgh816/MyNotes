@@ -39,15 +39,19 @@
     </Grid>
     <!--#endregion -->
 
+    <!--#region Search & Add Tag -->
     <Grid Grid.Row="1">
+      <!-- Search -->
       <AutoSuggestBox x:Name="View_SearchAutoSuggestBox"
                       Margin="12,0"
                       PlaceholderText="Search tags"
                       QueryIcon="Find"
                       QuerySubmitted="View_SearchAutoSuggestBox_QuerySubmitted" />
+      
+      <!-- New Tag -->
       <Grid x:Name="View_AddTagGrid"
             RowSpacing="4"
-            ColumnSpacing="4"
+            ColumnSpacing="8"
             Padding="12,4,12,12"
             Background="{StaticResource SubtleFillColorSecondaryBrush}"
             Visibility="Collapsed">
@@ -56,33 +60,40 @@
           <RowDefinition />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
           <ColumnDefinition />
           <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-        <TextBlock Text="New tags"
+        <TextBlock Text="New tag"
                    Grid.Row="0"
                    Grid.Column="0"
+                   Grid.ColumnSpan="2"
                    VerticalAlignment="Center" />
         <Button x:Name="View_CloseAddModeButton"
                 Grid.Row="0"
-                Grid.Column="1"
+                Grid.Column="2"
                 Style="{StaticResource AppFontIconNormalButtonStyle}"
                 Content="&#xE711;"
                 HorizontalAlignment="Right"
                 Click="View_CloseAddModeButton_Click" />
+        <view:TagColorSelector x:Name="View_TagColorSelector"
+                               Grid.Row="1"
+                               Grid.Column="0" />
         <TextBox x:Name="View_TagInputTextBox"
                  Grid.Row="1"
-                 Grid.Column="0"
+                 Grid.Column="1"
                  PlaceholderText="Enter a tag" />
         <Button x:Name="View_AddTagButton"
                 Grid.Row="1"
-                Grid.Column="1"
+                Grid.Column="2"
                 Content="Add"
                 Style="{StaticResource AccentButtonStyle}"
                 Click="View_AddTagButton_Click" />
       </Grid>
     </Grid>
+    <!--#endregion -->
 
+    <!--#region Tags View -->
     <Grid Grid.Row="2">
       <SemanticZoom x:Name="View_TagsSemanticZoom">
         <SemanticZoom.ZoomedOutView>
@@ -169,7 +180,9 @@
         </SemanticZoom.ZoomedInView>
       </SemanticZoom>
     </Grid>
+    <!--#endregion -->
 
+    <!--#region Selected Tag CommandBar -->
     <Grid x:Name="View_CommandBarGrid"
           Grid.Row="3"
           Background="{StaticResource AcrylicInAppFillColorBaseBrush}"
@@ -238,6 +251,8 @@
                  ActionButtonClick="View_DeleteTagsTeachingTip_ActionButtonClick"
                  CloseButtonContent="Close"
                  IsLightDismissEnabled="True" />
+    <!--#endregion -->
+    
     <VisualStateManager.VisualStateGroups>
       <VisualStateGroup x:Name="EditorModeStates">
         <VisualState x:Name="EditorModeNormal" />

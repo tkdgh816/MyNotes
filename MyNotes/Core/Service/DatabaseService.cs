@@ -394,7 +394,10 @@ VALUES
     await using SqliteConnection connection = new(_connectionString);
     await connection.OpenAsync();
 
-    string query = "SELECT * FROM Tags INNER JOIN NotesTags ON note_id = @note_id";
+    string query = 
+@"SELECT * FROM Tags
+INNER JOIN NotesTags ON Tags.id = NotesTags.tag_id
+WHERE NotesTags.note_id = @note_id";
     await using SqliteCommand command = new(query, connection);
 
     command.Parameters.AddWithValue("@note_id", dto.NoteId);
@@ -403,7 +406,7 @@ VALUES
     while (await reader.ReadAsync())
     {
       var id = GetReaderValue<Guid>(reader, "id");
-      var tag = GetReaderValue<string>(reader, "tag")!;
+      var tag = GetReaderValue<string>(reader, "text")!;
       var color = GetReaderValue<int>(reader, "color");
       tags.Add(new TagDbDto() { Id = id, Text = tag, Color = color });
     }
@@ -488,16 +491,14 @@ VALUES
     return command.ExecuteNonQuery() > 0;
   }
 
-  public bool AddTag(Note note, string tag)
+  public bool AddTagToNote(TagToNoteDbDto dto)
   {
     using SqliteConnection connection = new(_connectionString);
     connection.Open();
-    string query =
-@"INSERT OR IGNORE INTO NotesTags (id, tag)
-SELECT @id, tag FROM Tags WHERE tag = @tag";
+    string query = @"INSERT OR IGNORE INTO NotesTags (note_id, tag_id) VALUES (@note_id, @tag_id);";
     using SqliteCommand command = new(query, connection);
-    command.Parameters.AddWithValue("@id", note.Id);
-    command.Parameters.AddWithValue("@tag", tag);
+    command.Parameters.AddWithValue("@note_id", dto.NoteId);
+    command.Parameters.AddWithValue("@tag_id", dto.TagId);
     return command.ExecuteNonQuery() > 0;
   }
 
@@ -508,6 +509,17 @@ SELECT @id, tag FROM Tags WHERE tag = @tag";
     string query = "DELETE FROM Tags WHERE id = @id";
     using SqliteCommand command = new(query, connection);
     command.Parameters.AddWithValue("@id", dto.Id);
+    return command.ExecuteNonQuery() > 0;
+  }
+
+  public bool DeleteTagFromNote(TagToNoteDbDto dto)
+  {
+    using SqliteConnection connection = new(_connectionString);
+    connection.Open();
+    string query = "DELETE FROM NotesTags WHERE note_id = @note_id AND tag_id = @tag_id";
+    using SqliteCommand command = new(query, connection);
+    command.Parameters.AddWithValue("@note_id", dto.NoteId);
+    command.Parameters.AddWithValue("@tag_id", dto.TagId);
     return command.ExecuteNonQuery() > 0;
   }
   #endregion
@@ -599,7 +611,7 @@ trashed || {reader["trashed"]}
       while (reader.Read())
       {
         yield return
-@$"[ {reader["tag"]} ], ";
+@$"[ {reader["text"]} ], ";
       }
     }
     else if (tableName == "NotesTags")

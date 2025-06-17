@@ -2,7 +2,7 @@ using MyNotes.Core.Model;
 
 namespace MyNotes.Core.View;
 
-internal sealed partial class IconPicker : UserControl
+internal sealed partial class IconPicker : Button
 {
   public IconPicker()
   {
@@ -87,14 +87,8 @@ internal class IconPickerViewItemTemplateSelector : DataTemplateSelector
   };
 }
 
-internal class IconChangedEventArgs : EventArgs
+internal class IconChangedEventArgs(Icon oldIcon, Icon newIcon) : EventArgs
 {
-  public Icon? OldIcon { get; }
-  public Icon NewIcon { get; }
-
-  public IconChangedEventArgs(Icon oldIcon, Icon newIcon)
-  {
-    OldIcon = oldIcon;
-    NewIcon = newIcon;
-  }
+  public Icon? OldIcon { get; } = oldIcon;
+  public Icon NewIcon { get; } = newIcon;
 }

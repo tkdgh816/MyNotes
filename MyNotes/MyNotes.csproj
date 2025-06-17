@@ -19,6 +19,7 @@
     <None Remove="Assets\Square44x44Logo.targetsize-16.png" />
     <None Remove="Assets\Square44x44Logo.targetsize-24_altform-lightunplated.png" />
     <None Remove="Core\View\Controls\UserControls\IconPicker.xaml" />
+    <None Remove="Core\View\Controls\UserControls\TagColorSelector.xaml" />
     <None Remove="Core\View\Dialogs\TestDialog.xaml" />
     <None Remove="Core\View\NoteWindow.xaml" />
     <None Remove="Core\View\Pages\BookmarksPage.xaml" />
@@ -78,6 +79,9 @@
     <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <Page Update="Core\View\Controls\UserControls\TagColorSelector.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <None Update="Debugging\Test\Test.xaml">
       <Generator>MSBuild:Compile</Generator>
     </None>

@@ -15,16 +15,8 @@
       <ColumnDefinition Width="Auto" />
       <ColumnDefinition />
     </Grid.ColumnDefinitions>
-    <Button Grid.Column="0"
-            Style="{StaticResource AppIconMediumButtonStyle}">
-      <IconSourceElement IconSource="{x:Bind ViewModel.Icon, Converter={StaticResource IconToIconSourceConverter}, Mode=OneWay}" />
-      <Button.Flyout>
-        <Flyout Placement="BottomEdgeAlignedLeft"
-                ShouldConstrainToRootBounds="False">
-          <view:IconPicker Icon="{x:Bind ViewModel.Icon, Mode=TwoWay}" />
-        </Flyout>
-      </Button.Flyout>
-    </Button>
+    <view:IconPicker Grid.Column="0"
+                     Icon="{x:Bind ViewModel.Icon, Mode=TwoWay}" />
     <TextBox Grid.Column="1"
              Text="{x:Bind ViewModel.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
              VerticalAlignment="Center"

@@ -33,7 +33,14 @@ internal class TagService
 
   private TagDbDto ToDto(Tag tag) => new() { Id = tag.Id.Value, Text = tag.Text, Color = (int)tag.Color };
 
-  public IEnumerable<Tag> GetTags(NoteId noteId) => _databaseService.GetTags(new GetNoteTagsDbDto() { NoteId = noteId.Value }).Result.Select(ToTag);
+  public IEnumerable<Tag> GetTags(NoteId noteId) 
+    => _databaseService.GetTags(new GetNoteTagsDbDto() { NoteId = noteId.Value }).Result.Select(ToTag);
+
+  public bool AddTagToNote(Note note, Tag tag) 
+    => _databaseService.AddTagToNote(new TagToNoteDbDto() { NoteId = note.Id.Value, TagId = tag.Id.Value });
+
+  public bool DeleteTagFromNote(Note note, Tag tag)
+    => _databaseService.DeleteTagFromNote(new TagToNoteDbDto() { NoteId = note.Id.Value, TagId = tag.Id.Value });
 
   public void LoadAllTags()
   {
@@ -45,15 +52,14 @@ internal class TagService
       ToTag(dto);
   }
 
-  private int num = 0;
-  public Tag CreateTag(string text)
+  public Tag CreateTag(string text, TagColor color)
   {
     Tag? tag = Tags.FirstOrDefault(tag => tag.Text == text);
 
     if (tag is not null)
       return tag;
 
-    tag = new(new TagId(Guid.NewGuid()), text, (TagColor)(num++ % 9));
+    tag = new(new TagId(Guid.NewGuid()), text, color);
     AddToCache(tag);
     _databaseService.AddTag(ToDto(tag));
     return tag;

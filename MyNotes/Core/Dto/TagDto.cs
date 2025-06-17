@@ -1,4 +1,6 @@
-﻿namespace MyNotes.Core.Dto;
+﻿using MyNotes.Core.Model;
+
+namespace MyNotes.Core.Dto;
 
 internal record TagDbDto
 {
@@ -20,4 +22,16 @@ internal record CachedTagDbDto
 internal record DeleteTagDbDto
 {
   public required Guid Id { get; init; }
+}
+
+internal record TagToNoteDbDto
+{
+  public required Guid NoteId { get; init; }
+  public required Guid TagId { get; init; }
+}
+
+internal class TagCommandParameterDto
+{
+  public string Text { get; set; } = "";
+  public TagColor Color { get; set; }
 }

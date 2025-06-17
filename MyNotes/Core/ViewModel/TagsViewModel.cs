@@ -8,8 +8,6 @@ internal class TagsViewModel : ViewModelBase
   public TagsViewModel(TagService tagService)
   {
     _tagService = tagService;
-    foreach (Tag tag in _tagService.Tags)
-      TagGroup.AddItem(tag);
     TagsCollectionViewSource.Source = TagGroup;
   }
 
@@ -17,12 +15,19 @@ internal class TagsViewModel : ViewModelBase
   public CollectionViewSource TagsCollectionViewSource { get; } = new() { IsSourceGrouped = true };
   public TagGroup TagGroup { get; } = new();
 
+  public void RefreshView()
+  {
+    TagGroup.Clear();
+    foreach (Tag tag in _tagService.Tags)
+      TagGroup.AddItem(tag);
+  }
+
   public void AddTag(string tagText)
   {
     tagText = tagText.Trim();
     if (string.IsNullOrWhiteSpace(tagText) || TagGroup.Contains(tagText))
       return;
-    Tag newTag = _tagService.CreateTag(tagText);
+    Tag newTag = _tagService.CreateTag(tagText, TagColor.Transparent);
     TagGroup.AddItem(newTag);
   }
 

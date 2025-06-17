@@ -8,12 +8,13 @@ namespace MyNotes.Core.ViewModel;
 
 internal class NoteViewModel : ViewModelBase
 {
-  public NoteViewModel(Note note, WindowService windowService, DialogService dialogService, NoteService noteService)
+  public NoteViewModel(Note note, WindowService windowService, DialogService dialogService, NoteService noteService, TagService tagService)
   {
     Note = note;
     _windowService = windowService;
     _dialogService = dialogService;
     _noteService = noteService;
+    _tagService = tagService;
     RegisterEvents();
     SetCommands();
     RegisterMessengers();
@@ -22,6 +23,7 @@ internal class NoteViewModel : ViewModelBase
   private readonly WindowService _windowService;
   private readonly DialogService _dialogService;
   private readonly NoteService _noteService;
+  private readonly TagService _tagService;
   public Note Note { get; private set; }
 
   private bool _isWindowActive = true;
@@ -55,12 +57,14 @@ internal class NoteViewModel : ViewModelBase
   public void RegisterEvents()
   {
     Note.PropertyChanged += OnNoteChanged;
+    Note.Tags.CollectionChanged += OnNoteTagsCollectionChanged;
     _noteDebounceTimer.Tick += OnNoteDebounceTimerTick;
   }
 
   public void UnregisterEvents()
   {
     Note.PropertyChanged -= OnNoteChanged;
+    Note.Tags.CollectionChanged -= OnNoteTagsCollectionChanged;
     _noteDebounceTimer.Tick -= OnNoteDebounceTimerTick;
   }
   #endregion
@@ -120,7 +124,7 @@ internal class NoteViewModel : ViewModelBase
     _noteDebounceTimer.Start();
   }
 
-  //TEST TOSTRING
+  //TEST TO STRING
   public override string ToString() => Note.ToString();
 
   public bool IsBodyChanged = false;
@@ -138,6 +142,22 @@ internal class NoteViewModel : ViewModelBase
     IsBodyChanged = false;
   }
 
+
+  private void OnNoteTagsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+  {
+    switch (e.Action)
+    {
+      case NotifyCollectionChangedAction.Add:
+        if (e.NewItems is not null)
+        {
+          foreach (Tag tag in e.NewItems)
+            _tagService.AddTagToNote(Note, tag);
+        }
+        break;
+      case NotifyCollectionChangedAction.Remove:
+        break;
+    }
+  }
   //public void UpdateNoteTag(string tag)
   //{
   //  if (string.IsNullOrWhiteSpace(tag) || Note.Tags.Contains(tag))
@@ -160,7 +180,8 @@ internal class NoteViewModel : ViewModelBase
   public Command? ShowRenameNoteTitleDialogCommand { get; private set; }
   public Command<string>? RenameTitleCommand { get; private set; }
   public Command? ShowEditNoteTagsDialogCommmand { get; private set; }
-  public Command<string>? AddTagCommand { get; private set; }
+  public Command<TagCommandParameterDto>? AddTagCommand { get; private set; }
+  public Command<Tag>? DeleteTagCommand { get; private set; }
 
   private void SetCommands()
   {
@@ -218,13 +239,24 @@ internal class NoteViewModel : ViewModelBase
 
     ShowEditNoteTagsDialogCommmand = new(() => _dialogService.ShowEditNoteTagsDialog(Note));
 
-    AddTagCommand = new((text) =>
+    AddTagCommand = new((dto) =>
     {
-      if (!string.IsNullOrEmpty(text))
-        Note.Tags.Add(new Tag(new(Guid.NewGuid()), text, (TagColor)(num++ % 9)));
+      if (!string.IsNullOrEmpty(dto.Text))
+      {
+        if (!Note.Tags.Any(tag => tag.Text == dto.Text))
+        {
+          Tag newTag = _tagService.CreateTag(dto.Text, dto.Color);
+          Note.Tags.Add(newTag);
+        }
+      }
+    });
+
+    DeleteTagCommand = new((tag) =>
+    {
+      if (_tagService.DeleteTagFromNote(Note, tag))
+        Note.Tags.Remove(tag);
     });
   }
-  private int num = 0;
   #endregion
 
   #region Messengers
