@@ -105,10 +105,11 @@
                     <AppBarButton x:Name="Template_RenameTitleButton"
                                   Label="Rename title"
                                   Icon="{ui:FontIcon Glyph=&#xE8AC;}"
-                                  Command="{x:Bind RenameTitleCommand}" />
+                                  Command="{x:Bind ShowRenameNoteTitleDialogCommand}" />
                     <AppBarButton x:Name="Template_EditTagsButton"
                                   Label="Edit tags"
-                                  Icon="{ui:FontIcon Glyph=&#xE932;}" />
+                                  Icon="{ui:FontIcon Glyph=&#xE932;}" 
+                                  Command="{x:Bind ShowEditNoteTagsDialogCommmand}" />
                     <AppBarSeparator />
                     <AppBarButton Label="About"
                                   Icon="{ui:FontIcon Glyph=&#xE946;}" />
@@ -147,9 +148,11 @@
                                Spacing="4" />
                 </ItemsRepeater.Layout>
                 <ItemsRepeater.ItemTemplate>
-                  <DataTemplate x:DataType="x:String">
-                    <view:AppTagButton RemoveButtonVisible="Collapsed">
-                      <TextBlock Text="{x:Bind}"
+                  <DataTemplate x:DataType="model:Tag">
+                    <view:AppTagButton Background="{x:Bind Color, Converter={StaticResource TagColorToBackgroundBrushConverter}}"
+                                       Foreground="{x:Bind Color, Converter={StaticResource TagColorToForegroundBrushConverter}}"
+                                       DeleteButtonVisible="Collapsed">
+                      <TextBlock Text="{x:Bind Text}"
                                  TextTrimming="CharacterEllipsis" />
                     </view:AppTagButton>
                   </DataTemplate>
@@ -266,9 +269,9 @@
                                  Spacing="4" />
                   </ItemsRepeater.Layout>
                   <ItemsRepeater.ItemTemplate>
-                    <DataTemplate x:DataType="x:String">
+                    <DataTemplate x:DataType="model:Tag">
                       <view:AppTagButton>
-                        <TextBlock Text="{x:Bind}"
+                        <TextBlock Text="{x:Bind Text}"
                                    TextTrimming="CharacterEllipsis" />
                       </view:AppTagButton>
                     </DataTemplate>
@@ -314,7 +317,7 @@
                         <AppBarButton x:Name="Template_RenameTitleButton"
                                       Label="Rename title"
                                       Icon="{ui:FontIcon Glyph=&#xE8AC;}"
-                                      Command="{x:Bind RenameTitleCommand}" />
+                                      Command="{x:Bind ShowRenameNoteTitleDialogCommand}" />
                         <AppBarButton x:Name="Template_EditTagsButton"
                                       Label="Edit tags"
                                       Icon="{ui:FontIcon Glyph=&#xE932;}" />
@@ -636,7 +639,7 @@
       </GridView.ItemContainerTransitions>-->
     </GridView>
     <!--#endregion-->
-
+    
     <!--#region VisualStateManager -->
     <VisualStateManager.VisualStateGroups>
       <VisualStateGroup x:Name="CanAddNoteStates">

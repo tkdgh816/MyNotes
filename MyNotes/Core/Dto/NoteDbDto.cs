@@ -17,10 +17,10 @@ internal record NoteDbDto
   public required int PositionY { get; init; }
   public required bool Bookmarked { get; init; }
   public required bool Trashed { get; init; }
-  public required ImmutableList<string> Tags { get; init; }
+  //public required ImmutableList<Guid> Tags { get; init; }
 }
 
-internal record NoteDbUpdateDto
+internal record UpdateNoteDbDto
 {
   public required NoteUpdateFields UpdateFields { get; init; }
   public required Guid Id { get; init; }
@@ -38,21 +38,26 @@ internal record NoteDbUpdateDto
   public bool? Trashed { get; init; }
 }
 
+internal record GetNoteTagsDbDto
+{
+  public required Guid NoteId { get; init; }
+}
+
 [Flags]
 internal enum NoteUpdateFields
 {
-  None       = 0,
-  Parent     = 1 << 0,
-  Modified   = 1 << 1,
-  Title      = 1 << 2,
-  Body       = 1 << 3,
+  None = 0,
+  Parent = 1 << 0,
+  Modified = 1 << 1,
+  Title = 1 << 2,
+  Body = 1 << 3,
   Background = 1 << 4,
-  Backdrop   = 1 << 5,
-  Width      = 1 << 6,
-  Height     = 1 << 7,
-  PositionX  = 1 << 8,
-  PositionY  = 1 << 9,
+  Backdrop = 1 << 5,
+  Width = 1 << 6,
+  Height = 1 << 7,
+  PositionX = 1 << 8,
+  PositionY = 1 << 9,
   Bookmarked = 1 << 10,
-  Trashed    = 1 << 11,
-  All        = int.MaxValue
+  Trashed = 1 << 11,
+  All = int.MaxValue
 }

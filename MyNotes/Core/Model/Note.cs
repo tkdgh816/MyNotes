@@ -2,13 +2,13 @@
 
 internal class Note : ObservableObject
 {
-  public Note(Guid id, Guid boardId, string title, DateTimeOffset created, DateTimeOffset modified)
+  public Note(NoteId id, BoardId boardId, string title, DateTimeOffset created, DateTimeOffset modified)
   {
     Id = id;
     BoardId = boardId;
     _title = title;
     Created = created;
-    Modified = modified;
+    _modified = modified;
   }
 
   public void Initialize()
@@ -31,8 +31,8 @@ internal class Note : ObservableObject
       Modified = DateTimeOffset.UtcNow;
   }
 
-  public Guid Id { get; private set; }
-  public Guid BoardId { get; set; }
+  public NoteId Id { get; private set; }
+  public BoardId BoardId { get; set; }
   public DateTimeOffset Created { get; private set; }
 
   private DateTimeOffset _modified;
@@ -57,8 +57,6 @@ internal class Note : ObservableObject
     get => _body;
     set => SetProperty(ref _body, value);
   }
-
-  public ObservableCollection<string> Tags { get; } = new();
 
   private Color _background = Colors.LightGoldenrodYellow;
   public Color Background
@@ -101,6 +99,8 @@ internal class Note : ObservableObject
     get => _isTrashed;
     set => SetProperty(ref _isTrashed, value);
   }
+
+  public ObservableCollection<Tag> Tags { get; init; } = new();
 }
 
 internal enum BackdropKind { None, Acrylic, Mica }

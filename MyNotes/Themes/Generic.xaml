@@ -68,6 +68,9 @@
                                     FalseValue="{StaticResource UnionIconSource}" />
   <converters:IntToEnumConverter x:Key="IntToBackdropKindConverter"
                                  EnumType="model:BackdropKind" />
+  <converters:TagColorToBackgroundBrushConverter x:Key="TagColorToBackgroundBrushConverter" />
+  <converters:TagColorToForegroundBrushConverter x:Key="TagColorToForegroundBrushConverter" />
+  <converters:ToPointOverBrushConverter x:Key="ToPointOverBrushConverter" />
   <!-- #endregion-->
 
   <!-- #region Resources -->
@@ -1419,7 +1422,7 @@
           <Grid x:Name="RootGrid"
                 Background="{TemplateBinding Background}"
                 BackgroundSizing="{TemplateBinding BackgroundSizing}"
-                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderBrush="{TemplateBinding Foreground}"
                 BorderThickness="{TemplateBinding BorderThickness}"
                 CornerRadius="{TemplateBinding CornerRadius}"
                 Padding="4,0">
@@ -1451,9 +1454,10 @@
                     Width="18"
                     Height="18"
                     FontSize="12"
+                    Foreground="{TemplateBinding Foreground}"
                     VerticalAlignment="Center"
                     Margin="0,0,2,0"
-                    Visibility="{TemplateBinding RemoveButtonVisible}" />
+                    Visibility="{TemplateBinding DeleteButtonVisible}" />
 
             <VisualStateManager.VisualStateGroups>
               <VisualStateGroup x:Name="CommonStates">
@@ -1465,41 +1469,12 @@
                     <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid"
                                                    Storyboard.TargetProperty="Background">
                       <DiscreteObjectKeyFrame KeyTime="0"
-                                              Value="{ThemeResource AppBasicButtonBackgroundPointerOver}" />
-                    </ObjectAnimationUsingKeyFrames>
-                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid"
-                                                   Storyboard.TargetProperty="BorderBrush">
-                      <DiscreteObjectKeyFrame KeyTime="0"
-                                              Value="{ThemeResource ControlAAStrokeColorDisabledBrush}" />
-                    </ObjectAnimationUsingKeyFrames>
-                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter"
-                                                   Storyboard.TargetProperty="Foreground">
-                      <DiscreteObjectKeyFrame KeyTime="0"
-                                              Value="{ThemeResource AppBasicButtonForegroundPointerOver}" />
+                                              Value="{Binding PointerOverBrush, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
                     </ObjectAnimationUsingKeyFrames>
                   </Storyboard>
                 </VisualState>
 
-                <VisualState x:Name="Pressed">
-
-                  <Storyboard>
-                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid"
-                                                   Storyboard.TargetProperty="Background">
-                      <DiscreteObjectKeyFrame KeyTime="0"
-                                              Value="{ThemeResource AppBasicButtonBackgroundPressed}" />
-                    </ObjectAnimationUsingKeyFrames>
-                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid"
-                                                   Storyboard.TargetProperty="BorderBrush">
-                      <DiscreteObjectKeyFrame KeyTime="0"
-                                              Value="{ThemeResource ControlAAStrokeColorDisabledBrush}" />
-                    </ObjectAnimationUsingKeyFrames>
-                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter"
-                                                   Storyboard.TargetProperty="Foreground">
-                      <DiscreteObjectKeyFrame KeyTime="0"
-                                              Value="{ThemeResource AppBasicButtonForegroundPressed}" />
-                    </ObjectAnimationUsingKeyFrames>
-                  </Storyboard>
-                </VisualState>
+                <VisualState x:Name="Pressed" />
 
                 <VisualState x:Name="Disabled">
 
@@ -1515,6 +1490,11 @@
                                               Value="{ThemeResource ControlAAStrokeColorDisabledBrush}" />
                     </ObjectAnimationUsingKeyFrames>
                     <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter"
+                                                   Storyboard.TargetProperty="Foreground">
+                      <DiscreteObjectKeyFrame KeyTime="0"
+                                              Value="{ThemeResource AppBasicButtonForegroundDisabled}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="DeleteButton"
                                                    Storyboard.TargetProperty="Foreground">
                       <DiscreteObjectKeyFrame KeyTime="0"
                                               Value="{ThemeResource AppBasicButtonForegroundDisabled}" />

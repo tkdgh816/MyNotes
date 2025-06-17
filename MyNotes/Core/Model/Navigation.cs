@@ -88,10 +88,10 @@ internal class NavigationBookmarks : NavigationBoard
 
 internal class NavigationUserBoard : NavigationBoard
 {
-  public Guid Id { get; }
+  public BoardId Id { get; }
   public NavigationUserGroup? Parent { get; set; }
 
-  public NavigationUserBoard(string name, Icon icon, Guid id) : base(typeof(BoardPage), name, icon)
+  public NavigationUserBoard(string name, Icon icon, BoardId id) : base(typeof(BoardPage), name, icon)
   {
     Id = id;
   }
@@ -126,7 +126,7 @@ internal class NavigationUserGroup : NavigationUserBoard
   public ReadOnlyObservableCollection<NavigationUserBoard> Children { get; }
   public event NotifyCollectionChangedEventHandler? ChildrenChanged;
 
-  public NavigationUserGroup(string name, Icon icon, Guid id) : base(name, icon, id)
+  public NavigationUserGroup(string name, Icon icon, BoardId id) : base(name, icon, id)
   {
     PageType = typeof(UserGroupPage);
     Children = new(_children);
@@ -183,7 +183,7 @@ internal class NavigationUserGroup : NavigationUserBoard
 
 internal class NavigationUserRootGroup : NavigationUserGroup
 {
-  public NavigationUserRootGroup() : base("Root", IconLibrary.FindGlyph("\uE82D"), Guid.Empty)
+  public NavigationUserRootGroup() : base("Root", IconLibrary.FindGlyph("\uE82D"), BoardId.Empty)
   { }
 }
 

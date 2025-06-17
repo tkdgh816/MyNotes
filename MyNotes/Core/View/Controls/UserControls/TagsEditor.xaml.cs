@@ -25,19 +25,19 @@ internal sealed partial class TagsEditor : UserControl
     {
       ViewModel.TagsCollectionViewSource.Source =
         from grp in ViewModel.TagGroup
-        select new Tags(grp.Key, grp.Where(tag => tag.Contains(queryText, StringComparison.CurrentCultureIgnoreCase)));
+        select new Tags(grp.Key, grp.Where(tag => tag.Text.Contains(queryText, StringComparison.CurrentCultureIgnoreCase)));
     }
   }
 
   private void View_SelectedTagButton_Click(object sender, RoutedEventArgs e)
   {
-    string tag = (string)((Button)sender).Content;
+    Tag tag = (Tag)((Button)sender).DataContext;
     View_TagsListView.MakeVisible(new SemanticZoomLocation() { Item = tag, Bounds = new Rect(0.0, 50.0, 0.0, 0.0) });
   }
 
   private void View_SelectedTagButton_DeleteButtonClick(object sender, RoutedEventArgs e)
   {
-    string tag = (string)((Button)sender).Content;
+    Tag tag = (Tag)((Button)sender).DataContext;
     View_TagsListView.SelectedItems.Remove(tag);
   }
 
@@ -78,7 +78,7 @@ internal sealed partial class TagsEditor : UserControl
 
   private void View_DeleteTagsTeachingTip_ActionButtonClick(TeachingTip sender, object args)
   {
-    foreach (string tag in View_TagsListView.SelectedItems.Cast<string>().ToArray())
+    foreach (Tag tag in View_TagsListView.SelectedItems.Cast<Tag>().ToArray())
       ViewModel.DeleteTag(tag);
     View_DeleteTagsTeachingTip.IsOpen = false;
   }

@@ -140,7 +140,7 @@
                 </ItemsRepeater.Layout>
                 <ItemsRepeater.ItemTemplate>
                   <DataTemplate x:DataType="x:String">
-                    <view:AppTagButton RemoveButtonVisible="Collapsed">
+                    <view:AppTagButton DeleteButtonVisible="Collapsed">
                       <TextBlock Text="{x:Bind}"
                                  TextTrimming="CharacterEllipsis" />
                     </view:AppTagButton>
@@ -478,7 +478,7 @@
                 </ItemsRepeater.Layout>
                 <ItemsRepeater.ItemTemplate>
                   <DataTemplate x:DataType="x:String">
-                    <view:AppTagButton RemoveButtonVisible="Collapsed">
+                    <view:AppTagButton DeleteButtonVisible="Collapsed">
                       <TextBlock Text="{Binding}"
                                  TextTrimming="CharacterEllipsis" />
                     </view:AppTagButton>

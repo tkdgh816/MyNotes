@@ -19,13 +19,13 @@ internal class NavigationService
   public void AddBoard(NavigationUserBoard board)
   {
     var icon = GetIconTypeAndValue(board.Icon);
-    BoardDbInsertDto dto = new() { Id = board.Id, Grouped = board is NavigationUserGroup, Parent = board.Parent!.Id, Previous = board.GetPrevious()?.Id, Next = board.GetNext()?.Id, Name = board.Name, IconType = icon.IconType, IconValue = icon.IconValue };
+    InsertBoardDbDto dto = new() { Id = board.Id.Value, Grouped = board is NavigationUserGroup, Parent = board.Parent!.Id.Value, Previous = board.GetPrevious()?.Id.Value, Next = board.GetNext()?.Id.Value, Name = board.Name, IconType = icon.IconType, IconValue = icon.IconValue };
     _databaseService.AddBoard(dto);
   }
 
   public void DeleteBoard(NavigationUserBoard board)
   {
-    BoardDbDeleteDto dto = new() { Id = board.Id };
+    DeleteBoardDbDto dto = new() { Id = board.Id.Value };
     _databaseService.DeleteBoard(dto);
   }
 
@@ -35,12 +35,12 @@ internal class NavigationService
       return;
 
     var icon = GetIconTypeAndValue(board.Icon);
-    BoardDbUpdateDto dto = new()
+    UpdateBoardDbDto dto = new()
     {
       UpdateFields = updateFields,
-      Id = board.Id,
-      Parent = updateFields.HasFlag(BoardUpdateFields.Parent) ? board.Parent?.Id : null,
-      Previous = updateFields.HasFlag(BoardUpdateFields.Previous) ? board.GetPrevious()?.Id : null,
+      Id = board.Id.Value,
+      Parent = updateFields.HasFlag(BoardUpdateFields.Parent) ? board.Parent?.Id.Value : null,
+      Previous = updateFields.HasFlag(BoardUpdateFields.Previous) ? board.GetPrevious()?.Id.Value : null,
       Name = updateFields.HasFlag(BoardUpdateFields.Name) ? board.Name : null,
       IconType = updateFields.HasFlag(BoardUpdateFields.IconType) ? icon.IconType : null,
       IconValue = updateFields.HasFlag(BoardUpdateFields.IconValue) ? icon.IconValue : null,
@@ -58,15 +58,15 @@ internal class NavigationService
       NavigationUserBoard navigation = queue.Dequeue();
       if (navigation is NavigationUserGroup navigationGroup)
       {
-        var children = boards.Where(dto => dto.Parent == navigation.Id);
+        var children = boards.Where(dto => dto.Parent == navigation.Id.Value);
         Guid previous = Guid.Empty;
         BoardDbDto? child;
         while ((child = children.FirstOrDefault(dto => dto.Previous == previous)) is not null)
         {
           NavigationUserBoard newNavigation;
           newNavigation = child.Grouped
-            ? new NavigationUserGroup(child.Name, GetIcon((IconType)child.IconType, child.IconValue), child.Id)
-            : new NavigationUserBoard(child.Name, GetIcon((IconType)child.IconType, child.IconValue), child.Id);
+            ? new NavigationUserGroup(child.Name, GetIcon((IconType)child.IconType, child.IconValue), new BoardId(child.Id))
+            : new NavigationUserBoard(child.Name, GetIcon((IconType)child.IconType, child.IconValue), new BoardId(child.Id));
           navigationGroup.AddChild(newNavigation);
           queue.Enqueue(newNavigation);
           previous = child.Id;

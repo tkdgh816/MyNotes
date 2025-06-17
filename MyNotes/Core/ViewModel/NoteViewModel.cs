@@ -8,11 +8,11 @@ namespace MyNotes.Core.ViewModel;
 
 internal class NoteViewModel : ViewModelBase
 {
-  public NoteViewModel(Note note, WindowService windowService, DatabaseService databaseService, NoteService noteService)
+  public NoteViewModel(Note note, WindowService windowService, DialogService dialogService, NoteService noteService)
   {
     Note = note;
     _windowService = windowService;
-    _databaseService = databaseService;
+    _dialogService = dialogService;
     _noteService = noteService;
     RegisterEvents();
     SetCommands();
@@ -20,7 +20,7 @@ internal class NoteViewModel : ViewModelBase
   }
 
   private readonly WindowService _windowService;
-  private readonly DatabaseService _databaseService;
+  private readonly DialogService _dialogService;
   private readonly NoteService _noteService;
   public Note Note { get; private set; }
 
@@ -45,7 +45,7 @@ internal class NoteViewModel : ViewModelBase
       UnregisterEvents();
       UnregisterMessengers();
       App.Current.GetService<NoteViewModelFactory>().Close(Note);
-      App.Current.GetService<NoteService>().RemoveNoteCache(Note);
+      App.Current.GetService<NoteService>().RemoveFromCache(Note);
     }
 
     base.Dispose(disposing);
@@ -138,14 +138,14 @@ internal class NoteViewModel : ViewModelBase
     IsBodyChanged = false;
   }
 
-  public void UpdateNoteTag(string tag)
-  {
-    if (string.IsNullOrWhiteSpace(tag) || Note.Tags.Contains(tag))
-      return;
+  //public void UpdateNoteTag(string tag)
+  //{
+  //  if (string.IsNullOrWhiteSpace(tag) || Note.Tags.Contains(tag))
+  //    return;
 
-    Note.Tags.Add(tag);
-    _databaseService.AddTag(Note, tag);
-  }
+  //  Note.Tags.Add(tag);
+  //  _databaseService.AddTag(Note, tag);
+  //}
   #endregion
 
   #region Commands
@@ -157,7 +157,10 @@ internal class NoteViewModel : ViewModelBase
   public Command? BookmarkCommand { get; private set; }
   public Command? RemoveCommand { get; private set; }
   public Command? MoveToBoardCommand { get; private set; }
-  public Command? RenameTitleCommand { get; private set; }
+  public Command? ShowRenameNoteTitleDialogCommand { get; private set; }
+  public Command<string>? RenameTitleCommand { get; private set; }
+  public Command? ShowEditNoteTagsDialogCommmand { get; private set; }
+  public Command<string>? AddTagCommand { get; private set; }
 
   private void SetCommands()
   {
@@ -191,29 +194,37 @@ internal class NoteViewModel : ViewModelBase
 
     MoveToBoardCommand = new(async () =>
     {
-      AsyncRequestMessage<Guid?> message = new();
-      await WeakReferenceMessenger.Default.Send(message, Tokens.MoveNoteToBoard);
-      Guid? boardId = await message.Response;
-
-      if (boardId is not null && Note.BoardId != boardId)
+      var result = await _dialogService.ShowMoveNoteToBoardDialog();
+      if (result.DialogResult)
       {
-        Note.BoardId = (Guid)boardId;
-        _noteService.UpdateNote(Note, NoteUpdateFields.Parent);
-        WeakReferenceMessenger.Default.Send(new Message<NoteViewModel>(this), Tokens.RemoveNoteFromBoard);
+        BoardId? boardId = result.Id;
+
+        if (boardId is not null && boardId != Note.BoardId)
+        {
+          Note.BoardId = (BoardId)boardId;
+          _noteService.UpdateNote(Note, NoteUpdateFields.Parent);
+          WeakReferenceMessenger.Default.Send(new Message<NoteViewModel>(this), Tokens.RemoveNoteFromBoard);
+        }
       }
     });
 
-    RenameTitleCommand = new(async () =>
+    ShowRenameNoteTitleDialogCommand = new(() => _dialogService.ShowRenameNoteTitleDialog(Note));
+    RenameTitleCommand = new((title) =>
     {
-      AsyncRequestMessage<string> message = new();
-      await WeakReferenceMessenger.Default.Send(message, Tokens.RenameNoteTitle);
-
-      string title = await message.Response;
       title = title.Trim();
       if (!string.IsNullOrWhiteSpace(title))
         Note.Title = title;
     });
+
+    ShowEditNoteTagsDialogCommmand = new(() => _dialogService.ShowEditNoteTagsDialog(Note));
+
+    AddTagCommand = new((text) =>
+    {
+      if (!string.IsNullOrEmpty(text))
+        Note.Tags.Add(new Tag(new(Guid.NewGuid()), text, (TagColor)(num++ % 9)));
+    });
   }
+  private int num = 0;
   #endregion
 
   #region Messengers

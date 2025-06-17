@@ -7,15 +7,15 @@ internal class SortedObservableCollection<T> : Collection<T>, INotifyCollectionC
   public SortedObservableCollection() : base(new List<T>())
   {
     SortDescriptions = new();
-    SortDescriptions.CollectionChanged += OnSortDescripTionChanged;
-    if (this is IComparable<T>)
+    SortDescriptions.CollectionChanged += OnSortDescriptionChanged;
+    if (typeof(T).IsAssignableTo(typeof(IComparable<T>)))
       _comparers.Add(Comparer<T>.Default);
   }
 
   public SortedObservableCollection(IEnumerable<SortDescription<T>> sortDescriptions) : this()
   {
     SortDescriptions = new(sortDescriptions);
-    SortDescriptions.CollectionChanged += OnSortDescripTionChanged;
+    SortDescriptions.CollectionChanged += OnSortDescriptionChanged;
     InitializeComparer();
   }
 
@@ -24,20 +24,17 @@ internal class SortedObservableCollection<T> : Collection<T>, INotifyCollectionC
     if (sortDescriptions is not null)
     {
       SortDescriptions = new(sortDescriptions);
-      SortDescriptions.CollectionChanged += OnSortDescripTionChanged;
+      SortDescriptions.CollectionChanged += OnSortDescriptionChanged;
       InitializeComparer();
     }
-    else
-    {
-      if (this is IComparable<T>)
-        _comparers.Add(Comparer<T>.Default);
-    }
+    else if(typeof(T).IsAssignableTo(typeof(IComparable<T>)))
+      _comparers.Add(Comparer<T>.Default);
     AddRange(items);
   }
 
   ~SortedObservableCollection()
   {
-    SortDescriptions.CollectionChanged -= OnSortDescripTionChanged;
+    SortDescriptions.CollectionChanged -= OnSortDescriptionChanged;
   }
 
   public ObservableCollection<SortDescription<T>> SortDescriptions { get; }
@@ -55,7 +52,7 @@ internal class SortedObservableCollection<T> : Collection<T>, INotifyCollectionC
       _comparers.Add(sortDescription.Comparer);
     }
   }
-  private void OnSortDescripTionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+  private void OnSortDescriptionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     => InitializeComparer();
 
   public event NotifyCollectionChangedEventHandler? CollectionChanged;

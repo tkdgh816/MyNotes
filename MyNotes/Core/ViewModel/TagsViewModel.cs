@@ -5,31 +5,31 @@ namespace MyNotes.Core.ViewModel;
 
 internal class TagsViewModel : ViewModelBase
 {
-  public TagsViewModel(DatabaseService databaseService)
+  public TagsViewModel(TagService tagService)
   {
-    _databaseService = databaseService;
-    foreach (string tag in _databaseService.GetTagsAll().Result)
+    _tagService = tagService;
+    foreach (Tag tag in _tagService.Tags)
       TagGroup.AddItem(tag);
     TagsCollectionViewSource.Source = TagGroup;
   }
 
-  private readonly DatabaseService _databaseService;
+  private readonly TagService _tagService;
   public CollectionViewSource TagsCollectionViewSource { get; } = new() { IsSourceGrouped = true };
   public TagGroup TagGroup { get; } = new();
 
-  public void AddTag(string tag)
+  public void AddTag(string tagText)
   {
-    tag = tag.Trim();
-    if (string.IsNullOrWhiteSpace(tag) || TagGroup.Contains(tag))
+    tagText = tagText.Trim();
+    if (string.IsNullOrWhiteSpace(tagText) || TagGroup.Contains(tagText))
       return;
-    else if(_databaseService.AddTag(tag))
-      TagGroup.AddItem(tag);
+    Tag newTag = _tagService.CreateTag(tagText);
+    TagGroup.AddItem(newTag);
   }
 
-  public void DeleteTag(string tag)
+  public void DeleteTag(Tag tag)
   {
     if (TagGroup.RemoveItem(tag))
-      _databaseService.DeleteTag(tag);
+      _tagService.DeleteTag(tag);
   }
 
   private bool _isInclusionModeIntersect = true;

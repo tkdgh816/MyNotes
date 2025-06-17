@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog x:Class="MyNotes.Core.View.CreateBoardDialog"
+               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:view="using:MyNotes.Core.View"
+               Style="{StaticResource DefaultContentDialogStyle}"
+               Title="New board"
+               PrimaryButtonText="Add"
+               IsPrimaryButtonEnabled="{x:Bind ViewModel.Name, Converter={StaticResource EmptyStringToBoolConverter}, Mode=OneWay}"
+               CloseButtonText="Cancel"
+               DefaultButton="Primary">
+
+  <Grid ColumnSpacing="8">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="Auto" />
+      <ColumnDefinition />
+    </Grid.ColumnDefinitions>
+    <Button Grid.Column="0"
+            Style="{StaticResource AppIconMediumButtonStyle}">
+      <IconSourceElement IconSource="{x:Bind ViewModel.Icon, Converter={StaticResource IconToIconSourceConverter}, Mode=OneWay}" />
+      <Button.Flyout>
+        <Flyout Placement="BottomEdgeAlignedLeft"
+                ShouldConstrainToRootBounds="False">
+          <view:IconPicker Icon="{x:Bind ViewModel.Icon, Mode=TwoWay}" />
+        </Flyout>
+      </Button.Flyout>
+    </Button>
+    <TextBox Grid.Column="1"
+             Text="{x:Bind ViewModel.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+             VerticalAlignment="Center"
+             PlaceholderText="Enter board name" />
+  </Grid>
+</ContentDialog>

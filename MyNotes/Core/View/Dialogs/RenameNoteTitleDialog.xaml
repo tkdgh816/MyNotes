@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog x:Class="MyNotes.Core.View.RenameNoteTitleDialog"
+               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               Title="Rename"
+               PrimaryButtonText="OK"
+               IsPrimaryButtonEnabled="{Binding ElementName=View_RenameNoteTitleInputTextBox, Path=Text, Converter={StaticResource EmptyStringToBoolConverter}, Mode=OneWay}"
+               PrimaryButtonCommand="{x:Bind ViewModel.RenameTitleCommand}"
+               PrimaryButtonCommandParameter="{Binding ElementName=View_RenameNoteTitleInputTextBox, Path=Text}"
+               CloseButtonText="Cancel"
+               DefaultButton="Primary"
+               Style="{StaticResource DefaultContentDialogStyle}">
+  <Grid ColumnSpacing="8">
+    <TextBox x:Name="View_RenameNoteTitleInputTextBox"
+             Grid.Column="1"
+             VerticalAlignment="Center"
+             PlaceholderText="Enter name" />
+  </Grid>
+</ContentDialog>

@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-
-using Microsoft.Data.Sqlite;
+﻿using Microsoft.Data.Sqlite;
 
 using MyNotes.Core.Dto;
 using MyNotes.Core.Model;
@@ -19,21 +17,79 @@ internal class DatabaseService
       DataSource = Path.Combine(_databaseFolder.Path, "data.sqlite"),
       ForeignKeys = true
     }.ToString();
+
+    CreateTable();
+  }
+
+  #region Create Table
+  private void CreateTable()
+  {
     using SqliteConnection connection = new(_connectionString);
     connection.Open();
 
-    using (SqliteCommand command = new(Queries.CreateTable.Boards, connection))
-      command.ExecuteNonQuery();
-    using (SqliteCommand command = new(Queries.CreateTable.Notes, connection))
-      command.ExecuteNonQuery();
-    using (SqliteCommand command = new(Queries.CreateTable.Tags, connection))
-      command.ExecuteNonQuery();
-    using (SqliteCommand command = new(Queries.CreateTable.NotesTags, connection))
-      command.ExecuteNonQuery();
-  }
+    string createBoardsQuery =
+@"CREATE TABLE IF NOT EXISTS Boards
+(
+id              TEXT PRIMARY KEY NOT NULL,
+grouped         INTEGER NOT NULL DEFAULT 0,
+parent          TEXT NULL NOT NULL,
+previous        TEXT NULL,
+name            TEXT NOT NULL DEFAULT '',
+icon_type       INTEGER NOT NULL,
+icon_value      INTEGER NOT NULL
+)";
 
-  #region Board DTO
-  public void AddBoard(BoardDbInsertDto dto)
+    string createNotesQuery =
+  @"CREATE TABLE IF NOT EXISTS Notes
+(
+id              TEXT PRIMARY KEY NOT NULL,
+parent          TEXT NOT NULL,
+created         TEXT NOT NULL,
+modified        TEXT NOT NULL,
+title           TEXT NOT NULL DEFAULT '',
+body            TEXT NOT NULL DEFAULT '',
+background      TEXT NOT NULL,
+backdrop        INTEGER NOT NULL,
+width           INTEGER NOT NULL,
+height          INTEGER NOT NULL,
+position_x      INTEGER NOT NULL,
+position_y      INTEGER NOT NULL,
+bookmarked      INTEGER NOT NULL DEFAULT 0,
+trashed         INTEGER NOT NULL DEFAULT 0
+)";
+
+    string createTagsQuery =
+  @"CREATE TABLE IF NOT EXISTS Tags
+(
+id              TEXT PRIMARY KEY NOT NULL,
+text            TEXT NOT NULL UNIQUE,
+color           INTEGER NOT NULL
+)";
+
+    string createNotesTagsQuery =
+  @"CREATE TABLE IF NOT EXISTS NotesTags
+(
+note_id         TEXT NOT NULL,
+tag_id          TEXT NOT NULL,
+PRIMARY KEY (note_id, tag_id),
+FOREIGN KEY (note_id) REFERENCES Notes(id) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY (tag_id) REFERENCES Tags(id) ON DELETE CASCADE ON UPDATE CASCADE
+)";
+
+    using (SqliteCommand command = new(createBoardsQuery, connection))
+      command.ExecuteNonQuery();
+    using (SqliteCommand command = new(createNotesQuery, connection))
+      command.ExecuteNonQuery();
+    using (SqliteCommand command = new(createTagsQuery, connection))
+      command.ExecuteNonQuery();
+    using (SqliteCommand command = new(createNotesTagsQuery, connection))
+      command.ExecuteNonQuery();
+
+  }
+  #endregion
+
+  #region Boards
+  public void AddBoard(InsertBoardDbDto dto)
   {
     using SqliteConnection connection = new(_connectionString);
     connection.Open();
@@ -49,7 +105,12 @@ internal class DatabaseService
       updateNextCommand.ExecuteNonQuery();
     }
 
-    using SqliteCommand insertBoardCommand = new(Queries.Insert.Boards, connection);
+    string insertBoardQuery = @"INSERT OR IGNORE INTO Boards
+(id, grouped, parent, previous, name, icon_type, icon_value)
+VALUES
+(@id, @grouped, @parent, @previous, @name, @icon_type, @icon_value)
+";
+    using SqliteCommand insertBoardCommand = new(insertBoardQuery, connection);
     insertBoardCommand.Parameters.AddWithValue("@id", dto.Id);
     insertBoardCommand.Parameters.AddWithValue("@grouped", dto.Grouped);
     insertBoardCommand.Parameters.AddWithValue("@parent", dto.Parent);
@@ -84,7 +145,7 @@ internal class DatabaseService
     return boards;
   }
 
-  private Dictionary<string, object> GetBoardUpdateFieldValue(BoardDbUpdateDto dto)
+  private Dictionary<string, object> GetBoardUpdateFieldValue(UpdateBoardDbDto dto)
   {
     Dictionary<string, object> fields = new();
     var updateFields = dto.UpdateFields;
@@ -104,7 +165,7 @@ internal class DatabaseService
     return fields;
   }
 
-  public void UpdateBoard(BoardDbUpdateDto dto)
+  public void UpdateBoard(UpdateBoardDbDto dto)
   {
     Dictionary<string, object> fields = GetBoardUpdateFieldValue(dto);
 
@@ -123,7 +184,7 @@ internal class DatabaseService
     command.ExecuteNonQuery();
   }
 
-  public void DeleteBoard(BoardDbDeleteDto dto)
+  public void DeleteBoard(DeleteBoardDbDto dto)
   {
     using SqliteConnection connection = new(_connectionString);
     connection.Open();
@@ -171,12 +232,17 @@ internal class DatabaseService
   }
   #endregion
 
-  #region Note DTO
+  #region Notes
   public void AddNote(NoteDbDto noteDbDto)
   {
     using SqliteConnection connection = new(_connectionString);
     connection.Open();
-    using SqliteCommand command = new(Queries.Insert.Notes, connection);
+    string query = @"INSERT OR IGNORE INTO Notes
+(id, parent, created, modified, title, body, background, backdrop, width, height, position_x, position_y, bookmarked, trashed)
+VALUES
+(@id, @parent, @created, @modified, @title, @body, @background, @backdrop, @width, @height, @position_x, @position_y, @bookmarked, @trashed)
+";
+    using SqliteCommand command = new(query, connection);
     command.Parameters.AddWithValue("@id", noteDbDto.Id);
     command.Parameters.AddWithValue("@parent", noteDbDto.Parent);
     command.Parameters.AddWithValue("@created", noteDbDto.Created);
@@ -194,7 +260,7 @@ internal class DatabaseService
     command.ExecuteNonQuery();
   }
 
-  private Dictionary<string, object> GetNoteUpdateFieldValue(NoteDbUpdateDto dto)
+  private Dictionary<string, object> GetNoteUpdateFieldValue(UpdateNoteDbDto dto)
   {
     Dictionary<string, object> fields = new();
     var updateFields = dto.UpdateFields;
@@ -228,7 +294,7 @@ internal class DatabaseService
     return fields;
   }
 
-  public void UpdateNote(NoteDbUpdateDto dto)
+  public void UpdateNote(UpdateNoteDbDto dto)
   {
     Dictionary<string, object> fields = GetNoteUpdateFieldValue(dto);
 
@@ -250,7 +316,7 @@ internal class DatabaseService
     command.ExecuteNonQuery();
   }
 
-  public async Task<IEnumerable<NoteDbDto>> GetNotes(NavigationUserBoard navigation)
+  public async Task<IEnumerable<NoteDbDto>> GetNotes(GetBoardNotesDbDto dto)
   {
     List<NoteDbDto> notes = new();
     await using SqliteConnection connection = new(_connectionString);
@@ -258,7 +324,7 @@ internal class DatabaseService
 
     string query = "SELECT * FROM Notes WHERE parent = @parent AND trashed = 0";
     await using SqliteCommand command = new(query, connection);
-    command.Parameters.AddWithValue("@parent", navigation.Id);
+    command.Parameters.AddWithValue("@parent", dto.Id);
 
     await using SqliteDataReader reader = command.ExecuteReader();
     while (await reader.ReadAsync())
@@ -315,71 +381,110 @@ internal class DatabaseService
     var positionY = GetReaderValue<int>(reader, "position_y");
     var bookmarked = GetReaderValue<bool>(reader, "bookmarked");
     var trashed = GetReaderValue<bool>(reader, "trashed");
-    ImmutableList<string> tags = [.. GetTags(id).Result];
 
-    NoteDbDto noteDbDto = new() { Id = id, Parent = parent, Created = created, Modified = modified, Title = title, Body = body, Background = background, Backdrop = backdrop, Width = width, Height = height, PositionX = positionX, PositionY = positionY, Bookmarked = bookmarked, Trashed = trashed, Tags = tags };
+    NoteDbDto noteDbDto = new() { Id = id, Parent = parent, Created = created, Modified = modified, Title = title, Body = body, Background = background, Backdrop = backdrop, Width = width, Height = height, PositionX = positionX, PositionY = positionY, Bookmarked = bookmarked, Trashed = trashed };
     return noteDbDto;
   }
   #endregion
 
   #region Tags
-  public async Task<IEnumerable<string>> GetTagsAll()
+  public async Task<IEnumerable<TagDbDto>> GetTags(GetNoteTagsDbDto dto)
   {
-    List<string> tags = new();
+    List<TagDbDto> tags = new();
+    await using SqliteConnection connection = new(_connectionString);
+    await connection.OpenAsync();
+
+    string query = "SELECT * FROM Tags INNER JOIN NotesTags ON note_id = @note_id";
+    await using SqliteCommand command = new(query, connection);
+
+    command.Parameters.AddWithValue("@note_id", dto.NoteId);
+
+    await using SqliteDataReader reader = command.ExecuteReader();
+    while (await reader.ReadAsync())
+    {
+      var id = GetReaderValue<Guid>(reader, "id");
+      var tag = GetReaderValue<string>(reader, "tag")!;
+      var color = GetReaderValue<int>(reader, "color");
+      tags.Add(new TagDbDto() { Id = id, Text = tag, Color = color });
+    }
+
+    return tags;
+  }
+
+  public GetTagCountDbDto GetTagCount()
+  {
+    using SqliteConnection connection = new(_connectionString);
+    connection.Open();
+
+    string query = "SELECT COUNT(*) FROM Tags";
+    using SqliteCommand command = new(query, connection);
+    return new GetTagCountDbDto() { Count = Convert.ToInt32(command.ExecuteScalar()) };
+  }
+
+  public async Task<IEnumerable<TagDbDto>> GetUncachedTags(CachedTagDbDto cachedTagDbDto)
+  {
+    var cachedIds = cachedTagDbDto.Ids;
+
+    await using SqliteConnection connection = new(_connectionString);
+    await connection.OpenAsync();
+
+    string query = "SELECT * FROM Tags";
+    int cachedCount = cachedIds.Count;
+
+    if (cachedCount > 0)
+    {
+      var range = Enumerable.Range(0, cachedCount).Select(index => $"@{index}");
+      string inClause = $"WHERE id NOT IN ({string.Join(", ", range)})";
+      query = $"{query} {inClause}";
+    }
+
+    await using SqliteCommand command = new(query, connection);
+    for (int index = 0; index < cachedCount; index++)
+      command.Parameters.AddWithValue($"@{index}", cachedIds[index]);
+
+    List<TagDbDto> tagDbDtos = new();
+    await using SqliteDataReader reader = command.ExecuteReader();
+    while(await reader.ReadAsync())
+    {
+      Guid id = GetReaderValue<Guid>(reader, "id");
+      string text = GetReaderValue<string>(reader, "text")!;
+      int color = GetReaderValue<int>(reader, "color");
+      tagDbDtos.Add(new() { Id = id, Text = text, Color = color });
+    }
+
+    return tagDbDtos;
+  }
+
+  public async Task<IEnumerable<TagDbDto>> GetAllTags()
+  {
     await using SqliteConnection connection = new(_connectionString);
     await connection.OpenAsync();
 
     string query = "SELECT * FROM Tags";
     await using SqliteCommand command = new(query, connection);
 
+    List<TagDbDto> tagDbDtos = new();
     await using SqliteDataReader reader = command.ExecuteReader();
     while (await reader.ReadAsync())
-      tags.Add(GetReaderValue<string>(reader, "tag")!);
+    {
+      Guid id = GetReaderValue<Guid>(reader, "id");
+      string text = GetReaderValue<string>(reader, "text")!;
+      int color = GetReaderValue<int>(reader, "color");
+      tagDbDtos.Add(new() { Id = id, Text = text, Color = color });
+    }
 
-    return tags;
+    return tagDbDtos;
   }
 
-  public async Task<IEnumerable<string>> GetTags(Note note)
-  {
-    List<string> tags = new();
-    await using SqliteConnection connection = new(_connectionString);
-    await connection.OpenAsync();
-    string query = "SELECT tag FROM NotesTags WHERE id = @id ORDER BY tag ASC";
-
-    await using SqliteCommand command = new(query, connection);
-    command.Parameters.AddWithValue("@id", note.Id);
-
-    await using SqliteDataReader reader = command.ExecuteReader();
-    while (await reader.ReadAsync())
-      tags.Add(GetReaderValue<string>(reader, "tag")!);
-
-    return tags;
-  }
-
-  public async Task<IEnumerable<string>> GetTags(Guid id)
-  {
-    List<string> tags = new();
-    await using SqliteConnection connection = new(_connectionString);
-    await connection.OpenAsync();
-    string query = "SELECT tag FROM NotesTags WHERE id = @id ORDER BY tag ASC";
-
-    await using SqliteCommand command = new(query, connection);
-    command.Parameters.AddWithValue("@id", id);
-
-    await using SqliteDataReader reader = command.ExecuteReader();
-    while (await reader.ReadAsync())
-      tags.Add(GetReaderValue<string>(reader, "tag")!);
-
-    return tags;
-  }
-
-  public bool AddTag(string tag)
+  public bool AddTag(TagDbDto dto)
   {
     using SqliteConnection connection = new(_connectionString);
     connection.Open();
-    string query = "INSERT OR IGNORE INTO Tags (tag) VALUES (@tag)";
+    string query = "INSERT OR IGNORE INTO Tags (id, text, color) VALUES (@id, @text, @color)";
     using SqliteCommand command = new(query, connection);
-    command.Parameters.AddWithValue("@tag", tag);
+    command.Parameters.AddWithValue("@id", dto.Id);
+    command.Parameters.AddWithValue("@text", dto.Text);
+    command.Parameters.AddWithValue("@color", dto.Color);
     return command.ExecuteNonQuery() > 0;
   }
 
@@ -396,13 +501,13 @@ SELECT @id, tag FROM Tags WHERE tag = @tag";
     return command.ExecuteNonQuery() > 0;
   }
 
-  public bool DeleteTag(string tag)
+  public bool DeleteTag(DeleteTagDbDto dto)
   {
     using SqliteConnection connection = new(_connectionString);
     connection.Open();
-    string query = "DELETE FROM Tags WHERE tag = @tag";
+    string query = "DELETE FROM Tags WHERE id = @id";
     using SqliteCommand command = new(query, connection);
-    command.Parameters.AddWithValue("@tag", tag);
+    command.Parameters.AddWithValue("@id", dto.Id);
     return command.ExecuteNonQuery() > 0;
   }
   #endregion
@@ -499,22 +604,22 @@ trashed || {reader["trashed"]}
     }
     else if (tableName == "NotesTags")
     {
-      string query = "SELECT * FROM NotesTags ORDER BY id ASC, tag ASC";
+      string query = "SELECT * FROM NotesTags ORDER BY note_id ASC";
       using SqliteCommand command = new(query, connection);
       using SqliteDataReader reader = command.ExecuteReader();
       string id = "";
       while (reader.Read())
       {
-        if ((string)reader["id"] == id)
+        if ((string)reader["note_id"] == id)
           yield return
-@$"{reader["tag"]}, ";
+@$"{reader["tag_id"]}, ";
         else
         {
-          id = (string)reader["id"];
+          id = (string)reader["note_id"];
           yield return
 @$"
-[ {reader["id"]} ]
-{reader["tag"]}, ";
+[ {reader["note_id"]} ]
+{reader["tag_id"]}, ";
         }
       }
     }
@@ -553,103 +658,6 @@ trashed || {reader["trashed"]}
       string query = "DELETE FROM Notes; VACUUM;";
       using SqliteCommand command = new(query, connection);
       command.ExecuteNonQuery();
-    }
-  }
-  #endregion
-
-  #region Queries
-  private static class Queries
-  {
-    internal static class CreateTable
-    {
-      public const string Boards =
-  @"CREATE TABLE IF NOT EXISTS Boards
-(
-id              TEXT PRIMARY KEY NOT NULL,
-grouped         INTEGER NOT NULL DEFAULT 0,
-parent          TEXT NULL NOT NULL,
-previous        TEXT NULL,
-name            TEXT NOT NULL DEFAULT '',
-icon_type       INTEGER NOT NULL,
-icon_value      INTEGER NOT NULL
-)";
-
-      public const string Notes =
-  @"CREATE TABLE IF NOT EXISTS Notes
-(
-id              TEXT PRIMARY KEY NOT NULL,
-parent          TEXT NOT NULL,
-created         TEXT NOT NULL,
-modified        TEXT NOT NULL,
-title           TEXT NOT NULL DEFAULT '',
-body            TEXT NOT NULL DEFAULT '',
-background      TEXT NOT NULL,
-backdrop        INTEGER NOT NULL,
-width           INTEGER NOT NULL,
-height          INTEGER NOT NULL,
-position_x      INTEGER NOT NULL,
-position_y      INTEGER NOT NULL,
-bookmarked      INTEGER NOT NULL DEFAULT 0,
-trashed         INTEGER NOT NULL DEFAULT 0
-)";
-
-      public const string Tags =
-  @"CREATE TABLE IF NOT EXISTS Tags (tag TEXT PRIMARY KEY NOT NULL)";
-
-      public const string NotesTags =
-  @"CREATE TABLE IF NOT EXISTS NotesTags
-(
-id            TEXT NOT NULL,
-tag           TEXT NOT NULL,
-PRIMARY KEY (id, tag),
-FOREIGN KEY (id) REFERENCES Notes(id) ON DELETE CASCADE ON UPDATE CASCADE,
-FOREIGN KEY (tag) REFERENCES Tags(tag) ON DELETE CASCADE ON UPDATE CASCADE
-)";
-    }
-
-    internal static class Insert
-    {
-      public const string Boards =
-  @"INSERT OR IGNORE INTO Boards
-(id, grouped, parent, previous, name, icon_type, icon_value)
-VALUES
-(@id, @grouped, @parent, @previous, @name, @icon_type, @icon_value)
-";
-
-      public const string Notes =
-  @"INSERT OR IGNORE INTO Notes
-(id, parent, created, modified, title, body, background, backdrop, width, height, position_x, position_y, bookmarked, trashed)
-VALUES
-(@id, @parent, @created, @modified, @title, @body, @background, @backdrop, @width, @height, @position_x, @position_y, @bookmarked, @trashed)
-";
-    }
-
-    internal static class Update
-    {
-      public const string Board_Icon =
-  @"UPDATE Boards
-SET icon_type = @icon_type, icon_value = @icon_value
-WHERE id = @id";
-
-      public const string Board_Previous =
-  @"UPDATE Boards
-SET previous = @previous
-WHERE id = @id";
-
-      public const string Board_Parent =
-@"UPDATE Boards
-SET parent = @parent
-WHERE id = @id";
-
-      public const string Board_Name =
-  @"UPDATE Boards
-SET name = @name
-WHERE id = @id";
-    }
-
-    internal static class Delete
-    {
-
     }
   }
   #endregion

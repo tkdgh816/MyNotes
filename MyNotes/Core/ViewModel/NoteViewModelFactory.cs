@@ -13,10 +13,10 @@ internal class NoteViewModelFactory : ViewModelFactoryBase<Note, NoteViewModel>
         return noteViewModel;
 
     var windowService = App.Current.GetService<WindowService>();
-    var databaseService = App.Current.GetService<DatabaseService>();
+    var dialogService = App.Current.GetService<DialogService>();
     var noteService = App.Current.GetService<NoteService>();
 
-    NoteViewModel newViewModel = new(note, windowService,databaseService, noteService);
+    NoteViewModel newViewModel = new(note, windowService, dialogService, noteService);
     _cache.Remove(note);
     _cache.Add(note, new(newViewModel));
     ReferenceTracker.NoteViewModelReferences.Add(new(newViewModel));

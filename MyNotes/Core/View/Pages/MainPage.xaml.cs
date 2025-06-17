@@ -1,6 +1,5 @@
 using Microsoft.UI.Xaml.Media.Imaging;
 
-using MyNotes.Common.Messaging;
 using MyNotes.Core.Model;
 using MyNotes.Core.Service;
 using MyNotes.Core.ViewModel;
@@ -17,12 +16,20 @@ internal sealed partial class MainPage : Page
   {
     this.InitializeComponent();
     ViewModel = App.Current.GetService<MainViewModel>();
+
     _navigationService = App.Current.GetService<NavigationService>();
-    _navigationService.AttachView(View_NavigationView, View_NavigationContent_RootFrame);
+    _dialogService = App.Current.GetService<DialogService>();
 
     RegisterEvents();
     RegisterMessengers();
+    this.Loaded += MainPage_Loaded;
     this.Unloaded += MainPage_Unloaded;
+  }
+
+  private void MainPage_Loaded(object sender, RoutedEventArgs e)
+  {
+    _navigationService.AttachView(View_NavigationView, View_NavigationContent_RootFrame);
+    _dialogService.SetXamlRoot(this.XamlRoot);
   }
 
   private void MainPage_Unloaded(object sender, RoutedEventArgs e)
@@ -36,6 +43,7 @@ internal sealed partial class MainPage : Page
 
   public MainViewModel ViewModel { get; }
   private readonly NavigationService _navigationService;
+  private readonly DialogService _dialogService;
 
   #region Handling Events
   private void RegisterEvents()
@@ -61,19 +69,6 @@ internal sealed partial class MainPage : Page
   }
   #endregion
 
-  #region Rename Board
-  private void Template_Board_RenameMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
-    => ShowRenameBoardContentDialog((NavigationUserBoard)((FrameworkElement)sender).DataContext);
-
-  private async void ShowRenameBoardContentDialog(NavigationUserBoard navigation)
-  {
-    View_RenameBoardInputTextBox.Text = navigation.Name;
-    View_RenameBoardContentDialog.DataContext = navigation;
-    if (await View_RenameBoardContentDialog.ShowAsync() == ContentDialogResult.Primary)
-      ViewModel.RenameNavigationBoardMenu(navigation, View_RenameBoardInputTextBox.Text);
-  }
-  #endregion
-
   #region Add New Board
   // NavigationView Buttons
   private void View_NavigationViewFooter_NewBoardButton_Click(object sender, RoutedEventArgs e)
@@ -89,29 +84,44 @@ internal sealed partial class MainPage : Page
   private void Template_Group_NewBoardMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
     => ShowNewBoardDialog((NavigationUserGroup)((FrameworkElement)sender).DataContext);
 
-  private async void ShowNewGroupDialog(NavigationUserGroup group)
-  {
-    ViewModel.NewBoardGroupName = "";
-    ViewModel.NavigationGroupToAdd = group;
-    await View_NewGroupContentDialog.ShowAsync();
-  }
-
   private async void ShowNewBoardDialog(NavigationUserGroup group)
   {
-    ViewModel.NewBoardName = "";
-    ViewModel.NavigationGroupToAdd = group;
-    await View_NewBoardContentDialog.ShowAsync();
+    var result = await _dialogService.ShowCreateBoardDialog();
+    if (result.DialogResult)
+      group.AddChild(new NavigationUserBoard(result.Name!, result.Icon!, new BoardId(Guid.NewGuid())));
+  }
+
+  private async void ShowNewGroupDialog(NavigationUserGroup group)
+  {
+    var result = await _dialogService.ShowCreateBoardGroupDialog();
+    if (result.DialogResult)
+      group.AddChild(new NavigationUserGroup(result.Name!, result.Icon!, new BoardId(Guid.NewGuid())));
+  }
+  #endregion
+
+  #region Rename Board
+  private async void Template_Board_RenameMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+  {
+    if (((FrameworkElement)sender).DataContext is NavigationBoard navigation)
+    {
+      var result = await _dialogService.ShowRenameBoardDialog(navigation);
+      if (result.DialogResult)
+      {
+        if (result.Icon is not null)
+          navigation.Icon = result.Icon;
+        if (result.Name is not null)
+          navigation.Name = result.Name;
+      }
+    }
   }
   #endregion
 
   #region Remove Board
-  private void Template_Board_RemoveMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
-    => ShowRemoveBoardContentDialog((NavigationUserBoard)((FrameworkElement)sender).DataContext);
-
-  private async void ShowRemoveBoardContentDialog(NavigationUserBoard navigation)
+  private async void Template_Board_RemoveMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
   {
-    if (await View_RemoveBoardContentDialog.ShowAsync() == ContentDialogResult.Primary)
-      ViewModel.RemoveNavigationBoardMenu(navigation);
+    if (((FrameworkElement)sender).DataContext is NavigationUserBoard navigation)
+      if (await _dialogService.ShowRemoveBoardDialog(navigation))
+        ViewModel.RemoveNavigationBoardMenu(navigation);
   }
   #endregion
 
@@ -269,50 +279,13 @@ internal sealed partial class MainPage : Page
   #endregion
 
   #region Messengers
-  private void RegisterMessengers()
-  {
-    WeakReferenceMessenger.Default.Register<Message<NavigationUserBoard>, string>(this, Tokens.RenameBoardName, new((recipient, message) => ShowRenameBoardContentDialog(message.Content)));
-    WeakReferenceMessenger.Default.Register<Message<NavigationUserBoard>, string>(this, Tokens.RemoveBoard, new((recipient, message) => ShowRemoveBoardContentDialog(message.Content)));
+  private void RegisterMessengers() { }
 
-    WeakReferenceMessenger.Default.Register<AsyncRequestMessage<string>, string>(this, Tokens.RenameNoteTitle, new((recipient, message) =>
-    {
-      async Task<string> t()
-      {
-        return await View_RenameNoteTitleContentDialog.ShowAsync() == ContentDialogResult.Primary ? ViewModel.NoteTitleToRename : "";
-      }
-      message.Reply(t());
-    }));
-
-    WeakReferenceMessenger.Default.Register<AsyncRequestMessage<Guid?>, string>(this, Tokens.MoveNoteToBoard, new((recipient, message) =>
-    {
-      async Task<Guid?> t()
-      {
-        if (await View_MoveNoteToBoardContentDialog.ShowAsync() == ContentDialogResult.Primary)
-        {
-          if (View_MoveNoteToBoardTreeView.SelectedItem is NavigationUserBoard navigation)
-            return navigation.Id;
-        }
-        return null;
-      }
-      
-      message.Reply(t());
-    }));
-  }
-   
   private void UnregisterMessengers() => WeakReferenceMessenger.Default.UnregisterAll(this);
   #endregion
 
   //TEST: View Windows And Pages
   private void ViewWindowsButton_Click(object sender, RoutedEventArgs e) => ReferenceTracker.ReadActiveWindows();
-
-  //TEST: ContextFlyout
-  private void MainPage_Loaded(object sender, RoutedEventArgs e)
-  {
-    MenuFlyout ContextFlyout = new();
-    ContextFlyout.Items.Add(new MenuFlyoutItem() { Text = "Context Flyout" });
-    ScrollViewer MenuItemsHost = (ScrollViewer)((Grid)VisualTreeHelper.GetChild(View_NavigationView, 0)).FindName("MenuItemsScrollViewer");
-    MenuItemsHost.ContextFlyout = ContextFlyout;
-  }
 }
 
 internal class MainNavigationViewMenuItemTemplateSelector : DataTemplateSelector
@@ -327,18 +300,6 @@ internal class MainNavigationViewMenuItemTemplateSelector : DataTemplateSelector
     NavigationUserBoard => UserBoardMenuItemTemplate,
     NavigationItem => MenuItemTemplate,
     NavigationSeparator => SeparatorTemplate,
-    _ => throw new ArgumentException("")
-  };
-}
-
-internal class NavigationUserBoardTreeViewItemTemplateSelector : DataTemplateSelector
-{
-  public DataTemplate? UserGroupTemplate { get; set; }
-  public DataTemplate? UserBoardTemplate { get; set; }
-  protected override DataTemplate? SelectTemplateCore(object item) => item switch
-  {
-    NavigationUserGroup => UserGroupTemplate,
-    NavigationUserBoard => UserBoardTemplate,
     _ => throw new ArgumentException("")
   };
 }

@@ -30,6 +30,8 @@ public partial class App : Application
     services.AddSingleton<NavigationService>();
     services.AddSingleton<DatabaseService>();
     services.AddSingleton<NoteService>();
+    services.AddSingleton<TagService>();
+    services.AddSingleton<DialogService>();
 
     // ViewModels
     services.AddSingleton<MainViewModel>();

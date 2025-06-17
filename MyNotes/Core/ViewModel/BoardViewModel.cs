@@ -8,10 +8,11 @@ namespace MyNotes.Core.ViewModel;
 
 internal class BoardViewModel : ViewModelBase
 {
-  public BoardViewModel(NavigationBoard navigation, WindowService windowService, NoteService noteService, NoteViewModelFactory noteViewModelFactory)
+  public BoardViewModel(NavigationBoard navigation, WindowService windowService, DialogService dialogService, NoteService noteService, NoteViewModelFactory noteViewModelFactory)
   {
     Navigation = navigation;
     _windowService = windowService;
+    _dialogService = dialogService;
     _noteService = noteService;
     _noteViewModelFactory = noteViewModelFactory;
 
@@ -37,6 +38,7 @@ internal class BoardViewModel : ViewModelBase
   }
 
   private readonly WindowService _windowService;
+  private readonly DialogService _dialogService;
   private readonly NoteService _noteService;
   private readonly NoteViewModelFactory _noteViewModelFactory;
 
@@ -130,8 +132,19 @@ internal class BoardViewModel : ViewModelBase
       }
     });
 
-    ShowRenameBoardDialogCommand = new(() => WeakReferenceMessenger.Default.Send(new Message<NavigationUserBoard>((NavigationUserBoard)Navigation), Tokens.RenameBoardName));
-    ShowRemoveBoardDialogCommand = new(() => WeakReferenceMessenger.Default.Send(new Message<NavigationUserBoard>((NavigationUserBoard)Navigation), Tokens.RemoveBoard));
+    ShowRenameBoardDialogCommand = new(async () =>
+    {
+      var result = await _dialogService.ShowRenameBoardDialog(Navigation);
+      if (result.DialogResult)
+      {
+        if (result.Icon is not null)
+          Navigation.Icon = result.Icon;
+        if (result.Name is not null)
+          Navigation.Name = result.Name;
+      }
+    });
+
+    ShowRemoveBoardDialogCommand = new(async () => await _dialogService.ShowRemoveBoardDialog(Navigation));
 
     ChangeIconCommand = new((icon) => Navigation.Icon = icon);
   }

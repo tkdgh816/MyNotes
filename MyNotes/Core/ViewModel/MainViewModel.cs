@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-
-using MyNotes.Common.Commands;
+﻿using MyNotes.Common.Commands;
 using MyNotes.Common.Messaging;
 using MyNotes.Core.Dto;
 using MyNotes.Core.Model;
@@ -78,7 +76,9 @@ internal class MainViewModel : ViewModelBase
 
   private void OnNavigationPropertyChanged(object? sender, PropertyChangedEventArgs e)
   {
-    if (e.PropertyName == "Icon")
+    if(e.PropertyName == "Name")
+      _navigationService.UpdateBoard((NavigationUserBoard)sender!, BoardUpdateFields.Name);
+    else if (e.PropertyName == "Icon")
       _navigationService.UpdateBoard((NavigationUserBoard)sender!, BoardUpdateFields.IconType | BoardUpdateFields.IconValue);
   }
 
@@ -219,53 +219,6 @@ internal class MainViewModel : ViewModelBase
   }
 
   #region Rename
-  private string _boardNameToRename = "";
-  public string BoardNameToRename
-  {
-    get => _boardNameToRename;
-    set => SetProperty(ref _boardNameToRename, value);
-  }
-
-  private string _noteTitleToRename = "";
-  public string NoteTitleToRename
-  {
-    get => _noteTitleToRename;
-    set => SetProperty(ref _noteTitleToRename, value);
-  }
-  #endregion
-
-  #region New Board
-  public NavigationUserGroup NavigationGroupToAdd { get; set; } = null!;
-  private string _newBoardName = "";
-  public string NewBoardName
-  {
-    get => _newBoardName;
-    set => SetProperty(ref _newBoardName, value);
-  }
-
-  private string _newBoardGroupName = "";
-  public string NewBoardGroupName
-  {
-    get => _newBoardGroupName;
-    set => SetProperty(ref _newBoardGroupName, value);
-  }
-
-  private Icon _newBoardIcon = IconLibrary.FindGlyph("\uE70B");
-  public Icon NewBoardIcon
-  {
-    get => _newBoardIcon;
-    set => SetProperty(ref _newBoardIcon, value);
-  }
-
-  private Icon _newBoardGroupIcon = IconLibrary.FindGlyph("\uE82D");
-  public Icon NewBoardGroupIcon
-  {
-    get => _newBoardGroupIcon;
-    set => SetProperty(ref _newBoardGroupIcon, value);
-  }
-  #endregion
-
-  #region Rename
   public void RenameNavigationBoardMenu(NavigationUserBoard navigation, string newName)
   {
     if (string.IsNullOrEmpty(newName) || navigation.Name == newName)
@@ -289,10 +242,7 @@ internal class MainViewModel : ViewModelBase
   public Command<string>? SearchNavigationCommand { get; private set; }
   public Command? GoBackCommand { get; private set; }
   public Command<NavigationViewDisplayMode>? ChangeContentAlignmentCommand { get; private set; }
-  public Command? AddNavigationBoardCommand { get; private set; }
-  public Command? AddNavigationBoardGroupCommand { get; private set; }
   public Command? SetNavigationEditModeCommand { get; private set; }
-  public Command<NavigationUserBoard>? MoveNoteToBoardCommand { get; private set; }
 
   public void SetCommands()
   {
@@ -317,18 +267,6 @@ internal class MainViewModel : ViewModelBase
       }
     });
 
-    AddNavigationBoardCommand = new(() =>
-    {
-      NavigationUserBoard item = new(NewBoardName, NewBoardIcon, Guid.NewGuid());
-      NavigationGroupToAdd.AddChild(item);
-    });
-
-    AddNavigationBoardGroupCommand = new(() =>
-    {
-      NavigationUserGroup item = new(NewBoardGroupName, NewBoardGroupIcon, Guid.NewGuid());
-      NavigationGroupToAdd.AddChild(item);
-    });
-
     SetNavigationEditModeCommand = new(() =>
     {
       IsEditMode = !IsEditMode;
@@ -344,11 +282,6 @@ internal class MainViewModel : ViewModelBase
         RefreshNavigation();
 
       _navigationService.ChangeNavigationViewSelectionWithoutNavigation(IsEditMode ? null : _navigationService.CurrentNavigation);
-    });
-
-    MoveNoteToBoardCommand = new((board) =>
-    {
-      Debug.WriteLine(board.Name);
     });
   }
   #endregion

@@ -11,7 +11,7 @@ internal record BoardDbDto
   public required int IconValue { get; init; }
 }
 
-internal record BoardDbInsertDto
+internal record InsertBoardDbDto
 {
   public required Guid Id { get; init; }
   public required bool Grouped { get; init; }
@@ -23,12 +23,17 @@ internal record BoardDbInsertDto
   public required int IconValue { get; init; }
 }
 
-internal record BoardDbDeleteDto
+internal record DeleteBoardDbDto
 {
   public required Guid Id { get; init; }
 }
 
-internal record BoardDbUpdateDto
+internal record GetBoardNotesDbDto
+{
+  public required Guid Id { get; init; }
+}
+
+internal record UpdateBoardDbDto
 {
   public required BoardUpdateFields UpdateFields { get; init; }
   public required Guid Id { get; init; }
