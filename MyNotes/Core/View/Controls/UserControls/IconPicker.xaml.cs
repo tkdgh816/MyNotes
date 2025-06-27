@@ -35,14 +35,14 @@ internal sealed partial class IconPicker : Button
     {
       case "Basic":
         ControlSecondarySelectorBar(false);
-        View_IconsItemsRepeater.ItemsSource = IconLibrary.Glyphs;
+        View_IconsItemsRepeater.ItemsSource = IconManager.Glyphs;
         break;
       case "PeopleAndBody":
         ControlSecondarySelectorBar(true);
         break;
       default:
         ControlSecondarySelectorBar(false);
-        View_IconsItemsRepeater.ItemsSource = IconLibrary.EmojisList[selectedTag];
+        View_IconsItemsRepeater.ItemsSource = IconManager.EmojisList[selectedTag];
         break;
     }
     View_IconsViewScrollView.ScrollTo(0, 0);
@@ -68,7 +68,7 @@ internal sealed partial class IconPicker : Button
       return;
 
     string selectedTag = (string)sender.SelectedItem.Tag;
-    View_IconsItemsRepeater.ItemsSource = IconLibrary.EmojisList[selectedTag];
+    View_IconsItemsRepeater.ItemsSource = IconManager.EmojisList[selectedTag];
   }
 
   public event TypedEventHandler<IconPicker, IconChangedEventArgs>? IconChanged;

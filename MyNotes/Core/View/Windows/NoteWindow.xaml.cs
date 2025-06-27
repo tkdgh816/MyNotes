@@ -11,6 +11,6 @@ internal sealed partial class NoteWindow : Window
   {
     this.InitializeComponent();
     this.ExtendsContentIntoTitleBar = true;
-    View_NotePage.ViewModel = App.Current.GetService<NoteViewModelFactory>().Create(note);
+    View_NotePage.ViewModel = App.Instance.GetService<NoteViewModelFactory>().Resolve(note);
   }
 }

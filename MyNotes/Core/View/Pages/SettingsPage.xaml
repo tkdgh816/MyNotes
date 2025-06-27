@@ -31,7 +31,7 @@
           <controls:SettingsCard Header="App theme"
                                  HeaderIcon="{ui:FontIcon Glyph=&#xE790;}"
                                  Description="Select which app theme to display">
-            <ComboBox>
+            <ComboBox SelectedIndex="{x:Bind ViewModel.AppTheme, Converter={StaticResource AppThemeToIntConverter}, Mode=TwoWay}">
               <ComboBoxItem Content="Use System Settings"
                             Tag="Default" />
               <ComboBoxItem Content="Light"
@@ -59,7 +59,7 @@
                 </InfoBar>
               </StackPanel>
             </controls:SettingsCard.Description>
-            <ComboBox>
+            <ComboBox SelectedIndex="{x:Bind ViewModel.AppLanguage, Converter={StaticResource AppLanguageToIntConverter}, Mode=TwoWay}">
               <ComboBoxItem Content="Use System Default"
                             Tag="system" />
               <ComboBoxItem Content="English"
@@ -67,27 +67,6 @@
               <ComboBoxItem Content="한국어"
                             Tag="ko-KR" />
             </ComboBox>
-          </controls:SettingsCard>
-
-          <!-- NavigationView PaneDisplayMode -->
-          <controls:SettingsCard Header="NavigationView PaneDisplayMode"
-                                 HeaderIcon="{ui:FontIcon Glyph=&#xE7C4;}"
-                                 Description="NavigationView PaneDisplayMode">
-            <ComboBox>
-              <ComboBoxItem Content="Auto" />
-              <ComboBoxItem Content="Left" />
-              <ComboBoxItem Content="Top"
-                            Visibility="Collapsed" />
-              <ComboBoxItem Content="Compact" />
-              <ComboBoxItem Content="Minimal" />
-            </ComboBox>
-          </controls:SettingsCard>
-
-          <!-- Bookmarked Note To Top -->
-          <controls:SettingsCard Header="Move bookmarked notes to top"
-                                 HeaderIcon="{ui:FontIcon Glyph=&#xE8A4;}"
-                                 Description="Pin bookmarked notes to the top of each list page">
-            <ToggleSwitch IsOn="True" />
           </controls:SettingsCard>
         </StackPanel>
         <!--#endregion-->
@@ -99,41 +78,22 @@
                      Padding="4"
                      Style="{ThemeResource BaseTextBlockStyle}" />
 
-          <!-- Confirm Deletion -->
-          <controls:SettingsCard Header="Confirm before deleting"
-                                 HeaderIcon="Accept"
-                                 Description="Display a confirmation dialog before deleting a note">
-            <ToggleSwitch IsOn="True" />
-          </controls:SettingsCard>
-
-          <!-- Use Trash -->
-          <controls:SettingsCard Header="Use trash"
-                                 HeaderIcon="Delete"
-                                 Description="Move notes to trash when removed">
-            <ToggleSwitch IsOn="True" />
-          </controls:SettingsCard>
-
-          <!-- Always On Top -->
-          <controls:SettingsCard Header="Always on top"
-                                 HeaderIcon="{ui:FontIcon Glyph=&#xE7C4;}"
-                                 Description="App will always be the topmost window on the desktop">
-            <ToggleSwitch IsOn="True" />
-          </controls:SettingsCard>
-
-          <!-- Pin To Taskbar -->
-          <controls:SettingsCard Header="Pin to taskbar"
-                                 HeaderIcon="{ui:FontIcon Glyph=&#xE718;}"
-                                 Description="Pin this app to the taskbar for quick access">
-            <Button Content="Pin to taskbar"
-                    Style="{ThemeResource AccentButtonStyle}" />
-          </controls:SettingsCard>
-
           <!-- Startup -->
           <controls:SettingsCard Header="Run app at system startup"
                                  HeaderIcon="{ui:FontIcon Glyph=&#xE7C4;}"
                                  Description="Run app at system startup">
             <Button Content="Register for startup"
-                    Style="{ThemeResource AccentButtonStyle}" />
+                    Style="{ThemeResource AccentButtonStyle}" 
+                    Click="RunAtStartupButton_Click"/>
+          </controls:SettingsCard>
+
+          <!-- Taskbar -->
+          <controls:SettingsCard Header="Pin to taskbar"
+                                 HeaderIcon="{ui:FontIcon Glyph=&#xE7C4;}"
+                                 Description="Pin to taskbar">
+            <Button Content="Pin"
+                    Style="{ThemeResource AccentButtonStyle}"
+                    Click="PinToTaskbarButton_Click"/>
           </controls:SettingsCard>
         </StackPanel>
         <!--#endregion-->
@@ -148,7 +108,7 @@
                                  HeaderIcon="{ui:FontIcon Glyph=&#xE790;}"
                                  Description="Change the background color of a new note">
             <SplitButton>
-              <Border Background="LightGoldenrodYellow"
+              <Border Background="{x:Bind ViewModel.NoteBackground, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}"
                       Width="24"
                       Height="24"
                       CornerRadius="{ThemeResource ControlCornerRadius}" />
@@ -156,7 +116,7 @@
                 <Flyout Placement="Bottom"
                         ShouldConstrainToRootBounds="False">
                   <StackPanel>
-                    <ColorPicker Color="LightGoldenrodYellow"
+                    <ColorPicker Color="{x:Bind ViewModel.NoteBackground, Mode=TwoWay}"
                                  IsAlphaEnabled="True"
                                  IsMoreButtonVisible="True" />
                   </StackPanel>
@@ -169,10 +129,10 @@
           <controls:SettingsCard Header="Backdrop"
                                  HeaderIcon="{ui:FontIcon Glyph=&#xF4A5;}"
                                  Description="Change the backdrop effect of a new note">
-            <ComboBox>
+            <ComboBox SelectedIndex="{x:Bind ViewModel.NoteBackdrop, Converter={StaticResource BackdropKindToIntConverter}, Mode=TwoWay}">
+              <ComboBoxItem Content="None" />
               <ComboBoxItem Content="Acrylic" />
               <ComboBoxItem Content="Mica" />
-              <ComboBoxItem Content="None" />
             </ComboBox>
           </controls:SettingsCard>
 
@@ -184,14 +144,14 @@
                         Orientation="Horizontal"
                         Spacing="8">
               <NumberBox SpinButtonPlacementMode="Compact"
-                         Value="500"
+                         Value="{x:Bind ViewModel.NoteWidth, Mode=TwoWay}"
                          Minimum="300"
                          Maximum="1000"
                          SmallChange="10" />
               <TextBlock Text="⨉"
                          VerticalAlignment="Center" />
               <NumberBox SpinButtonPlacementMode="Compact"
-                         Value="400"
+                         Value="{x:Bind ViewModel.NoteHeight, Mode=TwoWay}"
                          Minimum="200"
                          Maximum="1000"
                          SmallChange="10" />
@@ -205,17 +165,12 @@
           <TextBlock Text="Others"
                      Padding="4"
                      Style="{ThemeResource BaseTextBlockStyle}" />
-          <controls:SettingsCard Header="Read Settings">
-            <Button Content="Read Settings" />
-          </controls:SettingsCard>
-          <controls:SettingsCard Header="Clear All Settings">
-            <Button Content="Clear All Settings" />
-          </controls:SettingsCard>
-          <controls:SettingsCard Header="Read Lists Database">
-            <Button Content="Read Lists Database" />
-          </controls:SettingsCard>
-          <controls:SettingsCard Header="Read Notes Database">
-            <Button Content="Read Notes Database" />
+
+          <!-- Bool SettingsCard -->
+          <controls:SettingsCard Header="Bool settings"
+                                 HeaderIcon="Accept"
+                                 Description="Display a confirmation dialog before deleting a note">
+            <ToggleSwitch IsOn="True" />
           </controls:SettingsCard>
         </StackPanel>
 

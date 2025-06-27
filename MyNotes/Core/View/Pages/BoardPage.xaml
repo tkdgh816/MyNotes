@@ -4,6 +4,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:ui="using:CommunityToolkit.WinUI"
       xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+      xmlns:media="using:CommunityToolkit.WinUI.Media"
       xmlns:model="using:MyNotes.Core.Model"
       xmlns:view="using:MyNotes.Core.View"
       xmlns:viewmodel="using:MyNotes.Core.ViewModel"
@@ -20,9 +21,13 @@
                   x:DataType="viewmodel:NoteViewModel">
       <UserControl x:Name="Template_RootUserControl"
                    Margin="6"
+                   RequestedTheme="Light"
                    PointerEntered="Template_RootUserControl_PointerEntered"
-                   PointerExited="Template_RootUserControl_PointerExited">
-        <Grid Background="{x:Bind Note.Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}"
+                   PointerExited="Template_RootUserControl_PointerExited"
+                   Holding="Template_RootUserControl_Holding"
+                   CanDrag="True"
+                   DragStarting="Template_RootUserControl_DragStarting">
+        <Grid Background="{x:Bind Note.Background, Converter={StaticResource AlphaBlendingWhiteConverter}, Mode=OneWay}"
               CornerRadius="8"
               BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
               BorderThickness="1"
@@ -31,7 +36,7 @@
           <Grid.Shadow>
             <ThemeShadow />
           </Grid.Shadow>
-
+          
           <Grid.RowDefinitions>
             <RowDefinition Height="32" />
             <RowDefinition />
@@ -41,7 +46,8 @@
           <Grid Grid.Row="0"
                 Background="{x:Bind Note.Background, Converter={StaticResource ColorToLayerBrushConverter}, Mode=OneWay}"
                 BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
-                BorderThickness="0,0,0,1">
+                BorderThickness="0,0,0,1"
+                CornerRadius="6,6,0,0">
 
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="Auto" />
@@ -57,7 +63,8 @@
                     Content="{x:Bind Note.IsBookmarked, Converter={StaticResource BoolToBookmarkIconGlyphConverter}, Mode=OneWay}"
                     CornerRadius="8,4,4,4"
                     Visibility="Collapsed"
-                    Command="{x:Bind BookmarkCommand}" />
+                    IsTabStop="False"
+                    Command="{x:Bind BookmarkNoteCommand}"/>
 
             <!--Note Title-->
             <TextBlock Grid.Column="1"
@@ -83,6 +90,7 @@
                     Style="{StaticResource AppFontIconNormalButtonStyle}"
                     Content="&#xE712;"
                     CornerRadius="4,8,4,4"
+                    IsTabStop="False"
                     Visibility="Collapsed">
               <Button.Flyout>
                 <CommandBarFlyout Placement="Bottom"
@@ -96,12 +104,12 @@
                   <AppBarButton x:Name="Template_RemoveNoteButton"
                                 Label="Remove"
                                 Icon="Delete"
-                                Command="{x:Bind RemoveCommand}" />
+                                Command="{x:Bind RemoveNoteCommand}" />
                   <CommandBarFlyout.SecondaryCommands>
                     <AppBarButton x:Name="Template_MoveToBoardButton"
                                   Label="Move to board"
                                   Icon="{ui:FontIcon Glyph=&#xE8DE;}" 
-                                  Command="{x:Bind MoveToBoardCommand}"/>
+                                  Command="{x:Bind ShowMoveNoteToBoardDialogCommand}"/>
                     <AppBarButton x:Name="Template_RenameTitleButton"
                                   Label="Rename title"
                                   Icon="{ui:FontIcon Glyph=&#xE8AC;}"
@@ -112,7 +120,8 @@
                                   Command="{x:Bind ShowEditNoteTagsDialogCommmand}" />
                     <AppBarSeparator />
                     <AppBarButton Label="About"
-                                  Icon="{ui:FontIcon Glyph=&#xE946;}" />
+                                  Icon="{ui:FontIcon Glyph=&#xE946;}" 
+                                  Command="{x:Bind ShowNoteInformationDialogOnMainCommand}"/>
                   </CommandBarFlyout.SecondaryCommands>
                 </CommandBarFlyout>
               </Button.Flyout>
@@ -135,8 +144,7 @@
           <Grid x:Name="Template_CommandBarGrid"
                 Grid.Row="1"
                 Visibility="Collapsed"
-                VerticalAlignment="Bottom"
-                Background="{x:Bind Note.Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}">
+                VerticalAlignment="Bottom">
             <ScrollViewer HorizontalScrollMode="Enabled"
                           VerticalScrollMode="Disabled"
                           HorizontalScrollBarVisibility="Hidden"
@@ -145,13 +153,14 @@
                              Margin="4">
                 <ItemsRepeater.Layout>
                   <StackLayout Orientation="Horizontal"
-                               Spacing="4" />
+                               Spacing="6" />
                 </ItemsRepeater.Layout>
                 <ItemsRepeater.ItemTemplate>
                   <DataTemplate x:DataType="model:Tag">
                     <view:AppTagButton Background="{x:Bind Color, Converter={StaticResource TagColorToBackgroundBrushConverter}}"
                                        Foreground="{x:Bind Color, Converter={StaticResource TagColorToForegroundBrushConverter}}"
-                                       DeleteButtonVisible="Collapsed">
+                                       DeleteButtonVisible="Collapsed"
+                                       IsTabStop="False">
                       <TextBlock Text="{x:Bind Text}"
                                  TextTrimming="CharacterEllipsis" />
                     </view:AppTagButton>
@@ -290,7 +299,7 @@
                         Content="{x:Bind Note.IsBookmarked, Converter={StaticResource BoolToBookmarkIconGlyphConverter}, Mode=OneWay}"
                         CornerRadius="8,4,4,4"
                         Visibility="Collapsed"
-                        Command="{x:Bind BookmarkCommand}" />
+                        Command="{x:Bind BookmarkNoteCommand}" />
 
                 <!--More Button-->
                 <Button x:Name="Template_MoreButton"
@@ -308,12 +317,12 @@
                       <AppBarButton x:Name="Template_RemoveNoteButton"
                                     Label="Remove"
                                     Icon="Delete"
-                                    Command="{x:Bind RemoveCommand}" />
+                                    Command="{x:Bind RemoveNoteCommand}" />
                       <CommandBarFlyout.SecondaryCommands>
                         <AppBarButton x:Name="Template_MoveToBoardButton"
                                       Label="Move to board"
                                       Icon="{ui:FontIcon Glyph=&#xE8DE;}" 
-                                      Command="{x:Bind MoveToBoardCommand}"/>
+                                      Command="{x:Bind MoveNoteToBoardCommand}"/>
                         <AppBarButton x:Name="Template_RenameTitleButton"
                                       Label="Rename title"
                                       Icon="{ui:FontIcon Glyph=&#xE8AC;}"
@@ -602,10 +611,10 @@
             <MenuFlyoutItem Text="Remove notes"
                             Icon="Delete" />
 
-            <MenuFlyoutItem Text="Remove board"
+            <MenuFlyoutItem Text="Delete board"
                             Icon="Delete"
                             Visibility="{x:Bind Navigation, Converter={StaticResource NavigationUserBoardToVisibilityConverter}}"
-                            Command="{x:Bind ViewModel.ShowRemoveBoardDialogCommand}" />
+                            Command="{x:Bind ViewModel.ShowDeleteBoardDialogCommand}" />
           </MenuFlyout>
         </Button.Flyout>
       </Button>
@@ -620,7 +629,11 @@
               ItemTemplate="{StaticResource GridViewItemTemplate_GridStyle}"
               ItemContainerStyle="{StaticResource AppGridViewItemContainerStyle210Moderate}"
               SelectionMode="None"
-              AllowFocusOnInteraction="False">
+              HorizontalAlignment="Center"
+              TabNavigation="Local"
+              TabFocusNavigation="Local"
+              AllowFocusOnInteraction="False"
+              ContainerContentChanging="View_NotesGridView_ContainerContentChanging">
       <!--<GridView.ItemContainerTransitions>
         <TransitionCollection>
           <AddDeleteThemeTransition />
@@ -634,6 +647,18 @@
     
     <!--#region VisualStateManager -->
     <VisualStateManager.VisualStateGroups>
+      <VisualStateGroup x:Name="NotesGridViewHorizontalAlignmentStates">
+        <VisualState x:Name="NotesGridViewCenter">
+          <VisualState.StateTriggers>
+            <AdaptiveTrigger MinWindowWidth="642" />
+          </VisualState.StateTriggers>
+          <VisualState.Setters>
+            <Setter Target="View_NotesGridView.HorizontalAlignment"
+                    Value="Stretch" />
+          </VisualState.Setters>
+        </VisualState>
+      </VisualStateGroup>
+      
       <VisualStateGroup x:Name="CanAddNoteStates">
         <VisualState x:Name="CanAddNote" />
         <VisualState x:Name="CannotAddNote">

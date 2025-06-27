@@ -12,16 +12,23 @@ internal class DialogService
   }
 
   private readonly NoteViewModelFactory _noteViewModelFactory;
-  private XamlRoot? _xamlRoot;
+  private XamlRoot? _mainXamlRoot;
+  private ContentDialog? _mainDialog;
 
-  public void SetXamlRoot(XamlRoot xamlRoot) => _xamlRoot = xamlRoot;
+  public void SetMainXamlRoot(XamlRoot xamlRoot) => _mainXamlRoot = xamlRoot;
+
+  private void ChangeNewDialog(ContentDialog dialog)
+  {
+    _mainDialog?.Hide();
+    _mainDialog = dialog;
+  }
 
   public async void ShowEditNoteTagsDialog(Note note)
   {
     NoteViewModel? noteViewModel = _noteViewModelFactory.Get(note);
     if (noteViewModel is not null)
     {
-      var dialog = new EditNoteTagsDialog(noteViewModel) { XamlRoot = _xamlRoot };
+      var dialog = new EditNoteTagsDialog(noteViewModel) { XamlRoot = _mainXamlRoot };
       await dialog.ShowAsync();
     }
   }
@@ -31,17 +38,28 @@ internal class DialogService
     NoteViewModel? noteViewModel = _noteViewModelFactory.Get(note);
     if (noteViewModel is not null)
     {
-      var dialog = new RenameNoteTitleDialog(noteViewModel) { XamlRoot = _xamlRoot };
+      var dialog = new RenameNoteTitleDialog(noteViewModel) { XamlRoot = _mainXamlRoot };
       await dialog.ShowAsync();
     }
   }
 
-  public async Task<(bool DialogResult, Icon? Icon, string? Name)> ShowRenameBoardDialog(NavigationBoard board)
+  public async void ShowNoteInformationDialog(Note note, XamlRoot? xamlRoot = null)
+  {
+    NoteViewModel? noteViewModel = _noteViewModelFactory.Get(note);
+    if (noteViewModel is not null)
+    {
+      xamlRoot ??= _mainXamlRoot;
+      var dialog = new NoteInformationDialog(noteViewModel) { XamlRoot = xamlRoot };
+      await dialog.ShowAsync();
+    }
+  }
+
+  public async Task<(bool DialogResult, Icon? Icon, string? Name)> ShowRenameBoardDialog(NavigationUserBoard board)
   {
     NavigationDialogViewModel viewModel = new(board.Icon, board.Name);
     (bool, Icon?, string?) result;
 
-    var dialog = new RenameBoardDialog(viewModel) { XamlRoot = _xamlRoot };
+    var dialog = new RenameBoardDialog(viewModel) { XamlRoot = _mainXamlRoot };
     if (await dialog.ShowAsync() == ContentDialogResult.Primary)
     {
       Icon? icon = viewModel.Icon == board.Icon ? null : viewModel.Icon;
@@ -53,17 +71,17 @@ internal class DialogService
     return result;
   }
 
-  public async Task<bool> ShowRemoveBoardDialog(NavigationBoard board)
+  public async Task<bool> ShowDeleteBoardDialog(NavigationUserBoard board)
   {
-    var dialog = new RemoveBoardDialog(board) { XamlRoot = _xamlRoot };
+    var dialog = new DeleteBoardDialog(board) { XamlRoot = _mainXamlRoot };
     return await dialog.ShowAsync() == ContentDialogResult.Primary;
   }
 
   public async Task<(bool DialogResult, Icon? Icon, string? Name)> ShowCreateBoardDialog()
   {
-    NavigationDialogViewModel viewModel = new(IconLibrary.FindGlyph("\uE70B"), "New Board");
+    NavigationDialogViewModel viewModel = new(IconManager.FindGlyph("\uE70B"), "New Board");
     (bool, Icon?, string?) result;
-    var dialog = new CreateBoardDialog(viewModel) { XamlRoot = _xamlRoot };
+    var dialog = new CreateBoardDialog(viewModel) { XamlRoot = _mainXamlRoot };
     if (await dialog.ShowAsync() == ContentDialogResult.Primary)
       result = (true, viewModel.Icon, viewModel.Name);
     else
@@ -73,9 +91,9 @@ internal class DialogService
 
   public async Task<(bool DialogResult, Icon? Icon, string? Name)> ShowCreateBoardGroupDialog()
   {
-    NavigationDialogViewModel viewModel = new(IconLibrary.FindGlyph("\uE82D"), "New Group");
+    NavigationDialogViewModel viewModel = new(IconManager.FindGlyph("\uE82D"), "New Group");
     (bool, Icon?, string?) result;
-    var dialog = new CreateBoardDialog(viewModel) { XamlRoot = _xamlRoot };
+    var dialog = new CreateBoardDialog(viewModel) { XamlRoot = _mainXamlRoot };
     if (await dialog.ShowAsync() == ContentDialogResult.Primary)
       result = (true, viewModel.Icon, viewModel.Name);
     else
@@ -85,10 +103,10 @@ internal class DialogService
 
   public async Task<(bool DialogResult, BoardId? Id)> ShowMoveNoteToBoardDialog()
   {
-    var mainViewModel = App.Current.GetService<MainViewModel>();
-    NavigationTreeDialogViewModel viewModel = new(mainViewModel.UserBoards);
+    var mainViewModel = App.Instance.GetService<MainViewModel>();
+    NavigationTreeDialogViewModel viewModel = new(mainViewModel.UserRootNavigation);
     (bool, BoardId?) result;
-    var dialog = new MoveNoteToBoardDialog(viewModel) { XamlRoot = _xamlRoot };
+    var dialog = new MoveNoteToBoardDialog(viewModel) { XamlRoot = _mainXamlRoot };
     if (await dialog.ShowAsync() == ContentDialogResult.Primary && viewModel.SelectedNavigation is not null)
       result = (true, viewModel.SelectedNavigation.Id);
     else
@@ -121,7 +139,7 @@ internal class DialogService
 
   public class NavigationTreeDialogViewModel : ViewModelBase
   {
-    public ReadOnlyObservableCollection<NavigationUserBoard> Navigations { get; }
+    public IReadOnlyList<NavigationUserBoard> Navigations { get; }
 
     private NavigationUserBoard? _selectedNavigation = null;
     public NavigationUserBoard? SelectedNavigation
@@ -130,9 +148,9 @@ internal class DialogService
       set => SetProperty(ref _selectedNavigation, value);
     }
 
-    public NavigationTreeDialogViewModel(ReadOnlyObservableCollection<NavigationUserBoard> navigations)
+    public NavigationTreeDialogViewModel(NavigationUserRootGroup rootNavigation)
     {
-      Navigations = navigations;
+      Navigations = rootNavigation.Children;
     }
   }
 }

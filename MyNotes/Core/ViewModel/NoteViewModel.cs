@@ -3,11 +3,18 @@ using MyNotes.Common.Messaging;
 using MyNotes.Core.Dto;
 using MyNotes.Core.Model;
 using MyNotes.Core.Service;
+using MyNotes.Core.Shared;
 
 namespace MyNotes.Core.ViewModel;
 
 internal class NoteViewModel : ViewModelBase
 {
+  public Note Note { get; }
+  private readonly WindowService _windowService;
+  private readonly DialogService _dialogService;
+  private readonly NoteService _noteService;
+  private readonly TagService _tagService;
+
   public NoteViewModel(Note note, WindowService windowService, DialogService dialogService, NoteService noteService, TagService tagService)
   {
     Note = note;
@@ -18,19 +25,6 @@ internal class NoteViewModel : ViewModelBase
     RegisterEvents();
     SetCommands();
     RegisterMessengers();
-  }
-
-  private readonly WindowService _windowService;
-  private readonly DialogService _dialogService;
-  private readonly NoteService _noteService;
-  private readonly TagService _tagService;
-  public Note Note { get; private set; }
-
-  private bool _isWindowActive = true;
-  public bool IsWindowActive
-  {
-    get => _isWindowActive;
-    set => SetProperty(ref _isWindowActive, value);
   }
 
   public bool IsNoteInBoard()
@@ -44,10 +38,11 @@ internal class NoteViewModel : ViewModelBase
   {
     if (disposing)
     {
+      ForceUpdateNoteProperties();
       UnregisterEvents();
       UnregisterMessengers();
-      App.Current.GetService<NoteViewModelFactory>().Close(Note);
-      App.Current.GetService<NoteService>().RemoveFromCache(Note);
+      App.Instance.GetService<NoteViewModelFactory>().Close(Note);
+      App.Instance.GetService<NoteService>().RemoveFromCache(Note);
     }
 
     base.Dispose(disposing);
@@ -104,11 +99,14 @@ internal class NoteViewModel : ViewModelBase
 
   private void OnNoteDebounceTimerTick(object? sender, object e)
   {
-    _noteService.UpdateNote(Note, _noteUpdateFields);
-    foreach (string changedPropertyName in _changedNoteProperties)
-      OnPropertyChanged(changedPropertyName);
-    ClearNotePropertyChangedFlags();
+    UpdateNoteProperties();
+    ApplyDebouncedChangesToView();
     _noteDebounceTimer.Stop();
+  }
+
+  // Debounce 적용 이후 후속 UI 작업
+  private void ApplyDebouncedChangesToView()
+  {
   }
   #endregion
 
@@ -123,25 +121,6 @@ internal class NoteViewModel : ViewModelBase
     _noteUpdateFields |= _notePropertyUpdateFieldMap[propertyName];
     _noteDebounceTimer.Start();
   }
-
-  //TEST TO STRING
-  public override string ToString() => Note.ToString();
-
-  public bool IsBodyChanged = false;
-  public void UpdateBody(string body) => Note.Body = body;
-  public void ForceUpdateNoteProperties()
-  {
-    _noteService.UpdateNote(Note, NoteUpdateFields.All);
-    ClearNotePropertyChangedFlags();
-  }
-
-  private void ClearNotePropertyChangedFlags()
-  {
-    _changedNoteProperties.Clear();
-    _noteUpdateFields = NoteUpdateFields.None;
-    IsBodyChanged = false;
-  }
-
 
   private void OnNoteTagsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
   {
@@ -158,14 +137,35 @@ internal class NoteViewModel : ViewModelBase
         break;
     }
   }
-  //public void UpdateNoteTag(string tag)
-  //{
-  //  if (string.IsNullOrWhiteSpace(tag) || Note.Tags.Contains(tag))
-  //    return;
 
-  //  Note.Tags.Add(tag);
-  //  _databaseService.AddTag(Note, tag);
-  //}
+  public bool IsBodyChanged = false;
+  public void UpdateBody(string body) => Note.Body = body;
+
+  private void UpdateNoteProperties()
+  {
+    _noteService.UpdateNote(Note, _noteUpdateFields);
+    foreach (string changedPropertyName in _changedNoteProperties)
+      OnPropertyChanged(changedPropertyName);
+    ClearNotePropertyChangedFlags();
+  }
+
+  public void ForceUpdateNoteProperties()
+  {
+    _noteService.UpdateNote(Note, NoteUpdateFields.All);
+    ClearNotePropertyChangedFlags();
+  }
+
+  private void ClearNotePropertyChangedFlags()
+  {
+    _changedNoteProperties.Clear();
+    _noteUpdateFields = NoteUpdateFields.None;
+    IsBodyChanged = false;
+  }
+
+  // 본문 저장 파일 가져오기
+  public Task<StorageFile> GetFile() => _noteService.GetFile(Note);
+  public Task<StorageFile> CreateFile() => _noteService.CreateFile(Note);
+  public Task DeleteFile() => _noteService.DeleteFile(Note);
   #endregion
 
   #region Commands
@@ -174,14 +174,18 @@ internal class NoteViewModel : ViewModelBase
   public Command? CloseWindowCommand { get; private set; }
   public Command? ToggleWindowPinCommand { get; private set; }
   public Command<int>? SetWindowBackdropCommand { get; private set; }
-  public Command? BookmarkCommand { get; private set; }
-  public Command? RemoveCommand { get; private set; }
-  public Command? MoveToBoardCommand { get; private set; }
+  public Command? BookmarkNoteCommand { get; private set; }
+  public Command? RemoveNoteCommand { get; private set; }
+  public Command? DeleteNoteCommand { get; private set; }
+  public Command? ShowMoveNoteToBoardDialogCommand { get; private set; }
+  public Command<BoardId>? MoveNoteToBoardCommand { get; private set; }
   public Command? ShowRenameNoteTitleDialogCommand { get; private set; }
-  public Command<string>? RenameTitleCommand { get; private set; }
+  public Command<string>? RenameNoteTitleCommand { get; private set; }
   public Command? ShowEditNoteTagsDialogCommmand { get; private set; }
-  public Command<TagCommandParameterDto>? AddTagCommand { get; private set; }
-  public Command<Tag>? DeleteTagCommand { get; private set; }
+  public Command? ShowNoteInformationDialogOnMainCommand { get; private set; }
+  public Command<XamlRoot>? ShowNoteInformationDialogCommand { get; private set; }
+  public Command<TagCommandParameterDto>? AddNoteTagCommand { get; private set; }
+  public Command<Tag>? DeleteNoteTagCommand { get; private set; }
 
   private void SetCommands()
   {
@@ -194,43 +198,46 @@ internal class NoteViewModel : ViewModelBase
     MinimizeWindowCommand = new(() => _windowService.MinimizeNoteWindow(Note));
     CloseWindowCommand = new(() => _windowService.CloseNoteWindow(Note));
     ToggleWindowPinCommand = new(() => _windowService.ToggleNoteWindowPin(Note, IsWindowAlwaysOnTop = !IsWindowAlwaysOnTop));
-    SetWindowBackdropCommand = new((backdropKind) =>
-    {
-      Note.Backdrop = (BackdropKind)backdropKind;
-      _windowService.SetNoteWindowBackdrop(Note, (BackdropKind)backdropKind);
-    });
+    SetWindowBackdropCommand = new((backdropKindIndex) => _windowService.SetNoteWindowBackdrop(Note, (BackdropKind)backdropKindIndex));
 
-    BookmarkCommand = new(() =>
+    BookmarkNoteCommand = new(() =>
     {
       Note.IsBookmarked = !Note.IsBookmarked;
       if (!Note.IsBookmarked)
         WeakReferenceMessenger.Default.Send(new Message<NoteViewModel>(this), Tokens.RemoveNoteFromBookmarks);
     });
 
-    RemoveCommand = new(() =>
+    RemoveNoteCommand = new(() =>
     {
       Note.IsTrashed = true;
       WeakReferenceMessenger.Default.Send(new Message<NoteViewModel>(this), Tokens.RemoveNoteFromBoard);
     });
 
-    MoveToBoardCommand = new(async () =>
+    DeleteNoteCommand = new(() =>
     {
-      var result = await _dialogService.ShowMoveNoteToBoardDialog();
-      if (result.DialogResult)
-      {
-        BoardId? boardId = result.Id;
+      _noteService.DeleteNote(Note);
+      WeakReferenceMessenger.Default.Send(new Message<NoteViewModel>(this), Tokens.RemoveNoteFromBoard);
+    });
 
-        if (boardId is not null && boardId != Note.BoardId)
-        {
-          Note.BoardId = (BoardId)boardId;
-          _noteService.UpdateNote(Note, NoteUpdateFields.Parent);
-          WeakReferenceMessenger.Default.Send(new Message<NoteViewModel>(this), Tokens.RemoveNoteFromBoard);
-        }
+    ShowMoveNoteToBoardDialogCommand = new(async () =>
+    {
+      var (dialogResult, boardId) = await _dialogService.ShowMoveNoteToBoardDialog();
+      if (dialogResult && boardId is not null)
+        MoveNoteToBoardCommand?.Execute(boardId);
+    });
+
+    MoveNoteToBoardCommand = new((boardId) =>
+    {
+      if (boardId != Note.BoardId)
+      {
+        Note.BoardId = boardId;
+        _noteService.UpdateNote(Note, NoteUpdateFields.Parent);
+        WeakReferenceMessenger.Default.Send(new Message<NoteViewModel>(this), Tokens.RemoveNoteFromBoard);
       }
     });
 
     ShowRenameNoteTitleDialogCommand = new(() => _dialogService.ShowRenameNoteTitleDialog(Note));
-    RenameTitleCommand = new((title) =>
+    RenameNoteTitleCommand = new((title) =>
     {
       title = title.Trim();
       if (!string.IsNullOrWhiteSpace(title))
@@ -238,8 +245,10 @@ internal class NoteViewModel : ViewModelBase
     });
 
     ShowEditNoteTagsDialogCommmand = new(() => _dialogService.ShowEditNoteTagsDialog(Note));
+    ShowNoteInformationDialogOnMainCommand = new(() => _dialogService.ShowNoteInformationDialog(Note));
+    ShowNoteInformationDialogCommand = new((xamlRoot) => _dialogService.ShowNoteInformationDialog(Note, xamlRoot));
 
-    AddTagCommand = new((dto) =>
+    AddNoteTagCommand = new((dto) =>
     {
       if (!string.IsNullOrEmpty(dto.Text))
       {
@@ -251,7 +260,7 @@ internal class NoteViewModel : ViewModelBase
       }
     });
 
-    DeleteTagCommand = new((tag) =>
+    DeleteNoteTagCommand = new((tag) =>
     {
       if (_tagService.DeleteTagFromNote(Note, tag))
         Note.Tags.Remove(tag);
@@ -283,9 +292,6 @@ internal class NoteViewModel : ViewModelBase
     }));
   }
 
-  private void UnregisterMessengers()
-  {
-    WeakReferenceMessenger.Default.UnregisterAll(this);
-  }
+  private void UnregisterMessengers() => WeakReferenceMessenger.Default.UnregisterAll(this);
   #endregion
 }

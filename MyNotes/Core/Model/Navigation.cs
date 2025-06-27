@@ -55,17 +55,17 @@ internal abstract class NavigationBoard : NavigationItem
 
 internal class NavigationSearch : NavigationBoard
 {
-  public NavigationSearch(string searchText) : base(typeof(SearchPage), searchText, IconLibrary.FindGlyph("\uE721")) { }
+  public NavigationSearch(string searchText) : base(typeof(SearchPage), searchText, IconManager.FindGlyph("\uE721")) { }
 }
 
 internal class NavigationHome : NavigationItem
 {
-  public NavigationHome() : base(typeof(HomePage), "Home", IconLibrary.FindGlyph("\uE80F")) { }
+  public NavigationHome() : base(typeof(HomePage), "Home", IconManager.FindGlyph("\uE80F")) { }
 }
 
 internal class NavigationTags : NavigationBoard
 {
-  public NavigationTags() : base(typeof(TagsPage), "Tags", IconLibrary.FindGlyph("\uE8EC"))
+  public NavigationTags() : base(typeof(TagsPage), "Tags", IconManager.FindGlyph("\uE8EC"))
   {
     SelectsOnInvoked = false;
   }
@@ -73,17 +73,17 @@ internal class NavigationTags : NavigationBoard
 
 internal class NavigationTrash : NavigationBoard
 {
-  public NavigationTrash() : base(typeof(BoardPage), "Trash", IconLibrary.FindGlyph("\uE74D")) { }
+  public NavigationTrash() : base(typeof(BoardPage), "Trash", IconManager.FindGlyph("\uE74D")) { }
 }
 
 internal class NavigationSettings : NavigationItem
 {
-  public NavigationSettings() : base(typeof(SettingsPage), "Settings", IconLibrary.FindGlyph("\uE713")) { }
+  public NavigationSettings() : base(typeof(SettingsPage), "Settings", IconManager.FindGlyph("\uE713")) { }
 }
 
 internal class NavigationBookmarks : NavigationBoard
 {
-  public NavigationBookmarks() : base(typeof(BoardPage), "Bookmarks", IconLibrary.FindGlyph("\uE734")) { }
+  public NavigationBookmarks() : base(typeof(BoardPage), "Bookmarks", IconManager.FindGlyph("\uE734")) { }
 }
 
 internal class NavigationUserBoard : NavigationBoard
@@ -183,7 +183,7 @@ internal class NavigationUserGroup : NavigationUserBoard
 
 internal class NavigationUserRootGroup : NavigationUserGroup
 {
-  public NavigationUserRootGroup() : base("Root", IconLibrary.FindGlyph("\uE82D"), BoardId.Empty)
+  public NavigationUserRootGroup() : base("Root", IconManager.FindGlyph("\uE82D"), BoardId.Empty)
   { }
 }
 

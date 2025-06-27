@@ -9,8 +9,8 @@ internal sealed partial class HomePage : Page
   public HomePage()
   {
     this.InitializeComponent();
-    WindowService = App.Current.GetService<WindowService>();
-    DatabaseService = App.Current.GetService<DatabaseService>();
+    WindowService = App.Instance.GetService<WindowService>();
+    DatabaseService = App.Instance.GetService<DatabaseService>();
   }
 
   public WindowService WindowService { get; }
@@ -143,14 +143,14 @@ internal sealed partial class HomePage : Page
 
   private void ViewWindowsButton_Click(object sender, RoutedEventArgs e)
   {
-    ReferenceTracker.ReadActiveWindows();
+    ReferenceTracker.ShowReferences();
   }
 
   private void TestWindowButton_Click(object sender, RoutedEventArgs e)
   {
     TestWindow window = new();
     window.Activate();
-    ReferenceTracker.WindowReferences.Add(new(window));
+    ReferenceTracker.WindowReferences.Add(new(window.GetType().Name, window));
   }
 
   public double CalculateContrastRatio(Color first, Color second)

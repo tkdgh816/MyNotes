@@ -5,42 +5,52 @@ namespace MyNotes.Debugging;
 
 internal static class ReferenceTracker
 {
-  public static readonly List<WeakReference<Window>> WindowReferences = new();
-  public static readonly List<WeakReference<Page>> NavigationPageReferences = new();
-  public static readonly List<WeakReference<Note>> NoteReferences = new();
-  public static readonly List<WeakReference<Page>> NotePageReferences = new();
-  public static readonly List<WeakReference<BoardViewModel>> BoardViewModelReferences = new();
-  public static readonly List<WeakReference<NoteViewModel>> NoteViewModelReferences = new();
+  public static readonly List<ReferenceTarget<Window>> WindowReferences = new();
+  public static readonly List<ReferenceTarget<UserControl>> ViewReferences = new();
+  public static readonly List<ReferenceTarget<Page>> NavigationPageReferences = new();
+  public static readonly List<ReferenceTarget<Note>> NoteReferences = new();
+  public static readonly List<ReferenceTarget<Page>> NotePageReferences = new();
+  public static readonly List<ReferenceTarget<BoardViewModel>> BoardViewModelReferences = new();
+  public static readonly List<ReferenceTarget<NoteViewModel>> NoteViewModelReferences = new();
 
-
-  public static void ReadActiveWindows()
+  public static void ShowReferences()
   {
     Debug.WriteLine("-----------------------------------------------");
     GC.Collect();
-    WindowReferences.RemoveAll(wr => !wr.TryGetTarget(out _));
+    WindowReferences.RemoveAll(rt => !rt.Target.TryGetTarget(out _));
     Debug.WriteLine("Windows: " + string.Join(", ", WindowReferences.Select(
-      wr => wr.TryGetTarget(out Window? target) ? target?.GetHashCode().ToString() : "")));
+      rt => rt.Target.TryGetTarget(out Window? target) ? $"[{rt.Name}, {target.GetHashCode()}]" : "")));
 
-    NavigationPageReferences.RemoveAll(wr => !wr.TryGetTarget(out _));
+    ViewReferences.RemoveAll(rt => !rt.Target.TryGetTarget(out _));
+    Debug.WriteLine("Controls: " + string.Join(", ", ViewReferences.Select(
+      rt => rt.Target.TryGetTarget(out UserControl? target) ? $"[{rt.Name}, {target.GetHashCode()}]" : "")));
+
+    NavigationPageReferences.RemoveAll(rt => !rt.Target.TryGetTarget(out _));
     Debug.WriteLine("Navigation Pages: " + string.Join(", ", NavigationPageReferences.Select(
-      wr => wr.TryGetTarget(out Page? target) ? target.GetHashCode().ToString() : "")));
+      rt => rt.Target.TryGetTarget(out Page? target) ? $"[{rt.Name}, {target.GetHashCode()}]" : "")));
 
-    BoardViewModelReferences.RemoveAll(wr => !wr.TryGetTarget(out _));
+    BoardViewModelReferences.RemoveAll(rt => !rt.Target.TryGetTarget(out _));
     Debug.WriteLine("Board ViewModel: " + string.Join(", ", BoardViewModelReferences.Select(
-      wr => wr.TryGetTarget(out BoardViewModel? target) ? target.GetHashCode().ToString() : "")));
+      rt => rt.Target.TryGetTarget(out BoardViewModel? target) ? $"[{rt.Name}, {target.GetHashCode()}]" : "")));
 
-    NoteReferences.RemoveAll(wr => !wr.TryGetTarget(out _));
+    NoteReferences.RemoveAll(rt => !rt.Target.TryGetTarget(out _));
     Debug.WriteLine("Notes: " + string.Join(", ", NoteReferences.Select(
-      wr => wr.TryGetTarget(out Note? target) ? target.GetHashCode().ToString() : "")));
+      rt => rt.Target.TryGetTarget(out Note? target) ? $"[{rt.Name}, {target.GetHashCode()}]" : "")));
 
-    NotePageReferences.RemoveAll(wr => !wr.TryGetTarget(out _));
+    NotePageReferences.RemoveAll(rt => !rt.Target.TryGetTarget(out _));
     Debug.WriteLine("Note Pages: " + string.Join(", ", NotePageReferences.Select(
-      wr => wr.TryGetTarget(out Page? target) ? target.GetHashCode().ToString() : "")));
+      rt => rt.Target.TryGetTarget(out Page? target) ? $"[{rt.Name}, {target.GetHashCode()}]" : "")));
 
-    NoteViewModelReferences.RemoveAll(wr => !wr.TryGetTarget(out _));
+    NoteViewModelReferences.RemoveAll(rt => !rt.Target.TryGetTarget(out _));
     Debug.WriteLine("Note ViewModel: " + string.Join(", ", NoteViewModelReferences.Select(
-      wr => wr.TryGetTarget(out NoteViewModel? target) ? target.GetHashCode().ToString() : "")));
+      rt => rt.Target.TryGetTarget(out NoteViewModel? target) ? $"[{rt.Name}, {target.GetHashCode()}]" : "")));
 
     Debug.WriteLine("");
   }
+}
+
+internal class ReferenceTarget<T>(string name, T target) where T: class
+{
+  public string Name { get; } = name;
+  public WeakReference<T> Target { get; } = new(target);
 }

@@ -6,7 +6,7 @@
                xmlns:model="using:MyNotes.Core.Model"
                xmlns:dto="using:MyNotes.Core.Dto"
                xmlns:controls="using:CommunityToolkit.WinUI.Controls"
-               Title="Edit Tags"
+               Title="{x:Bind ViewModel.Note.Title, Converter={StaticResource StringWrapperConverter}, ConverterParameter='Tags for: |%|'}"
                CloseButtonText="Close"
                Style="{StaticResource DefaultContentDialogStyle}">
   <Grid Width="350"
@@ -27,7 +27,7 @@
       <ItemsRepeater x:Name="View_EditNoteTagsItemsRepeater"
                      ItemsSource="{x:Bind ViewModel.Note.Tags}">
         <ItemsRepeater.Layout>
-          <controls:WrapLayout HorizontalSpacing="4"
+          <controls:WrapLayout HorizontalSpacing="6"
                                VerticalSpacing="6" />
         </ItemsRepeater.Layout>
 
@@ -68,7 +68,7 @@
               Grid.Column="2"
               Content="Add"
               Style="{StaticResource AccentButtonStyle}"
-              Command="{x:Bind ViewModel.AddTagCommand}">
+              Command="{x:Bind ViewModel.AddNoteTagCommand}">
         <Button.CommandParameter>
           <dto:TagCommandParameterDto Text="{x:Bind View_AddTagAutoSuggestBox.Text, Mode=OneWay}"
                                       Color="{x:Bind View_TagColorSelector.TagColor, Mode=OneWay}" />

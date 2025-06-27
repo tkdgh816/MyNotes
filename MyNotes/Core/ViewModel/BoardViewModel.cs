@@ -3,11 +3,18 @@ using MyNotes.Common.Commands;
 using MyNotes.Common.Messaging;
 using MyNotes.Core.Model;
 using MyNotes.Core.Service;
+using MyNotes.Core.Shared;
 
 namespace MyNotes.Core.ViewModel;
 
 internal class BoardViewModel : ViewModelBase
 {
+  public NavigationBoard Navigation { get; }
+  private readonly WindowService _windowService;
+  private readonly DialogService _dialogService;
+  private readonly NoteService _noteService;
+  private readonly NoteViewModelFactory _noteViewModelFactory;
+
   public BoardViewModel(NavigationBoard navigation, WindowService windowService, DialogService dialogService, NoteService noteService, NoteViewModelFactory noteViewModelFactory)
   {
     Navigation = navigation;
@@ -28,34 +35,27 @@ internal class BoardViewModel : ViewModelBase
       foreach (var noteViewModel in NoteViewModels)
       {
         if (!_windowService.IsNoteWindowActive(noteViewModel.Note))
-          noteViewModel.Dispose(); 
+          noteViewModel.Dispose();
       }
       UnregisterMessengers();
-      App.Current.GetService<BoardViewModelFactory>().Close(Navigation);
+      App.Instance.GetService<BoardViewModelFactory>().Close(Navigation);
     }
     NoteViewModels.Clear();
     base.Dispose(disposing);
   }
 
-  private readonly WindowService _windowService;
-  private readonly DialogService _dialogService;
-  private readonly NoteService _noteService;
-  private readonly NoteViewModelFactory _noteViewModelFactory;
-
   private void GetNoteViewModels()
   {
     NoteViewModels = Navigation switch
     {
-      NavigationUserBoard userBoard => new(_noteService.GetNotes(userBoard).Select(_noteViewModelFactory.Create)),
-      NavigationBookmarks => new(_noteService.GetBookmarkedNotes().Select(_noteViewModelFactory.Create)),
-      NavigationTrash => new(_noteService.GetTrashedNotes().Select(_noteViewModelFactory.Create)),
+      NavigationUserBoard userBoard => new(_noteService.GetNotes(userBoard).Select(_noteViewModelFactory.Resolve)),
+      NavigationBookmarks => new(_noteService.GetBookmarkedNotes().Select(_noteViewModelFactory.Resolve)),
+      NavigationTrash => new(_noteService.GetTrashedNotes().Select(_noteViewModelFactory.Resolve)),
       _ => new(),
     };
 
     NoteViewModels.SortDescriptions.Add(new SortDescription<NoteViewModel>(func: vm => vm.Note.Modified, direction: SortDirection.Descending, keyPropertyName: "Modified"));
   }
-
-  public NavigationBoard Navigation { get; }
 
   #region NoteViewModels: Notes Collection
   public SortedObservableCollection<NoteViewModel> NoteViewModels { get; private set; } = null!;
@@ -89,7 +89,7 @@ internal class BoardViewModel : ViewModelBase
   public Command<string>? ChangeSortKeyCommand { get; private set; }
   public Command<string>? ChangeSortDirectionCommand { get; private set; }
   public Command? ShowRenameBoardDialogCommand { get; private set; }
-  public Command? ShowRemoveBoardDialogCommand { get; private set; }
+  public Command? ShowDeleteBoardDialogCommand { get; private set; }
   public Command<Icon>? ChangeIconCommand { get; private set; }
 
   private void SetCommands()
@@ -97,7 +97,7 @@ internal class BoardViewModel : ViewModelBase
     AddNewNoteCommand = new(() =>
     {
       Note newNote = _noteService.CreateNote((NavigationUserBoard)Navigation);
-      NoteViewModel noteViewModel = _noteViewModelFactory.Create(newNote);
+      NoteViewModel noteViewModel = _noteViewModelFactory.Resolve(newNote);
       NoteViewModels.Add(noteViewModel);
       noteViewModel.CreateWindow();
     });
@@ -134,17 +134,24 @@ internal class BoardViewModel : ViewModelBase
 
     ShowRenameBoardDialogCommand = new(async () =>
     {
-      var result = await _dialogService.ShowRenameBoardDialog(Navigation);
-      if (result.DialogResult)
+      if (Navigation is NavigationUserBoard userBoard)
       {
-        if (result.Icon is not null)
-          Navigation.Icon = result.Icon;
-        if (result.Name is not null)
-          Navigation.Name = result.Name;
+        var result = await _dialogService.ShowRenameBoardDialog(userBoard);
+        if (result.DialogResult)
+        {
+          if (result.Icon is not null)
+            Navigation.Icon = result.Icon;
+          if (result.Name is not null)
+            Navigation.Name = result.Name;
+        }
       }
     });
 
-    ShowRemoveBoardDialogCommand = new(async () => await _dialogService.ShowRemoveBoardDialog(Navigation));
+    ShowDeleteBoardDialogCommand = new(async () => 
+    {
+      if (Navigation is NavigationUserBoard userBoard)
+        await _dialogService.ShowDeleteBoardDialog(userBoard);
+    });
 
     ChangeIconCommand = new((icon) => Navigation.Icon = icon);
   }

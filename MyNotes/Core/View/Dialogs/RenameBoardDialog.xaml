@@ -4,7 +4,7 @@
                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                xmlns:view="using:MyNotes.Core.View"
                Style="{StaticResource DefaultContentDialogStyle}"
-               Title="{x:Bind SetTitle(ViewModel.Name)}"
+               Title="{x:Bind ViewModel.Name, Converter={StaticResource StringWrapperConverter}, ConverterParameter='Rename: |%|'}"
                PrimaryButtonText="OK"
                IsPrimaryButtonEnabled="{x:Bind ViewModel.Name, Converter={StaticResource EmptyStringToBoolConverter}, Mode=OneWay}"
                CloseButtonText="Cancel"

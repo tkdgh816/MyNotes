@@ -6,13 +6,13 @@ internal abstract class ViewModelFactoryBase<TModel, TViewModel> : IViewModelFac
 {
   protected readonly Dictionary<TModel, WeakReference<TViewModel>> _cache = new();
 
-  public abstract TViewModel Create(TModel model);
+  public abstract TViewModel Resolve(TModel model);
 
   public virtual TViewModel? Get(TModel model) 
     => _cache.TryGetValue(model, out var wr) && wr.TryGetTarget(out var vm) ? vm : null;
 
   public bool Close(TModel model) => _cache.Remove(model);
 
-  TViewModel IViewModelFactory<TViewModel>.Create() => throw new NotSupportedException();
+  TViewModel IViewModelFactory<TViewModel>.Resolve() => throw new NotSupportedException();
 
 }

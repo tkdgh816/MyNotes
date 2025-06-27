@@ -2,5 +2,5 @@
 
 public interface IViewModelFactory<TViewModel>
 {
-  TViewModel Create();
+  TViewModel Resolve();
 }

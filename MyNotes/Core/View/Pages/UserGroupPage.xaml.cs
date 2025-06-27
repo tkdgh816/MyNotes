@@ -22,6 +22,6 @@ internal sealed partial class UserGroupPage : Page
   {
     base.OnNavigatedTo(e);
     Navigation = (NavigationUserGroup)e.Parameter;
-    ViewModel = App.Current.GetService<BoardViewModelFactory>().Create(Navigation);
+    ViewModel = App.Instance.GetService<BoardViewModelFactory>().Resolve(Navigation);
   }
 }

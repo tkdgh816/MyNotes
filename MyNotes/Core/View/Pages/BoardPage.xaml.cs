@@ -1,6 +1,12 @@
+using Microsoft.UI.Xaml.Media.Imaging;
+
 using MyNotes.Common.Messaging;
 using MyNotes.Core.Model;
+using MyNotes.Core.Shared;
 using MyNotes.Core.ViewModel;
+
+using Windows.ApplicationModel.DataTransfer;
+using Windows.Graphics.Imaging;
 
 namespace MyNotes.Core.View;
 
@@ -22,7 +28,7 @@ internal sealed partial class BoardPage : Page
   {
     base.OnNavigatedTo(e);
     Navigation = (NavigationBoard)e.Parameter;
-    ViewModel = App.Current.GetService<BoardViewModelFactory>().Create(Navigation);
+    ViewModel = App.Instance.GetService<BoardViewModelFactory>().Resolve(Navigation);
     this.DataContext = ViewModel;
     RegisterEvents();
   }
@@ -61,6 +67,11 @@ internal sealed partial class BoardPage : Page
   private void Template_RootUserControl_PointerExited(object sender, PointerRoutedEventArgs e)
     => VisualStateManager.GoToState((Control)sender, "HoverStateNormal", false);
 
+  private void Template_RootUserControl_Holding(object sender, HoldingRoutedEventArgs e)
+  {
+    Debug.WriteLine("Holding!");
+  }
+
   private void View_SearchButton_Click(object sender, RoutedEventArgs e)
   => VisualStateManager.GoToState(this, "SearchBoxSearching", false);
 
@@ -73,6 +84,21 @@ internal sealed partial class BoardPage : Page
       View_SearchAutoSuggestBox.Focus(FocusState.Programmatic);
   }
 
+  private void View_NotesGridView_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
+  {
+    if (args.InRecycleQueue)
+      return;
+
+    if (args.ItemContainer is GridViewItem container)
+    {
+      if (container.ContentTemplateRoot is Control rootControl)
+      {
+        container.GotFocus += (s, e) => VisualStateManager.GoToState(rootControl, "HoverStateHovering", false);
+        container.LostFocus += (s, e) => VisualStateManager.GoToState(rootControl, "HoverStateNormal", false);
+      }
+    }
+  }
+
   #region Change View Style
   private bool _isViewGridStyle = true;
   private void View_StyleChangeRadioButton_Click(object sender, RoutedEventArgs e)
@@ -81,12 +107,12 @@ internal sealed partial class BoardPage : Page
     {
       case "GridStyle":
         _isViewGridStyle = true;
-        View_NotesGridView.ItemsPanel = (ItemsPanelTemplate)App.Current.Resources["AppItemPanelTemplate_GridStyle"];
+        View_NotesGridView.ItemsPanel = (ItemsPanelTemplate)App.Instance.Resources["AppItemPanelTemplate_GridStyle"];
         View_NotesGridView.ItemTemplate = (DataTemplate)this.Resources["GridViewItemTemplate_GridStyle"];
         break;
       case "ListStyle":
         _isViewGridStyle = false;
-        View_NotesGridView.ItemsPanel = (ItemsPanelTemplate)App.Current.Resources["AppItemPanelTemplate_ListStyle"];
+        View_NotesGridView.ItemsPanel = (ItemsPanelTemplate)App.Instance.Resources["AppItemPanelTemplate_ListStyle"];
         View_NotesGridView.ItemTemplate = (DataTemplate)this.Resources["GridViewItemTemplate_ListStyle"];
         break;
     }
@@ -148,7 +174,7 @@ internal sealed partial class BoardPage : Page
   #endregion
 
 
-  private void View_IconPicker_IconChanged(IconPicker sender, IconChangedEventArgs args) 
+  private void View_IconPicker_IconChanged(IconPicker sender, IconChangedEventArgs args)
     => ViewModel.ChangeIconCommand?.Execute(args.NewIcon);
 
   #region Messengers
@@ -177,18 +203,6 @@ internal sealed partial class BoardPage : Page
       if (message.Sender == ViewModel)
         NotesCollectionViewSource.Source = message.Content;
     }));
-
-    WeakReferenceMessenger.Default.Register<Message<string>, string>(this, Tokens.ChangeNoteBoardGridViewAlignment, new((recipient, message) =>
-    {
-      if (message.Sender == ViewModel)
-      {
-        switch (message.Content)
-        {
-          case "GridViewAlignCenter": View_NotesGridView.HorizontalAlignment = HorizontalAlignment.Center; break;
-          case "GridViewAlignStretch": View_NotesGridView.HorizontalAlignment = HorizontalAlignment.Stretch; break;
-        }
-      }
-    }));
   }
 
   private void UnregisterMessengers()
@@ -196,4 +210,31 @@ internal sealed partial class BoardPage : Page
     WeakReferenceMessenger.Default.UnregisterAll(this);
   }
   #endregion
+
+  private async void Template_RootUserControl_DragStarting(UIElement sender, DragStartingEventArgs args)
+  {
+    NoteViewModel noteViewModel = (NoteViewModel)((FrameworkElement)sender).DataContext;
+
+    NoteId noteId = noteViewModel.Note.Id;
+    string noteTitle = noteViewModel.Note.Title;
+    string noteBody = noteViewModel.Note.Body;
+    var container = (FrameworkElement)View_NotesGridView.ContainerFromItem(noteViewModel);
+
+    args.Data.SetData(StandardDataFormats.Text, $"[{noteTitle}]\r\n{noteBody}");
+    args.Data.SetData(DataFormats.Note, noteId.Value.ToString());
+
+    args.AllowedOperations = DataPackageOperation.Move;
+
+    DragOperationDeferral defferal = args.GetDeferral();
+    RenderTargetBitmap renderTargetBitmap = new();
+    await renderTargetBitmap.RenderAsync(container, (int)(container.Width * 0.64), (int)(container.Height * 0.64));
+
+
+    var pixels = await renderTargetBitmap.GetPixelsAsync();
+
+    SoftwareBitmap softwareBitmap = new(BitmapPixelFormat.Bgra8, renderTargetBitmap.PixelWidth, renderTargetBitmap.PixelHeight, BitmapAlphaMode.Premultiplied);
+    softwareBitmap.CopyFromBuffer(pixels);
+    args.DragUI.SetContentFromSoftwareBitmap(softwareBitmap, new Point(0, 0));
+    defferal.Complete();
+  }
 }

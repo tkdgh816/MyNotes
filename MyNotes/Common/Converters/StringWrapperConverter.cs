@@ -6,7 +6,7 @@ internal class StringWrapperConverter : IValueConverter
   {
     if (value is string stringValue && parameter is string wrapper)
     {
-      var splitted = wrapper.Split("||");
+      var splitted = wrapper.Split("|%|");
       string prefix = splitted.Length > 0 ? splitted[0] : "";
       string suffix = splitted.Length > 1 ? splitted[1] : "";
       return $"{prefix}{stringValue}{suffix}";

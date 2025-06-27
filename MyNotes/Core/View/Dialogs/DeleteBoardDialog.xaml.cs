@@ -1,13 +1,12 @@
 using MyNotes.Core.Model;
 
 namespace MyNotes.Core.View;
-internal sealed partial class RemoveBoardDialog : ContentDialog
+internal sealed partial class DeleteBoardDialog : ContentDialog
 {
-  public RemoveBoardDialog(NavigationBoard board)
+  public DeleteBoardDialog(NavigationBoard board)
   {
     InitializeComponent();
     Board = board;
-    Title = $"Delete {Board.Name}?";
   }
 
   public NavigationBoard Board { get; }

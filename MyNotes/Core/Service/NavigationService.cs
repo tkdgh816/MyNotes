@@ -1,6 +1,7 @@
 ﻿using MyNotes.Common.Messaging;
 using MyNotes.Core.Dto;
 using MyNotes.Core.Model;
+using MyNotes.Core.Shared;
 using MyNotes.Debugging;
 
 namespace MyNotes.Core.Service;
@@ -14,40 +15,8 @@ internal class NavigationService
 
   private readonly DatabaseService _databaseService;
 
-  #region Manage Navigation Boards from DatabaseService
-  // BoardDbDto <-> NavigationBoard
-  public void AddBoard(NavigationUserBoard board)
-  {
-    var icon = GetIconTypeAndValue(board.Icon);
-    InsertBoardDbDto dto = new() { Id = board.Id.Value, Grouped = board is NavigationUserGroup, Parent = board.Parent!.Id.Value, Previous = board.GetPrevious()?.Id.Value, Next = board.GetNext()?.Id.Value, Name = board.Name, IconType = icon.IconType, IconValue = icon.IconValue };
-    _databaseService.AddBoard(dto);
-  }
-
-  public void DeleteBoard(NavigationUserBoard board)
-  {
-    DeleteBoardDbDto dto = new() { Id = board.Id.Value };
-    _databaseService.DeleteBoard(dto);
-  }
-
-  public void UpdateBoard(NavigationUserBoard board, BoardUpdateFields updateFields)
-  {
-    if (updateFields == BoardUpdateFields.None)
-      return;
-
-    var icon = GetIconTypeAndValue(board.Icon);
-    UpdateBoardDbDto dto = new()
-    {
-      UpdateFields = updateFields,
-      Id = board.Id.Value,
-      Parent = updateFields.HasFlag(BoardUpdateFields.Parent) ? board.Parent?.Id.Value : null,
-      Previous = updateFields.HasFlag(BoardUpdateFields.Previous) ? board.GetPrevious()?.Id.Value : null,
-      Name = updateFields.HasFlag(BoardUpdateFields.Name) ? board.Name : null,
-      IconType = updateFields.HasFlag(BoardUpdateFields.IconType) ? icon.IconType : null,
-      IconValue = updateFields.HasFlag(BoardUpdateFields.IconValue) ? icon.IconValue : null,
-    };
-    _databaseService.UpdateBoard(dto);
-  }
-
+  #region NavigationUserBoard와 Database 관련 로직 (트리 생성, 추가, 제거, 업데이트)
+  // 데이터베이스에서 트리 구조 가져와서 사용자 보드, 그룹 트리 구조 생성
   public void BuildNavigationTree(NavigationUserRootGroup root)
   {
     var boards = _databaseService.GetBoards().Result;
@@ -65,8 +34,8 @@ internal class NavigationService
         {
           NavigationUserBoard newNavigation;
           newNavigation = child.Grouped
-            ? new NavigationUserGroup(child.Name, GetIcon((IconType)child.IconType, child.IconValue), new BoardId(child.Id))
-            : new NavigationUserBoard(child.Name, GetIcon((IconType)child.IconType, child.IconValue), new BoardId(child.Id));
+            ? new NavigationUserGroup(child.Name, IconManager.ToIcon((IconType)child.IconType, child.IconValue), new BoardId(child.Id))
+            : new NavigationUserBoard(child.Name, IconManager.ToIcon((IconType)child.IconType, child.IconValue), new BoardId(child.Id));
           navigationGroup.AddChild(newNavigation);
           queue.Enqueue(newNavigation);
           previous = child.Id;
@@ -75,22 +44,56 @@ internal class NavigationService
     }
   }
 
-  private Icon GetIcon(IconType iconType, int iconValue)
-  => iconType switch
+  // 사용자 보드, 그룹 데이터베이스에 추가
+  public void AddBoard(NavigationUserBoard board)
   {
-    IconType.Glyph => IconLibrary.FindGlyph(iconValue),
-    IconType.Emoji => IconLibrary.FindEmoji(iconValue),
-    _ => IconLibrary.FindEmoji(0)
-  };
+    var icon = IconManager.ToIconTypeValue(board.Icon);
+    InsertBoardDbDto dto = new()
+    {
+      Id = board.Id.Value,
+      Grouped = board is NavigationUserGroup,
+      Parent = board.Parent!.Id.Value,
+      Previous = board.GetPrevious()?.Id.Value,
+      Next = board.GetNext()?.Id.Value,
+      Name = board.Name,
+      IconType = icon.IconType,
+      IconValue = icon.IconValue
+    };
+    _databaseService.AddBoard(dto);
+  }
 
-  private (int IconType, int IconValue) GetIconTypeAndValue(Icon icon)
-  => ((int)icon.IconType, icon.IconType switch
+  // 데이터베이스에서 사용자 보드, 그룹 제거
+  public void DeleteBoard(NavigationUserBoard board)
   {
-    IconType.Glyph => char.ConvertToUtf32(icon.Code, 0),
-    IconType.Emoji => ((Emoji)icon).Index,
-    _ => 0
-  });
+    DeleteBoardDbDto dto = new() { Id = board.Id.Value };
+    _databaseService.DeleteBoard(dto);
+  }
+
+  // 사용자 보드, 그룹 속성 변경 시 데이터베이스에 업데이트
+  public void UpdateBoard(NavigationUserBoard board, BoardUpdateFields updateFields)
+  {
+    if (updateFields == BoardUpdateFields.None)
+      return;
+
+    var icon = IconManager.ToIconTypeValue(board.Icon);
+    UpdateBoardDbDto dto = new()
+    {
+      UpdateFields = updateFields,
+      Id = board.Id.Value,
+      Parent = updateFields.HasFlag(BoardUpdateFields.Parent) ? board.Parent?.Id.Value : null,
+      Previous = updateFields.HasFlag(BoardUpdateFields.Previous) ? board.GetPrevious()?.Id.Value : null,
+      Name = updateFields.HasFlag(BoardUpdateFields.Name) ? board.Name : null,
+      IconType = updateFields.HasFlag(BoardUpdateFields.IconType) ? icon.IconType : null,
+      IconValue = updateFields.HasFlag(BoardUpdateFields.IconValue) ? icon.IconValue : null,
+    };
+    _databaseService.UpdateBoard(dto);
+  }
   #endregion
+
+  #region MainPage의 NavigationView와 Frame 등록 및 해제
+  // MainPage 로드, 언로드 시 NavigationView, Frame 컨트롤을 반드시 등록 또는 해제해야 함
+  private NavigationView? _navigationView;
+  private Frame? _frame;
 
   public void AttachView(NavigationView navigationView, Frame frame)
   {
@@ -107,28 +110,24 @@ internal class NavigationService
     _navigationView = null;
     _frame = null;
   }
+  #endregion
 
-  private NavigationView? _navigationView;
-  private Frame? _frame;
-
+  #region Navigation 로직(현재 내비게이션, 페이지 이동 등)
   public NavigationItem? CurrentNavigation { get; private set; }
   public void SetCurrentNavigation(NavigationItem? navigation) => CurrentNavigation = navigation;
 
   private bool _preventNavigation = false;
 
+  // 탐색, 페이지 이동 (파라미터로 Navigation 인스턴스 전달)
   public void Navigate(NavigationItem navigation)
   {
-    if (_frame is null)
+    if (_frame is null || _preventNavigation)
       return;
-
-    if (!_preventNavigation)
-    {
-      _frame.Navigate(navigation.PageType, navigation);
-      //TEST: Page
-      ReferenceTracker.NavigationPageReferences.Add(new((Page)_frame.Content));
-    }
+    _frame.Navigate(navigation.PageType, navigation);
+    ReferenceTracker.NavigationPageReferences.Add(new(navigation.PageType.Name, (Page)_frame.Content));
   }
 
+  // 뒤로 탐색
   public void GoBack()
   {
     if (_frame is null)
@@ -140,6 +139,7 @@ internal class NavigationService
 
       if (backStack[^1].Parameter is NavigationUserBoard userBoard)
       {
+        // 삭제된 Navigation인지 확인 후 삭제되었으면 이전 탐색으로 건너뜀
         if (!WeakReferenceMessenger.Default.Send(new ExtendedRequestMessage<NavigationUserBoard, bool>(userBoard), Tokens.IsValidNavigation).Response)
         {
           backStack.RemoveAt(backStack.Count - 1);
@@ -152,6 +152,8 @@ internal class NavigationService
     }
   }
 
+  // NavigationView.SelectionChanged 이벤트로 Navigate 메서드를 호출하여 페이지를 이동하므로
+  // 페이지 이동 없이 NavigationView의 Selection을 변경하고자 할 때 사용
   public void ChangeNavigationViewSelectionWithoutNavigation(NavigationItem? navigation)
   {
     if (_navigationView is null)
@@ -162,10 +164,20 @@ internal class NavigationService
     _preventNavigation = false;
   }
 
+  // 페이지 이동 후 CurrentNavigation을 해당 페이지로 변경
   private void OnNavigated(object sender, NavigationEventArgs e)
   {
     NavigationItem navigation = (NavigationItem)e.Parameter;
     CurrentNavigation = navigation;
     ChangeNavigationViewSelectionWithoutNavigation(navigation is NavigationSearch ? null : navigation);
   }
+
+  // 페이지 컨텐트를 비활성화
+  public void ToggleNavigationViewContentEnabled(bool enabled)
+  {
+    if (_frame is null)
+      return;
+    _frame.IsEnabled = enabled;
+  }
+  #endregion
 }

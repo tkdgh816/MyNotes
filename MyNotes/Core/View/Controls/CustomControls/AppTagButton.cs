@@ -1,3 +1,5 @@
+using System.Windows.Input;
+
 using ToolkitColorHelper = CommunityToolkit.WinUI.Helpers.ColorHelper;
 
 namespace MyNotes.Core.View;
@@ -27,25 +29,17 @@ public sealed class AppTagButton : Button
 
   public event RoutedEventHandler? DeleteButtonClick;
 
-  public Brush PointerOverBrush
+  public static readonly DependencyProperty DeleteCommandProperty = DependencyProperty.Register("DeleteCommand", typeof(ICommand), typeof(AppTagButton), new PropertyMetadata(null));
+  public ICommand DeleteCommand
   {
-    get
-    {
-      if (Background is SolidColorBrush brush)
-      {
-        Color color = brush.Color;
+    get => (ICommand)GetValue(DeleteCommandProperty);
+    set => SetValue(DeleteCommandProperty, value);
+  }
 
-        var hsv = ToolkitColorHelper.ToHsv(color);
-        if (hsv.V > 0.08)
-          hsv.S += 0.08;
-        else
-          hsv.A += 0.08;
-
-        color = ToolkitColorHelper.FromHsv(hsv.H, hsv.S, hsv.V, hsv.A);
-        return new SolidColorBrush(color);
-      }
-
-      return Background;
-    }
+  public static readonly DependencyProperty DeleteCommandParameterProperty = DependencyProperty.Register("DeleteCommandParameter", typeof(object), typeof(AppTagButton), new PropertyMetadata(null));
+  public object DeleteCommandParameter
+  {
+    get => GetValue(DeleteCommandParameterProperty);
+    set => SetValue(DeleteCommandParameterProperty, value);
   }
 }

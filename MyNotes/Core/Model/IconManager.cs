@@ -1,8 +1,8 @@
 ﻿namespace MyNotes.Core.Model;
 
-internal static class IconLibrary
+internal static class IconManager
 {
-  static IconLibrary()
+  static IconManager()
   {
     EmojisList = new()
     {
@@ -5340,4 +5340,20 @@ internal static class IconLibrary
         return true;
     return false;
   }
+
+  public static Icon ToIcon(IconType iconType, int iconValue)
+  => iconType switch
+  {
+    IconType.Glyph => FindGlyph(iconValue),
+    IconType.Emoji => FindEmoji(iconValue),
+    _ => FindEmoji(0)
+  };
+
+  public static (int IconType, int IconValue) ToIconTypeValue(Icon icon)
+  => ((int)icon.IconType, icon.IconType switch
+  {
+    IconType.Glyph => char.ConvertToUtf32(icon.Code, 0),
+    IconType.Emoji => ((Emoji)icon).Index,
+    _ => 0
+  });
 }

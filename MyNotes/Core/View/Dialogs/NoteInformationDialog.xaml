@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<UserControl x:Class="MyNotes.Core.View.NoteInfoTable"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <ScrollView MaxWidth="300"
+<ContentDialog x:Class="MyNotes.Core.View.NoteInformationDialog"
+               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               CloseButtonText="Close"
+               Title="{x:Bind ViewModel.Note.Title, Converter={StaticResource StringWrapperConverter}, ConverterParameter='About: |%|'}"
+               Style="{StaticResource DefaultContentDialogStyle}">
+
+  <ScrollViewer MaxWidth="300"
                 HorizontalScrollMode="Auto"
                 HorizontalScrollBarVisibility="Auto"
                 VerticalScrollMode="Auto"
@@ -27,7 +31,7 @@
                  Text="Title" />
       <TextBlock Grid.Row="0"
                  Grid.Column="1"
-                 Text="{x:Bind Note.Title}"
+                 Text="{x:Bind ViewModel.Note.Title}"
                  IsTextSelectionEnabled="True" />
 
       <TextBlock Grid.Row="1"
@@ -35,7 +39,7 @@
                  Text="Created" />
       <TextBlock Grid.Row="1"
                  Grid.Column="1"
-                 Text="2025-01-01 01:30:33"
+                 Text="{x:Bind ViewModel.Note.Created}"
                  IsTextSelectionEnabled="True" />
 
       <TextBlock Grid.Row="2"
@@ -43,7 +47,7 @@
                  Text="Modified" />
       <TextBlock Grid.Row="2"
                  Grid.Column="1"
-                 Text="2025-01-01 01:30:33"
+                 Text="{x:Bind ViewModel.Note.Modified}"
                  IsTextSelectionEnabled="True" />
 
       <TextBlock Grid.Row="3"
@@ -59,8 +63,9 @@
                  Text="Tags" />
       <TextBlock Grid.Row="4"
                  Grid.Column="1"
-                 Text="Tag1 Tag2 Tag3"
+                 Text="{x:Bind ViewModel.Note.Tags, Converter={StaticResource CollectionToStringConverter}}"
                  IsTextSelectionEnabled="True" />
     </Grid>
-  </ScrollView>
-</UserControl>
+  </ScrollViewer>
+
+</ContentDialog>

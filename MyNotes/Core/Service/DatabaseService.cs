@@ -1,20 +1,20 @@
 ﻿using Microsoft.Data.Sqlite;
 
 using MyNotes.Core.Dto;
-using MyNotes.Core.Model;
 
 namespace MyNotes.Core.Service;
 
 internal class DatabaseService
 {
-  private readonly StorageFolder _databaseFolder = ApplicationData.Current.LocalFolder;
+  private readonly StorageFolder _localFolder = ApplicationData.Current.LocalFolder;
   private readonly string _connectionString;
 
   public DatabaseService()
   {
+    var databaseFolder = _localFolder.CreateFolderAsync("data", CreationCollisionOption.OpenIfExists).GetAwaiter().GetResult();
     _connectionString = new SqliteConnectionStringBuilder()
     {
-      DataSource = Path.Combine(_databaseFolder.Path, "data.sqlite"),
+      DataSource = Path.Combine(databaseFolder.Path, "data.sqlite"),
       ForeignKeys = true
     }.ToString();
 
@@ -233,7 +233,7 @@ VALUES
   #endregion
 
   #region Notes
-  public void AddNote(NoteDbDto noteDbDto)
+  public bool AddNote(NoteDbDto dto)
   {
     using SqliteConnection connection = new(_connectionString);
     connection.Open();
@@ -243,21 +243,31 @@ VALUES
 (@id, @parent, @created, @modified, @title, @body, @background, @backdrop, @width, @height, @position_x, @position_y, @bookmarked, @trashed)
 ";
     using SqliteCommand command = new(query, connection);
-    command.Parameters.AddWithValue("@id", noteDbDto.Id);
-    command.Parameters.AddWithValue("@parent", noteDbDto.Parent);
-    command.Parameters.AddWithValue("@created", noteDbDto.Created);
-    command.Parameters.AddWithValue("@modified", noteDbDto.Modified);
-    command.Parameters.AddWithValue("@title", noteDbDto.Title);
-    command.Parameters.AddWithValue("@body", noteDbDto.Body);
-    command.Parameters.AddWithValue("@background", noteDbDto.Background);
-    command.Parameters.AddWithValue("@backdrop", noteDbDto.Backdrop);
-    command.Parameters.AddWithValue("@width", noteDbDto.Width);
-    command.Parameters.AddWithValue("@height", noteDbDto.Height);
-    command.Parameters.AddWithValue("@position_x", noteDbDto.PositionX);
-    command.Parameters.AddWithValue("@position_y", noteDbDto.PositionY);
-    command.Parameters.AddWithValue("@bookmarked", noteDbDto.Bookmarked);
-    command.Parameters.AddWithValue("@trashed", noteDbDto.Trashed);
-    command.ExecuteNonQuery();
+    command.Parameters.AddWithValue("@id", dto.Id);
+    command.Parameters.AddWithValue("@parent", dto.Parent);
+    command.Parameters.AddWithValue("@created", dto.Created);
+    command.Parameters.AddWithValue("@modified", dto.Modified);
+    command.Parameters.AddWithValue("@title", dto.Title);
+    command.Parameters.AddWithValue("@body", dto.Body);
+    command.Parameters.AddWithValue("@background", dto.Background);
+    command.Parameters.AddWithValue("@backdrop", dto.Backdrop);
+    command.Parameters.AddWithValue("@width", dto.Width);
+    command.Parameters.AddWithValue("@height", dto.Height);
+    command.Parameters.AddWithValue("@position_x", dto.PositionX);
+    command.Parameters.AddWithValue("@position_y", dto.PositionY);
+    command.Parameters.AddWithValue("@bookmarked", dto.Bookmarked);
+    command.Parameters.AddWithValue("@trashed", dto.Trashed);
+    return command.ExecuteNonQuery() > 0;
+  }
+
+  public bool DeleteNote(DeleteNoteDbDto dto)
+  {
+    using SqliteConnection connection = new(_connectionString);
+    connection.Open();
+    string query = @"DELETE FROM Notes WHERE id = @id";
+    using SqliteCommand command = new(query, connection);
+    command.Parameters.AddWithValue("@id", dto.Id);
+    return command.ExecuteNonQuery() > 0;
   }
 
   private Dictionary<string, object> GetNoteUpdateFieldValue(UpdateNoteDbDto dto)
@@ -294,12 +304,12 @@ VALUES
     return fields;
   }
 
-  public void UpdateNote(UpdateNoteDbDto dto)
+  public bool UpdateNote(UpdateNoteDbDto dto)
   {
     Dictionary<string, object> fields = GetNoteUpdateFieldValue(dto);
 
     if (fields.Count == 0)
-      return;
+      return false;
 
     string setClause = string.Join(", ", fields.Select(field => $"{field.Key} = @{field.Key}"));
     string query = @$"UPDATE Notes SET {setClause} WHERE id = @id";
@@ -313,7 +323,7 @@ VALUES
       command.Parameters.AddWithValue($"@{field.Key}", field.Value);
       //Debug.WriteLine($"DBUpdate: [ {field.Key}, {field.Value} ]");
     }
-    command.ExecuteNonQuery();
+    return command.ExecuteNonQuery() > 0;
   }
 
   public async Task<IEnumerable<NoteDbDto>> GetNotes(GetBoardNotesDbDto dto)
@@ -394,7 +404,7 @@ VALUES
     await using SqliteConnection connection = new(_connectionString);
     await connection.OpenAsync();
 
-    string query = 
+    string query =
 @"SELECT * FROM Tags
 INNER JOIN NotesTags ON Tags.id = NotesTags.tag_id
 WHERE NotesTags.note_id = @note_id";
@@ -447,7 +457,7 @@ WHERE NotesTags.note_id = @note_id";
 
     List<TagDbDto> tagDbDtos = new();
     await using SqliteDataReader reader = command.ExecuteReader();
-    while(await reader.ReadAsync())
+    while (await reader.ReadAsync())
     {
       Guid id = GetReaderValue<Guid>(reader, "id");
       string text = GetReaderValue<string>(reader, "text")!;

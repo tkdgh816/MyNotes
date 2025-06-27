@@ -6,15 +6,7 @@ internal class ToPointOverBrushConverter : IValueConverter
 {
   public static SolidColorBrush Convert(object value)
   {
-    SolidColorBrush brush;
-
-    if (value is SolidColorBrush b)
-      brush = b;
-    else if (value is Color c)
-      brush = new(c);
-    else
-      throw new ArgumentException();
-
+    SolidColorBrush brush = value is SolidColorBrush b ? b : (value is Color c ? new SolidColorBrush(c) : throw new ArgumentException());
     Color color = brush.Color;
     
     var hsv = ToolkitColorHelper.ToHsv(color);

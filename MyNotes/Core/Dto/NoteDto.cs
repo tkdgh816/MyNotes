@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-
-namespace MyNotes.Core.Dto;
+﻿namespace MyNotes.Core.Dto;
 internal record NoteDbDto
 {
   public required Guid Id { get; init; }
@@ -17,7 +15,6 @@ internal record NoteDbDto
   public required int PositionY { get; init; }
   public required bool Bookmarked { get; init; }
   public required bool Trashed { get; init; }
-  //public required ImmutableList<Guid> Tags { get; init; }
 }
 
 internal record UpdateNoteDbDto
@@ -41,6 +38,11 @@ internal record UpdateNoteDbDto
 internal record GetNoteTagsDbDto
 {
   public required Guid NoteId { get; init; }
+}
+
+internal record DeleteNoteDbDto
+{
+  public required Guid Id { get; init; }
 }
 
 [Flags]

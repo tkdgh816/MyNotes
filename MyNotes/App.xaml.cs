@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Windows.Globalization;
 
 using MyNotes.Core.Service;
 using MyNotes.Core.ViewModel;
@@ -15,9 +16,12 @@ public partial class App : Application
   protected override void OnLaunched(LaunchActivatedEventArgs args)
   {
     GetService<WindowService>().GetMainWindow().Activate();
+    var settingsService = GetService<SettingsService>();
+    Debug.WriteLine(string.Join(", ", ApplicationLanguages.Languages));
+    Debug.WriteLine(string.Join(", ", ApplicationLanguages.ManifestLanguages));
   }
 
-  public static new readonly App Current = (App)Application.Current;
+  public static App Instance => (App)Current;
 
   #region Services
   public ServiceProvider Services { get; } = ConfigureServices();
@@ -26,6 +30,7 @@ public partial class App : Application
     ServiceCollection services = new();
 
     // Services
+    services.AddSingleton<SettingsService>();
     services.AddSingleton<WindowService>();
     services.AddSingleton<NavigationService>();
     services.AddSingleton<DatabaseService>();
@@ -38,6 +43,7 @@ public partial class App : Application
     services.AddSingleton<BoardViewModelFactory>();
     services.AddSingleton<NoteViewModelFactory>();
     services.AddSingleton<TagsViewModel>();
+    services.AddSingleton<SettingsViewModel>();
 
     return services.BuildServiceProvider();
   }

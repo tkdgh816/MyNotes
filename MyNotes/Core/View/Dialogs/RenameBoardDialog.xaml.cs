@@ -10,6 +10,4 @@ internal sealed partial class RenameBoardDialog : ContentDialog
   }
 
   public DialogService.NavigationDialogViewModel ViewModel { get; }
-
-  public string SetTitle(string name) => $"Rename {name}";
 }

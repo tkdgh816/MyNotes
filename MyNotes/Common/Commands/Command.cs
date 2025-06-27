@@ -4,56 +4,55 @@ namespace MyNotes.Common.Commands;
 
 internal class Command : ICommand
 {
-  private readonly Action? _executeNoParams;
-  private readonly Action<object>? _execute;
-  private readonly Predicate<object>? _canExecute;
+  private readonly Action? _execute;
+  private readonly Func<bool>? _canExecute;
 
-  public Command(Action execute, Predicate<object>? canExecute = null)
-  {
-    _executeNoParams = execute;
-    _canExecute = canExecute;
-  }
+  private readonly Action<object>? _executeWithParam;
+  private readonly Func<object, bool>? _canExecuteWithParam;
 
-  public Command(Action<object> execute, Predicate<object>? canExecute = null)
+  public Command(Action execute, Func<bool>? canExecute = null)
   {
     _execute = execute;
     _canExecute = canExecute;
   }
 
-  public Command(Action executeNoParams, Action<object> execute, Predicate<object>? canExecute = null)
+  public Command(Action<object> execute, Func<object, bool>? canExecute = null)
   {
-    _execute = execute;
-    _executeNoParams = executeNoParams;
-    _canExecute = canExecute;
+    _executeWithParam = execute;
+    _canExecuteWithParam = canExecute;
   }
 
   public event EventHandler? CanExecuteChanged;
 
-  public bool CanExecute(object? parameter)
+  public bool CanExecute(object? parameter = null)
+    => parameter is null
+      ? _canExecute is null || _canExecute()
+      : _canExecuteWithParam is null || _canExecuteWithParam(parameter);
+
+  public void Execute(object? parameter = null)
   {
+    if (!CanExecute(parameter))
+      return;
+
     if (parameter is null)
-      return true;
-    if (_canExecute is null)
-      return true;
-
-    return _canExecute(parameter);
-  }
-
-  public void Execute(object? parameter)
-  {
-    if (_execute is not null && parameter is not null)
-      _execute(parameter);
-    else if (_executeNoParams is not null)
-      _executeNoParams();
+    {
+      if (_execute is not null)
+        _execute();
+    }
+    else
+    {
+      if (_executeWithParam is not null)
+        _executeWithParam(parameter);
+    }
   }
 }
 
 internal class Command<T> : ICommand
 {
   private readonly Action<T>? _execute;
-  private readonly Predicate<T>? _canExecute;
+  private readonly Func<T, bool>? _canExecute;
 
-  public Command(Action<T> execute, Predicate<T>? canExecute = null)
+  public Command(Action<T> execute, Func<T, bool>? canExecute = null)
   {
     _execute = execute;
     _canExecute = canExecute;
@@ -61,18 +60,14 @@ internal class Command<T> : ICommand
 
   public event EventHandler? CanExecuteChanged;
 
-  public bool CanExecute(object? parameter)
-  {
-    if (parameter is null)
-      return true;
-    if (_canExecute is null)
-      return true;
-
-    return _canExecute((T)parameter);
-  }
+  public bool CanExecute(object? parameter) 
+    => parameter is null || _canExecute is null ? true : _canExecute((T)parameter);
 
   public void Execute(object? parameter)
   {
+    if (!CanExecute(parameter))
+      return;
+
     if (_execute is not null && parameter is not null)
       _execute((T)parameter);
   }

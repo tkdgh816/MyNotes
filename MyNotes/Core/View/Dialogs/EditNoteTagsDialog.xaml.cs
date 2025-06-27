@@ -10,9 +10,7 @@ internal sealed partial class EditNoteTagsDialog : ContentDialog
   {
     InitializeComponent();
     ViewModel = noteViewModel;
-    _tagService = App.Current.GetService<TagService>();
-
-    Title = $"Tags for {ViewModel.Note.Title}";
+    _tagService = App.Instance.GetService<TagService>();
   }
 
   public NoteViewModel ViewModel { get; }
@@ -72,6 +70,6 @@ internal sealed partial class EditNoteTagsDialog : ContentDialog
 
   private void AppTagButton_DeleteButtonClick(object sender, RoutedEventArgs e)
   {
-    ViewModel.DeleteTagCommand?.Execute((Tag)((FrameworkElement)sender).DataContext);
+    ViewModel.DeleteNoteTagCommand?.Execute((Tag)((FrameworkElement)sender).DataContext);
   }
 }

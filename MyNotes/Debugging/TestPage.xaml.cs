@@ -7,7 +7,7 @@ internal sealed partial class TestPage : Page
   {
     InitializeComponent();
     WindowService = ((App)Application.Current).GetService<WindowService>();
-    ReferenceTracker.NavigationPageReferences.Add(new(this));
+    ReferenceTracker.NavigationPageReferences.Add(new(Model.Text, this));
   }
 
   public WindowService WindowService { get; }

@@ -1,4 +1,5 @@
 using MyNotes.Common.Messaging;
+using MyNotes.Core.Shared;
 using MyNotes.Core.ViewModel;
 using MyNotes.Debugging;
 
@@ -13,22 +14,59 @@ internal sealed partial class NotePage : Page
     this.Unloaded += NotePage_Unloaded;
   }
 
-  private void NotePage_Loaded(object sender, RoutedEventArgs e)
+  private async void NotePage_Loaded(object sender, RoutedEventArgs e)
   {
-    ReferenceTracker.NotePageReferences.Add(new(this));
+    await LoadBodyAsync();
+    ReferenceTracker.NotePageReferences.Add(new(this.GetType().Name, this));
     ViewModel.SetWindowTitlebar(View_TitleTextGrid);
     RegisterEvents();
     RegisterMessengers();
   }
 
-  private void NotePage_Unloaded(object sender, RoutedEventArgs e)
+  private async void NotePage_Unloaded(object sender, RoutedEventArgs e)
   {
     UnRegisterEvents();
     UnregisterMessengers();
-    UpdateBodyText();
-    ViewModel.ForceUpdateNoteProperties();
+
+    View_TextEditorRichEditBox.Document.GetText(TextGetOptions.AdjustCrlf, out string body);
+    if (ViewModel.Note.Created == ViewModel.Note.Modified && string.IsNullOrWhiteSpace(body))
+    {
+      ViewModel.DeleteNoteCommand?.Execute();
+    }
+    else
+    {
+      UpdateBodyText(body);
+      await SaveBodyAsync();
+    }
+
     if (!ViewModel.IsNoteInBoard())
       ViewModel.Dispose();
+  }
+
+  private async Task LoadBodyAsync()
+  {
+    View_TextEditorRichEditBox.Document.SetText(TextSetOptions.None, ViewModel.Note.Body);
+
+    try
+    {
+      StorageFile file = await ViewModel.GetFile();
+      using var stream = await file.OpenAsync(FileAccessMode.Read);
+      try
+      {
+        View_TextEditorRichEditBox.Document.LoadFromStream(TextSetOptions.FormatRtf, stream);
+      }
+      catch (Exception)
+      { }
+    }
+    catch (Exception)
+    { }
+  }
+
+  private async Task SaveBodyAsync()
+  {
+    var file = await ViewModel.CreateFile();
+    using var stream = await file.OpenAsync(FileAccessMode.ReadWrite);
+    View_TextEditorRichEditBox.Document.SaveToStream(TextGetOptions.FormatRtf, stream);
   }
 
   public NoteViewModel ViewModel { get; set; } = null!;
@@ -75,7 +113,8 @@ internal sealed partial class NotePage : Page
   private DispatcherTimer _editorInputDebounceTimer = new() { Interval = TimeSpan.FromSeconds(10) };
   private void OnEditorInputDebounceTimerTick(object? sender, object e)
   {
-    UpdateBodyText();
+    View_TextEditorRichEditBox.Document.GetText(TextGetOptions.AdjustCrlf, out string body);
+    UpdateBodyText(body);
   }
   #endregion
 
@@ -89,17 +128,14 @@ internal sealed partial class NotePage : Page
     if (_editorCounter++ > EditorCounterMax)
     {
       _editorCounter = 0;
-      UpdateBodyText();
+      View_TextEditorRichEditBox.Document.GetText(TextGetOptions.AdjustCrlf, out string body);
+      UpdateBodyText(body);
     }
     else
       _editorInputDebounceTimer.Start();
   }
 
-  private void UpdateBodyText()
-  {
-    View_TextEditorRichEditBox.Document.GetText(TextGetOptions.AdjustCrlf, out string body);
-    ViewModel.UpdateBody(body);
-  }
+  private void UpdateBodyText(string body) => ViewModel.UpdateBody(body);
 
   private void View_TextEditorRichEditBox_SelectionChanged(object sender, RoutedEventArgs e)
   {
@@ -259,16 +295,6 @@ internal sealed partial class NotePage : Page
     View_HighlightButton.IsEnabled = isEditMode;
   }
 
-  private async void View_RemoveMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
-  {
-    await View_RemoveNoteContentDialog.ShowAsync();
-  }
-
-  private async void View_AboutMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
-  {
-    await View_NoteInfoContentDialog.ShowAsync();
-  }
-
   #region Messengers
   private void RegisterMessengers()
   {
@@ -289,4 +315,7 @@ internal sealed partial class NotePage : Page
 
   private void UnregisterMessengers() => WeakReferenceMessenger.Default.UnregisterAll(this);
   #endregion
+
+  // Debbuging: Reference Tracker
+  private void View_ReferenceTrackerMenuFlyoutItem_Click(object sender, RoutedEventArgs e) => ReferenceTracker.ShowReferences();
 }

@@ -1,5 +1,6 @@
 ﻿using MyNotes.Core.Dto;
 using MyNotes.Core.Model;
+using MyNotes.Core.Shared;
 using MyNotes.Debugging;
 
 using ToolkitColorHelper = CommunityToolkit.WinUI.Helpers.ColorHelper;
@@ -8,17 +9,27 @@ namespace MyNotes.Core.Service;
 
 internal class NoteService
 {
-  public NoteService(DatabaseService databaseService, TagService tagService)
+  private readonly DatabaseService _databaseService;
+  private readonly TagService _tagService;
+  private readonly SettingsService _settingsService;
+  private readonly StorageFolder _noteFolder;
+
+  public NoteService(DatabaseService databaseService, TagService tagService, SettingsService settingsService)
   {
     _databaseService = databaseService;
     _tagService = tagService;
+    _settingsService = settingsService;
+    _noteFolder = ApplicationData.Current.LocalFolder.CreateFolderAsync("notes", CreationCollisionOption.OpenIfExists).GetAwaiter().GetResult();
   }
 
-  private readonly DatabaseService _databaseService;
-  private readonly TagService _tagService;
   private readonly Dictionary<NoteId, Note> _cache = new();
   public IEnumerable<Note> Notes => _cache.Values;
 
+  public void AddToCache(Note note)
+  {
+    if (_cache.TryAdd(note.Id, note))
+      note.Initialize();
+  }
   public void RemoveFromCache(Note note) => _cache.Remove(note.Id);
   private Note ToNote(NoteDbDto dto)
   {
@@ -38,9 +49,8 @@ internal class NoteService
         IsTrashed = dto.Trashed,
         Tags = new(_tagService.GetTags(noteId))
       };
-      newNote.Initialize();
-      _cache.Add(newNote.Id, newNote);
-      ReferenceTracker.NoteReferences.Add(new(newNote));
+      AddToCache(newNote);
+      ReferenceTracker.NoteReferences.Add(new(newNote.Title, newNote));
       return newNote;
     }
   }
@@ -49,11 +59,23 @@ internal class NoteService
   public Note CreateNote(NavigationUserBoard navigation)
   {
     DateTimeOffset creationTime = DateTimeOffset.UtcNow;
-    Note newNote = new(new NoteId(Guid.NewGuid()), navigation.Id, "New note", creationTime, creationTime) { Background = Colors.LightGoldenrodYellow, Position = new(-1, -1) };
+    var settings = _settingsService.GetNoteSettings();
+    Note newNote = new(new NoteId(Guid.NewGuid()), navigation.Id, "New note", creationTime, creationTime)
+    { 
+      Background = settings.Background,
+      Backdrop = settings.Backdrop,
+      Size = settings.Size,
+      Position = new(-1, -1)
+    };
+    AddToCache(newNote);
     _databaseService.AddNote(ToDto(newNote));
-    _cache.Add(newNote.Id, newNote);
     return newNote;
   }
+
+  public bool DeleteNote(Note note) => _databaseService.DeleteNote(new DeleteNoteDbDto() { Id = note.Id.Value });
+
+  public Note? GetNote(NoteId noteId) => _cache.TryGetValue(noteId, out Note? note) ? note : null;
+
   public IEnumerable<Note> GetNotes(NavigationUserBoard navigation)
     => _databaseService.GetNotes(new GetBoardNotesDbDto() { Id = navigation.Id.Value }).Result.Select(ToNote);
   public IEnumerable<Note> GetBookmarkedNotes()
@@ -84,5 +106,21 @@ internal class NoteService
       Trashed = updateFields.HasFlag(NoteUpdateFields.Trashed) ? note.IsTrashed : null
     };
     _databaseService.UpdateNote(dto);
+  }
+
+  public Task<StorageFile> GetFile(Note note)
+    => _noteFolder.GetFileAsync($"{note.Id.Value}.rtf").AsTask();
+
+  public Task<StorageFile> CreateFile(Note note) 
+    => _noteFolder.CreateFileAsync($"{note.Id.Value}.rtf", CreationCollisionOption.OpenIfExists).AsTask();
+
+  public async Task DeleteFile(Note note)
+  {
+    try
+    {
+      await (await CreateFile(note)).DeleteAsync(StorageDeleteOption.PermanentDelete);
+    }
+    catch (Exception)
+    { }
   }
 }

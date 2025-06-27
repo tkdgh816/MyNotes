@@ -29,6 +29,8 @@ internal class Tag : ObservableObject, IEquatable<Tag>, IComparable<Tag>
 
   public bool Equals(Tag? other) => other is not null && other.Text == Text;
   public int CompareTo(Tag? other) => other is null ? 1 : Text.CompareTo(other.Text);
+
+  public override string ToString() => Text;
 }
 
 internal enum TagColor

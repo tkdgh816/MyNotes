@@ -88,13 +88,18 @@
               <MenuFlyoutSeparator />
               <MenuFlyoutItem x:Name="View_AboutMenuFlyoutItem"
                               Text="About"
-                              Icon="{ui:FontIcon Glyph=&#xE946;}"
-                              Click="View_AboutMenuFlyoutItem_Click" />
+                              Icon="{ui:FontIcon Glyph=&#xE946;}" 
+                              Command="{x:Bind ViewModel.ShowNoteInformationDialogCommand}"
+                              CommandParameter="{x:Bind XamlRoot}"/>
               <MenuFlyoutSeparator />
               <MenuFlyoutItem x:Name="View_RemoveMenuFlyoutItem"
                               Text="Remove"
-                              Icon="{ui:FontIcon Glyph=&#xE74D;}"
-                              Click="View_RemoveMenuFlyoutItem_Click" />
+                              Icon="{ui:FontIcon Glyph=&#xE74D;}" />
+              <MenuFlyoutSeparator />
+              <MenuFlyoutItem x:Name="View_ReferenceTrackerMenuFlyoutItem"
+                              Text="Reference Tracker"
+                              Icon="{ui:FontIcon Glyph=&#xEC7A;}"
+                              Click="View_ReferenceTrackerMenuFlyoutItem_Click" />
             </MenuFlyout>
           </Button.Flyout>
         </Button>
@@ -189,9 +194,9 @@
                       Style="{StaticResource AppFontIconLargeTopToggleButtonStyle}"
                       Click="View_StrikethroughButton_Click" />
         <view:AppSplitButton x:Name="View_MarkerButton"
-                              Content="&#xF2C7;"
-                              Style="{StaticResource AppFontIconLargeSplitButtonStyle}"
-                              Click="View_MarkerButton_Click">
+                             Content="&#xF2C7;"
+                             Style="{StaticResource AppFontIconLargeSplitButtonStyle}"
+                             Click="View_MarkerButton_Click">
           <view:AppSplitButton.SecondaryButtonFlyout>
             <Flyout Placement="Bottom"
                     ShouldConstrainToRootBounds="False">
@@ -267,8 +272,8 @@
         </Button>
 
         <view:AppSplitButton x:Name="View_FontColorButton"
-                              Style="{StaticResource AppFontIconLargeSplitButtonStyle}"
-                              Click="View_FontColorButton_Click">
+                             Style="{StaticResource AppFontIconLargeSplitButtonStyle}"
+                             Click="View_FontColorButton_Click">
           <Grid>
             <FontIcon x:Name="View_FontColorButtonFillFontIcon"
                       Glyph="&#xE73B;"
@@ -300,8 +305,8 @@
         </view:AppSplitButton>
 
         <view:AppSplitButton x:Name="View_HighlightButton"
-                              Style="{StaticResource AppFontIconLargeSplitButtonStyle}"
-                              Click="View_HighlightButton_Click">
+                             Style="{StaticResource AppFontIconLargeSplitButtonStyle}"
+                             Click="View_HighlightButton_Click">
           <Grid>
             <FontIcon x:Name="View_HighlightButtonFillFontIcon"
                       Glyph="&#xE891;"
@@ -337,7 +342,8 @@
                 <RadioButtons x:Name="View_BackdropRadioButtons"
                               Header="Backdrop type"
                               HeaderTemplate="{StaticResource AppBoldTextHeaderTemplate}"
-                              MaxColumns="2">
+                              MaxColumns="2"
+                              SelectedIndex="{x:Bind ViewModel.Note.Backdrop, Converter={StaticResource BackdropKindToIntConverter}, Mode=TwoWay}">
                   <interactivity:Interaction.Behaviors>
                     <interactivity:EventTriggerBehavior EventName="SelectionChanged">
                       <interactivity:InvokeCommandAction Command="{x:Bind ViewModel.SetWindowBackdropCommand}"
@@ -374,22 +380,7 @@
       </ScrollViewer.RenderTransform>
       <!--</view:AppScrollViewer>-->
     </ScrollViewer>
-
     <!--#endregion-->
-
-    <ContentDialog x:Name="View_RemoveNoteContentDialog"
-                   Title="Remove note"
-                   PrimaryButtonText="Yes"
-                   CloseButtonText="Cancel"
-                   DefaultButton="Close">
-      <ContentDialog.Content>Remove this note?</ContentDialog.Content>
-    </ContentDialog>
-    <ContentDialog x:Name="View_NoteInfoContentDialog"
-                   Title="About"
-                   CloseButtonText="Close"
-                   DefaultButton="Close">
-      <view:NoteInfoTable Note="{x:Bind ViewModel.Note}" />
-    </ContentDialog>
 
     <VisualStateManager.VisualStateGroups>
       <VisualStateGroup x:Name="WindowActivationStates">

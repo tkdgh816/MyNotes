@@ -7,9 +7,11 @@
                     xmlns:animatedvisuals="using:Microsoft.UI.Xaml.Controls.AnimatedVisuals"
                     xmlns:controls2="using:CommunityToolkit.WinUI.Controls"
                     xmlns:ui="using:CommunityToolkit.WinUI"
+                    xmlns:media="using:CommunityToolkit.WinUI.Media"
                     xmlns:converters="using:MyNotes.Common.Converters"
                     xmlns:view="using:MyNotes.Core.View"
-                    xmlns:model="using:MyNotes.Core.Model">
+                    xmlns:model="using:MyNotes.Core.Model"
+                    xmlns:shared="using:MyNotes.Core.Shared">
 
   <ResourceDictionary.ThemeDictionaries>
   </ResourceDictionary.ThemeDictionaries>
@@ -57,8 +59,8 @@
                                     FalseValue="&#xE734;" />
   <!-- [Dot: &#xE9B0; &#xE915;] [Set: &#xF5ED; &#xF5EE;] [Window: &#xE8A7; &#xE944;] [Pin: &#xE718; &#xE841;] [Expand: &#xEE49; &#xEE47;] -->
   <converters:BoolToObjectConverter x:Key="BoolToWindowPinIconGlyphConverter"
-                                    TrueValue="&#xEE49;"
-                                    FalseValue="&#xEE47;" />
+                                    TrueValue="&#xEE47;"
+                                    FalseValue="&#xEE49;" />
   <BitmapIconSource x:Key="IntersectIconSource"
                     UriSource="/Assets/icons/fluent/FluentShapeIntersect24Regular.png" />
   <BitmapIconSource x:Key="UnionIconSource"
@@ -68,9 +70,24 @@
                                     FalseValue="{StaticResource UnionIconSource}" />
   <converters:IntToEnumConverter x:Key="IntToBackdropKindConverter"
                                  EnumType="model:BackdropKind" />
+  <converters:EnumToIntConverter x:Key="BackdropKindToIntConverter"
+                                 EnumType="model:BackdropKind" />
+  <converters:EnumToIntConverter x:Key="AppThemeToIntConverter"
+                                 EnumType="shared:AppTheme" />
+  <converters:EnumToIntConverter x:Key="AppLanguageToIntConverter"
+                                 EnumType="shared:AppLanguage" />
+  <converters:EnumToIntConverter x:Key="NavigationViewPaneDisplayModeToIntConverter"
+                                 EnumType="controls:NavigationViewPaneDisplayMode" />
+
   <converters:TagColorToBackgroundBrushConverter x:Key="TagColorToBackgroundBrushConverter" />
   <converters:TagColorToForegroundBrushConverter x:Key="TagColorToForegroundBrushConverter" />
   <converters:ToPointOverBrushConverter x:Key="ToPointOverBrushConverter" />
+  <converters:CollectionToStringConverter x:Key="CollectionToStringConverter" />
+  <converters:EmptyCollectionToObjectConverter x:Key="EmptyCollectionToVisibilityCollapsedConverter"
+                                               TrueValue="{StaticResource VisibilityCollapsed}"
+                                               FalseValue="{StaticResource VisibilityVisible}" />
+  <converters:AlphaBlendingConverter x:Key="AlphaBlendingWhiteConverter"
+                                     BackgroundColor="White" />
   <!-- #endregion-->
 
   <!-- #region Resources -->
@@ -1396,7 +1413,7 @@
     <Setter Property="BorderThickness"
             Value="{ThemeResource ButtonBorderThemeThickness}" />
     <Setter Property="Padding"
-            Value="4,1,4,4" />
+            Value="4,1,0,4" />
     <Setter Property="HorizontalAlignment"
             Value="Left" />
     <Setter Property="VerticalAlignment"
@@ -1419,15 +1436,10 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="view:AppTagButton">
-          <Grid x:Name="RootGrid"
-                Background="{TemplateBinding Background}"
-                BackgroundSizing="{TemplateBinding BackgroundSizing}"
-                BorderBrush="{TemplateBinding Foreground}"
-                BorderThickness="{TemplateBinding BorderThickness}"
-                CornerRadius="{TemplateBinding CornerRadius}"
-                Padding="4,0">
+          <Grid x:Name="RootGrid">
             <Grid.ColumnDefinitions>
               <ColumnDefinition />
+              <ColumnDefinition Width="4" />
               <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
@@ -1435,8 +1447,26 @@
               <BrushTransition Duration="0:0:0.083" />
             </Grid.BackgroundTransition>
 
+            <Rectangle x:Name="BackgroundRectangle"
+                       Grid.Column="0"
+                       Grid.ColumnSpan="3"
+                       Fill="{TemplateBinding Background}"
+                       Stroke="{TemplateBinding Foreground}"
+                       StrokeThickness="{TemplateBinding BorderThickness}"
+                       Stretch="Fill"
+                       RadiusX="12"
+                       RadiusY="12">
+              <ui:Effects.Shadow>
+                <media:AttachedCardShadow CornerRadius="12"
+                                          Offset="2,2"
+                                          Opacity="0.1"
+                                          BlurRadius="2"/>
+              </ui:Effects.Shadow>
+            </Rectangle>
+
             <Border Grid.Column="0"
-                    Padding="{TemplateBinding Padding}">
+                    Padding="{TemplateBinding Padding}"
+                    Margin="4,0">
               <ContentPresenter x:Name="ContentPresenter"
                                 Foreground="{TemplateBinding Foreground}"
                                 Content="{TemplateBinding Content}"
@@ -1448,7 +1478,7 @@
             </Border>
 
             <Button x:Name="DeleteButton"
-                    Grid.Column="1"
+                    Grid.Column="2"
                     Style="{StaticResource AppFontIconButtonStyle}"
                     Content="&#xE711;"
                     Width="18"
@@ -1456,8 +1486,10 @@
                     FontSize="12"
                     Foreground="{TemplateBinding Foreground}"
                     VerticalAlignment="Center"
-                    Margin="0,0,2,0"
-                    Visibility="{TemplateBinding DeleteButtonVisible}" />
+                    Margin="0,0,6,0"
+                    Visibility="{TemplateBinding DeleteButtonVisible}"
+                    Command="{TemplateBinding DeleteCommand}"
+                    CommandParameter="{TemplateBinding DeleteCommandParameter}" />
 
             <VisualStateManager.VisualStateGroups>
               <VisualStateGroup x:Name="CommonStates">
@@ -1466,10 +1498,10 @@
                 <VisualState x:Name="PointerOver">
 
                   <Storyboard>
-                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid"
-                                                   Storyboard.TargetProperty="Background">
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackgroundRectangle"
+                                                   Storyboard.TargetProperty="Fill">
                       <DiscreteObjectKeyFrame KeyTime="0"
-                                              Value="{Binding PointerOverBrush, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
+                                              Value="{Binding Background, RelativeSource={RelativeSource Mode=TemplatedParent}, Converter={StaticResource ToPointOverBrushConverter}}" />
                     </ObjectAnimationUsingKeyFrames>
                   </Storyboard>
                 </VisualState>
@@ -1479,13 +1511,13 @@
                 <VisualState x:Name="Disabled">
 
                   <Storyboard>
-                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid"
-                                                   Storyboard.TargetProperty="Background">
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackgroundRectangle"
+                                                   Storyboard.TargetProperty="Fill">
                       <DiscreteObjectKeyFrame KeyTime="0"
                                               Value="{ThemeResource AppBasicButtonBackgroundDisabled}" />
                     </ObjectAnimationUsingKeyFrames>
-                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid"
-                                                   Storyboard.TargetProperty="BorderBrush">
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="BackgroundRectangle"
+                                                   Storyboard.TargetProperty="Stroke">
                       <DiscreteObjectKeyFrame KeyTime="0"
                                               Value="{ThemeResource ControlAAStrokeColorDisabledBrush}" />
                     </ObjectAnimationUsingKeyFrames>
@@ -1541,7 +1573,7 @@
             Value="{ThemeResource ControlCornerRadius}" />
     <Setter Property="Template">
       <Setter.Value>
-        <ControlTemplate TargetType="NavigationViewItem">
+        <ControlTemplate TargetType="view:AppNavigationViewItem">
           <Grid x:Name="NVIRootGrid">
 
             <Grid.RowDefinitions>
@@ -1579,6 +1611,15 @@
 
               </VisualStateGroup>
 
+              <VisualStateGroup x:Name="HoverOverlayStates">
+                <VisualState x:Name="HoverOverlayVisible">
+                  <VisualState.Setters>
+                    <Setter Target="HoverOverlayBorder.Visibility"
+                            Value="Visible" />
+                  </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="HoverOverlayCollapsed" />
+              </VisualStateGroup>
             </VisualStateManager.VisualStateGroups>
             <primitives:NavigationViewItemPresenter x:Name="NavigationViewItemPresenter"
                                                     Icon="{TemplateBinding Icon}"
@@ -1602,6 +1643,12 @@
                                                     CanDrag="{TemplateBinding CanDrag}"
                                                     AllowDrop="{TemplateBinding AllowDrop}"
                                                     Control.IsTemplateFocusTarget="True" />
+            <Border x:Name="HoverOverlayBorder"
+                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                    BorderBrush="{ThemeResource SystemAccentColor}"
+                    BorderThickness="1.5"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    Visibility="Collapsed" />
             <ItemsRepeater x:Load="False"
                            Grid.Row="1"
                            Visibility="Collapsed"

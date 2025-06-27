@@ -16,15 +16,10 @@ internal class Note : ObservableObject
     PropertyChanged += OnPropertyChanged;
   }
 
-  ~Note()
-  {
-    PropertyChanged -= OnPropertyChanged;
-  }
-
   //TEST TO STRING
   public override string ToString() => Title;
 
-  static readonly HashSet<string> _propertiesAffectingModified = new() { nameof(Title), nameof(Body), nameof(Background), nameof(Backdrop), nameof(Size), nameof(Position) };
+  static readonly HashSet<string> _propertiesAffectingModified = new() { nameof(Title), nameof(Body), nameof(Background), nameof(Backdrop) };
   private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
   {
     if (e.PropertyName is not null && _propertiesAffectingModified.Contains(e.PropertyName))
@@ -41,8 +36,6 @@ internal class Note : ObservableObject
     get => _modified;
     private set => SetProperty(ref _modified, value);
   }
-
-  //public DateTimeOffset Modified { get; private set; }
 
   private string _title;
   public string Title
