@@ -367,6 +367,7 @@ internal sealed partial class MainPage : Page
 internal class MainNavigationViewMenuItemTemplateSelector : DataTemplateSelector
 {
   public DataTemplate? MenuItemTemplate { get; set; }
+  public DataTemplate? InvokableMenuItemTemplate { get; set; }
   public DataTemplate? SeparatorTemplate { get; set; }
   public DataTemplate? UserGroupMenuItemTemplate { get; set; }
   public DataTemplate? UserBoardMenuItemTemplate { get; set; }
@@ -374,6 +375,7 @@ internal class MainNavigationViewMenuItemTemplateSelector : DataTemplateSelector
   {
     NavigationUserGroup => UserGroupMenuItemTemplate,
     NavigationUserBoard => UserBoardMenuItemTemplate,
+    NavigationTags => InvokableMenuItemTemplate,
     NavigationItem => MenuItemTemplate,
     NavigationSeparator => SeparatorTemplate,
     _ => throw new ArgumentException("")

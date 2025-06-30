@@ -1,4 +1,7 @@
-﻿using MyNotes.Common.Messaging;
+﻿using Microsoft.Extensions.DependencyInjection;
+
+using MyNotes.Common.Messaging;
+using MyNotes.Core.Dao;
 using MyNotes.Core.Dto;
 using MyNotes.Core.Model;
 using MyNotes.Core.Shared;
@@ -8,18 +11,18 @@ namespace MyNotes.Core.Service;
 
 internal class NavigationService
 {
-  public NavigationService(DatabaseService databaseService)
+  public NavigationService([FromKeyedServices("BoardDao")] DbDaoBase daoBase)
   {
-    _databaseService = databaseService;
+    _boardDao = (BoardDbDao)daoBase;
   }
 
-  private readonly DatabaseService _databaseService;
+  private readonly BoardDbDao _boardDao;
 
   #region NavigationUserBoard와 Database 관련 로직 (트리 생성, 추가, 제거, 업데이트)
   // 데이터베이스에서 트리 구조 가져와서 사용자 보드, 그룹 트리 구조 생성
   public void BuildNavigationTree(NavigationUserRootGroup root)
   {
-    var boards = _databaseService.GetBoards().Result;
+    var boards = _boardDao.GetBoards().Result;
     Queue<NavigationUserBoard> queue = new();
     queue.Enqueue(root);
     while (queue.Count > 0)
@@ -29,7 +32,7 @@ internal class NavigationService
       {
         var children = boards.Where(dto => dto.Parent == navigation.Id.Value);
         Guid previous = Guid.Empty;
-        BoardDbDto? child;
+        BoardDto? child;
         while ((child = children.FirstOrDefault(dto => dto.Previous == previous)) is not null)
         {
           NavigationUserBoard newNavigation;
@@ -48,7 +51,7 @@ internal class NavigationService
   public void AddBoard(NavigationUserBoard board)
   {
     var icon = IconManager.ToIconTypeValue(board.Icon);
-    InsertBoardDbDto dto = new()
+    InsertBoardDto dto = new()
     {
       Id = board.Id.Value,
       Grouped = board is NavigationUserGroup,
@@ -59,14 +62,14 @@ internal class NavigationService
       IconType = icon.IconType,
       IconValue = icon.IconValue
     };
-    _databaseService.AddBoard(dto);
+    _boardDao.AddBoard(dto);
   }
 
   // 데이터베이스에서 사용자 보드, 그룹 제거
   public void DeleteBoard(NavigationUserBoard board)
   {
-    DeleteBoardDbDto dto = new() { Id = board.Id.Value };
-    _databaseService.DeleteBoard(dto);
+    DeleteBoardDto dto = new() { Id = board.Id.Value };
+    _boardDao.DeleteBoard(dto);
   }
 
   // 사용자 보드, 그룹 속성 변경 시 데이터베이스에 업데이트
@@ -76,7 +79,7 @@ internal class NavigationService
       return;
 
     var icon = IconManager.ToIconTypeValue(board.Icon);
-    UpdateBoardDbDto dto = new()
+    UpdateBoardDto dto = new()
     {
       UpdateFields = updateFields,
       Id = board.Id.Value,
@@ -86,7 +89,7 @@ internal class NavigationService
       IconType = updateFields.HasFlag(BoardUpdateFields.IconType) ? icon.IconType : null,
       IconValue = updateFields.HasFlag(BoardUpdateFields.IconValue) ? icon.IconValue : null,
     };
-    _databaseService.UpdateBoard(dto);
+    _boardDao.UpdateBoard(dto);
   }
   #endregion
 

@@ -1,6 +1,6 @@
 ﻿namespace MyNotes.Core.Dto;
 
-internal record BoardDbDto
+internal record BoardDto
 {
   public required Guid Id { get; init; }
   public required bool Grouped { get; init; }
@@ -11,7 +11,7 @@ internal record BoardDbDto
   public required int IconValue { get; init; }
 }
 
-internal record InsertBoardDbDto
+internal record InsertBoardDto
 {
   public required Guid Id { get; init; }
   public required bool Grouped { get; init; }
@@ -23,17 +23,17 @@ internal record InsertBoardDbDto
   public required int IconValue { get; init; }
 }
 
-internal record DeleteBoardDbDto
+internal record DeleteBoardDto
 {
   public required Guid Id { get; init; }
 }
 
-internal record GetBoardNotesDbDto
+internal record GetBoardNotesDto
 {
   public required Guid Id { get; init; }
 }
 
-internal record UpdateBoardDbDto
+internal record UpdateBoardDto
 {
   public required BoardUpdateFields UpdateFields { get; init; }
   public required Guid Id { get; init; }

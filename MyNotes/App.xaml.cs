@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Windows.Globalization;
 
+using MyNotes.Core.Dao;
 using MyNotes.Core.Service;
 using MyNotes.Core.ViewModel;
 
@@ -37,6 +38,11 @@ public partial class App : Application
     services.AddSingleton<NoteService>();
     services.AddSingleton<TagService>();
     services.AddSingleton<DialogService>();
+
+    // DAOs
+    services.AddKeyedSingleton<DbDaoBase, BoardDbDao>("BoardDao");
+    services.AddKeyedSingleton<DbDaoBase, NoteDbDao>("NoteDao");
+    services.AddKeyedSingleton<DbDaoBase, TagDbDao>("TagDao");
 
     // ViewModels
     services.AddSingleton<MainViewModel>();

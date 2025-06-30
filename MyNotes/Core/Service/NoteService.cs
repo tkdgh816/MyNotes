@@ -1,26 +1,20 @@
-﻿using MyNotes.Core.Dto;
+﻿using Microsoft.Extensions.DependencyInjection;
+
+using MyNotes.Core.Dao;
+using MyNotes.Core.Dto;
 using MyNotes.Core.Model;
-using MyNotes.Core.Shared;
 using MyNotes.Debugging;
 
 using ToolkitColorHelper = CommunityToolkit.WinUI.Helpers.ColorHelper;
 
 namespace MyNotes.Core.Service;
 
-internal class NoteService
+internal class NoteService([FromKeyedServices("NoteDao")] DbDaoBase daoBase, TagService tagService, SettingsService settingsService)
 {
-  private readonly DatabaseService _databaseService;
-  private readonly TagService _tagService;
-  private readonly SettingsService _settingsService;
-  private readonly StorageFolder _noteFolder;
-
-  public NoteService(DatabaseService databaseService, TagService tagService, SettingsService settingsService)
-  {
-    _databaseService = databaseService;
-    _tagService = tagService;
-    _settingsService = settingsService;
-    _noteFolder = ApplicationData.Current.LocalFolder.CreateFolderAsync("notes", CreationCollisionOption.OpenIfExists).GetAwaiter().GetResult();
-  }
+  private readonly NoteDbDao _noteDao = (NoteDbDao)daoBase;
+  private readonly TagService _tagService = tagService;
+  private readonly SettingsService _settingsService = settingsService;
+  private readonly StorageFolder _noteFolder = ApplicationData.Current.LocalFolder.CreateFolderAsync("notes", CreationCollisionOption.OpenIfExists).GetAwaiter().GetResult();
 
   private readonly Dictionary<NoteId, Note> _cache = new();
   public IEnumerable<Note> Notes => _cache.Values;
@@ -31,7 +25,7 @@ internal class NoteService
       note.Initialize();
   }
   public void RemoveFromCache(Note note) => _cache.Remove(note.Id);
-  private Note ToNote(NoteDbDto dto)
+  private Note ToNote(NoteDto dto)
   {
     NoteId noteId = new(dto.Id);
     if (_cache.TryGetValue(noteId, out Note? note))
@@ -54,7 +48,7 @@ internal class NoteService
       return newNote;
     }
   }
-  private NoteDbDto ToDto(Note note) => new() { Id = note.Id.Value, Parent = note.BoardId.Value, Created = note.Created, Modified = note.Modified, Title = note.Title, Body = note.Body, Background = note.Background.ToString(), Backdrop = (int)note.Backdrop, Width = note.Size.Width, Height = note.Size.Height, PositionX = note.Position.X, PositionY = note.Position.Y, Bookmarked = note.IsBookmarked, Trashed = note.IsTrashed };
+  private NoteDto ToDto(Note note) => new() { Id = note.Id.Value, Parent = note.BoardId.Value, Created = note.Created, Modified = note.Modified, Title = note.Title, Body = note.Body, Background = note.Background.ToString(), Backdrop = (int)note.Backdrop, Width = note.Size.Width, Height = note.Size.Height, PositionX = note.Position.X, PositionY = note.Position.Y, Bookmarked = note.IsBookmarked, Trashed = note.IsTrashed };
 
   public Note CreateNote(NavigationUserBoard navigation)
   {
@@ -68,27 +62,27 @@ internal class NoteService
       Position = new(-1, -1)
     };
     AddToCache(newNote);
-    _databaseService.AddNote(ToDto(newNote));
+    _noteDao.AddNote(ToDto(newNote));
     return newNote;
   }
 
-  public bool DeleteNote(Note note) => _databaseService.DeleteNote(new DeleteNoteDbDto() { Id = note.Id.Value });
+  public bool DeleteNote(Note note) => _noteDao.DeleteNote(new DeleteNoteDto() { Id = note.Id.Value });
 
   public Note? GetNote(NoteId noteId) => _cache.TryGetValue(noteId, out Note? note) ? note : null;
 
   public IEnumerable<Note> GetNotes(NavigationUserBoard navigation)
-    => _databaseService.GetNotes(new GetBoardNotesDbDto() { Id = navigation.Id.Value }).Result.Select(ToNote);
+    => _noteDao.GetNotes(new GetBoardNotesDto() { Id = navigation.Id.Value }).Result.Select(ToNote);
   public IEnumerable<Note> GetBookmarkedNotes()
-    => _databaseService.GetBookmarkedNotes().Result.Select(ToNote);
+    => _noteDao.GetBookmarkedNotes().Result.Select(ToNote);
   public IEnumerable<Note> GetTrashedNotes()
-    => _databaseService.GetTrashedNotes().Result.Select(ToNote);
+    => _noteDao.GetTrashedNotes().Result.Select(ToNote);
 
   public void UpdateNote(Note note, NoteUpdateFields updateFields)
   {
     if (updateFields == NoteUpdateFields.None)
       return;
 
-    UpdateNoteDbDto dto = new()
+    UpdateNoteDto dto = new()
     {
       UpdateFields = updateFields,
       Id = note.Id.Value,
@@ -105,7 +99,7 @@ internal class NoteService
       Bookmarked = updateFields.HasFlag(NoteUpdateFields.Bookmarked) ? note.IsBookmarked : null,
       Trashed = updateFields.HasFlag(NoteUpdateFields.Trashed) ? note.IsTrashed : null
     };
-    _databaseService.UpdateNote(dto);
+    _noteDao.UpdateNote(dto);
   }
 
   public Task<StorageFile> GetFile(Note note)

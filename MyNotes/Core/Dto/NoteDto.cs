@@ -1,5 +1,5 @@
 ﻿namespace MyNotes.Core.Dto;
-internal record NoteDbDto
+internal record NoteDto
 {
   public required Guid Id { get; init; }
   public required Guid Parent { get; init; }
@@ -17,7 +17,7 @@ internal record NoteDbDto
   public required bool Trashed { get; init; }
 }
 
-internal record UpdateNoteDbDto
+internal record UpdateNoteDto
 {
   public required NoteUpdateFields UpdateFields { get; init; }
   public required Guid Id { get; init; }
@@ -35,12 +35,12 @@ internal record UpdateNoteDbDto
   public bool? Trashed { get; init; }
 }
 
-internal record GetNoteTagsDbDto
+internal record GetNoteTagsDto
 {
   public required Guid NoteId { get; init; }
 }
 
-internal record DeleteNoteDbDto
+internal record DeleteNoteDto
 {
   public required Guid Id { get; init; }
 }

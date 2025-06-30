@@ -2,29 +2,24 @@
 
 namespace MyNotes.Core.Dto;
 
-internal record TagDbDto
+internal record TagDto
 {
   public required Guid Id { get; init; }
   public required string Text { get; init; }
   public required int Color { get; init; }
 }
 
-internal record GetTagCountDbDto
+internal record GetTagCountDto
 {
   public required int Count { get; init; }
 }
 
-internal record CachedTagDbDto
-{
-  public required ImmutableList<Guid> Ids { get; init; }
-}
-
-internal record DeleteTagDbDto
+internal record DeleteTagDto
 {
   public required Guid Id { get; init; }
 }
 
-internal record TagToNoteDbDto
+internal record TagToNoteDto
 {
   public required Guid NoteId { get; init; }
   public required Guid TagId { get; init; }

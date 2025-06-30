@@ -27,14 +27,28 @@
         <DataTemplate x:DataType="model:NavigationItem">
           <NavigationViewItem DataContext="{x:Bind}"
                               Content="{x:Bind Name, Mode=OneWay}"
-                              IsEnabled="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}"
-                              SelectsOnInvoked="{x:Bind SelectsOnInvoked, Mode=OneWay}">
+                              IsEnabled="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
             <NavigationViewItem.Icon>
               <IconSourceElement IconSource="{x:Bind Icon, Converter={StaticResource IconToIconSourceConverter}, Mode=OneWay}" />
             </NavigationViewItem.Icon>
           </NavigationViewItem>
         </DataTemplate>
       </view:MainNavigationViewMenuItemTemplateSelector.MenuItemTemplate>
+      <!--#endregion-->
+
+      <!--#region MenuItemTemplate: Invokable Menu Item-->
+      <view:MainNavigationViewMenuItemTemplateSelector.InvokableMenuItemTemplate>
+        <DataTemplate x:DataType="model:NavigationItem">
+          <NavigationViewItem DataContext="{x:Bind}"
+                              Content="{x:Bind Name, Mode=OneWay}"
+                              IsEnabled="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}"
+                              SelectsOnInvoked="False">
+            <NavigationViewItem.Icon>
+              <IconSourceElement IconSource="{x:Bind Icon, Converter={StaticResource IconToIconSourceConverter}, Mode=OneWay}" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+        </DataTemplate>
+      </view:MainNavigationViewMenuItemTemplateSelector.InvokableMenuItemTemplate>
       <!--#endregion-->
 
       <!--#region SeparatorTemplate-->
@@ -207,8 +221,8 @@
         <Button Style="{StaticResource AppFontIconNormalButtonStyle}"
                 Width="100"
                 Content="&#xEC7A;"
-                Click="ViewWindowsButton_Click" 
-                Visibility="Collapsed"/>
+                Click="ViewWindowsButton_Click"
+                Visibility="Visible" />
       </TitleBar.RightHeader>
       <!--#endregion -->
     </TitleBar>

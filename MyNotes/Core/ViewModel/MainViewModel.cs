@@ -5,6 +5,8 @@ using MyNotes.Core.Model;
 using MyNotes.Core.Service;
 using MyNotes.Core.Shared;
 
+using WinRT;
+
 namespace MyNotes.Core.ViewModel;
 
 internal class MainViewModel : ViewModelBase

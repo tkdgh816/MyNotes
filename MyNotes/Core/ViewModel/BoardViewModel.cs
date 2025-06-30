@@ -96,10 +96,14 @@ internal class BoardViewModel : ViewModelBase
   {
     AddNewNoteCommand = new(() =>
     {
-      Note newNote = _noteService.CreateNote((NavigationUserBoard)Navigation);
-      NoteViewModel noteViewModel = _noteViewModelFactory.Resolve(newNote);
-      NoteViewModels.Add(noteViewModel);
-      noteViewModel.CreateWindow();
+      for (int i = 0; i < 10; i++)
+      {
+        Note newNote = _noteService.CreateNote((NavigationUserBoard)Navigation);
+        newNote.Body = "Test Body";
+        NoteViewModel noteViewModel = _noteViewModelFactory.Resolve(newNote);
+        NoteViewModels.Add(noteViewModel);
+        noteViewModel.CreateWindow();
+      }
     });
 
     SearchNotesCommand = new((query) =>

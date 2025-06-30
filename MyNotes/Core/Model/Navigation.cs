@@ -10,13 +10,6 @@ internal abstract class Navigation : ObservableObject
     get => _isEditable;
     set => SetProperty(ref _isEditable, value);
   }
-
-  private bool _selectsOnInvoked = true;
-  public bool SelectsOnInvoked
-  {
-    get => _selectsOnInvoked;
-    set => SetProperty(ref _selectsOnInvoked, value);
-  }
 }
 
 internal class NavigationSeparator : Navigation
@@ -65,10 +58,7 @@ internal class NavigationHome : NavigationItem
 
 internal class NavigationTags : NavigationBoard
 {
-  public NavigationTags() : base(typeof(TagsPage), "Tags", IconManager.FindGlyph("\uE8EC"))
-  {
-    SelectsOnInvoked = false;
-  }
+  public NavigationTags() : base(typeof(TagsPage), "Tags", IconManager.FindGlyph("\uE8EC")) { }
 }
 
 internal class NavigationTrash : NavigationBoard
@@ -91,17 +81,7 @@ internal class NavigationUserBoard : NavigationBoard
   public BoardId Id { get; }
   public NavigationUserGroup? Parent { get; set; }
 
-  public NavigationUserBoard(string name, Icon icon, BoardId id) : base(typeof(BoardPage), name, icon)
-  {
-    Id = id;
-  }
-
-  private async Task<Note[]> LoadItemsAsync(uint offset)
-  {
-    await Task.Delay(500);
-    List<Note> items = new();
-    return items.ToArray();
-  }
+  public NavigationUserBoard(string name, Icon icon, BoardId id) : base(typeof(BoardPage), name, icon) => Id = id;
 
   public NavigationUserBoard? GetNext()
   {
@@ -172,7 +152,7 @@ internal class NavigationUserGroup : NavigationUserBoard
 
   public void RemoveChildAt(int index) => _children.RemoveAt(index);
 
-  public int IndexOfChild(NavigationUserBoard child) => _children.IndexOf(child);
+  public int IndexOfChild(NavigationUserBoard item) => _children.IndexOf(item);
 
   public NavigationUserBoard GetChild(int index) => _children[index];
 

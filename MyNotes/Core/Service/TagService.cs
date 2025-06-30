@@ -1,16 +1,19 @@
-﻿using MyNotes.Core.Dto;
+﻿using Microsoft.Extensions.DependencyInjection;
+
+using MyNotes.Core.Dao;
+using MyNotes.Core.Dto;
 using MyNotes.Core.Model;
 
 namespace MyNotes.Core.Service;
 internal class TagService
 {
-  public TagService(DatabaseService databaseService)
+  public TagService([FromKeyedServices("TagDao")] DbDaoBase daoBase)
   {
-    _databaseService = databaseService;
+    _tagDao = (TagDbDao)daoBase;
     LoadAllTags();
   }
 
-  private readonly DatabaseService _databaseService;
+  private readonly TagDbDao _tagDao;
 
   private readonly Dictionary<TagId, Tag> _cache = new();
   public IEnumerable<Tag> Tags => _cache.Values;
@@ -19,7 +22,7 @@ internal class TagService
 
   private void RemoveFromCache(Tag tag) => _cache.Remove(tag.Id);
 
-  private Tag ToTag(TagDbDto dto)
+  private Tag ToTag(TagDto dto)
   {
     if (_cache.TryGetValue(new TagId(dto.Id), out Tag? tag))
       return tag;
@@ -31,24 +34,24 @@ internal class TagService
     }
   }
 
-  private TagDbDto ToDto(Tag tag) => new() { Id = tag.Id.Value, Text = tag.Text, Color = (int)tag.Color };
+  private TagDto ToDto(Tag tag) => new() { Id = tag.Id.Value, Text = tag.Text, Color = (int)tag.Color };
 
   public IEnumerable<Tag> GetTags(NoteId noteId) 
-    => _databaseService.GetTags(new GetNoteTagsDbDto() { NoteId = noteId.Value }).Result.Select(ToTag);
+    => _tagDao.GetTags(new GetNoteTagsDto() { NoteId = noteId.Value }).Result.Select(ToTag);
 
   public bool AddTagToNote(Note note, Tag tag) 
-    => _databaseService.AddTagToNote(new TagToNoteDbDto() { NoteId = note.Id.Value, TagId = tag.Id.Value });
+    => _tagDao.AddTagToNote(new TagToNoteDto() { NoteId = note.Id.Value, TagId = tag.Id.Value });
 
   public bool DeleteTagFromNote(Note note, Tag tag)
-    => _databaseService.DeleteTagFromNote(new TagToNoteDbDto() { NoteId = note.Id.Value, TagId = tag.Id.Value });
+    => _tagDao.DeleteTagFromNote(new TagToNoteDto() { NoteId = note.Id.Value, TagId = tag.Id.Value });
 
   public void LoadAllTags()
   {
     //CachedTagDbDto cachedTagDbDto = new() { Ids = [.. _tags.Keys.Select(tag => tag.Value)] };
-    //foreach (TagDbDto dto in _databaseService.GetUncachedTags(cachedTagDbDto).Result)
+    //foreach (TagDbDto dto in _tagDao.GetUncachedTags(cachedTagDbDto).Result)
     //  ToTag(dto);
 
-    foreach (TagDbDto dto in _databaseService.GetAllTags().Result)
+    foreach (TagDto dto in _tagDao.GetAllTags().Result)
       ToTag(dto);
   }
 
@@ -61,13 +64,13 @@ internal class TagService
 
     tag = new(new TagId(Guid.NewGuid()), text, color);
     AddToCache(tag);
-    _databaseService.AddTag(ToDto(tag));
+    _tagDao.AddTag(ToDto(tag));
     return tag;
   }
 
   public void DeleteTag(Tag tag)
   {
-    if (_databaseService.DeleteTag(new DeleteTagDbDto() { Id = tag.Id.Value }))
+    if (_tagDao.DeleteTag(new DeleteTagDto() { Id = tag.Id.Value }))
       RemoveFromCache(tag);
   }
 }
