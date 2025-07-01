@@ -1,4 +1,7 @@
-﻿using MyNotes.Common.Comparers;
+﻿using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading;
+
+using MyNotes.Common.Comparers;
 
 namespace MyNotes.Common.Collections;
 
@@ -160,4 +163,40 @@ internal class SortedObservableCollection<T> : Collection<T>, INotifyCollectionC
   {
     return ((List<T>)Items).BinarySearch(item, _comparers);
   }
+
+  //public Func<uint, Task<IList<T>>> LoadFunc { get; init; }
+  //private uint _currentPage = 0;
+  //private bool _hasMoreItems = true;
+  //private bool _isLoading = false;
+
+  //public bool HasMoreItems => _hasMoreItems && !_isLoading;
+
+  //public IAsyncOperation<LoadMoreItemsResult> LoadMoreItemsAsync(uint count) => AsyncInfo.Run((c) => LoadMoreItemsAsyncOverride(count));
+
+  //private async Task<LoadMoreItemsResult> LoadMoreItemsAsyncOverride(uint count)
+  //{
+  //  if (_isLoading) return new LoadMoreItemsResult { Count = 0 };
+  //  _isLoading = true;
+
+  //  try
+  //  {
+  //    var newItems = await LoadFunc(_currentPage);
+
+  //    if (newItems == null || newItems.Count == 0)
+  //    {
+  //      _hasMoreItems = false;
+  //      return new LoadMoreItemsResult { Count = 0 };
+  //    }
+
+  //    foreach (var item in newItems)
+  //      Add(item);
+
+  //    _currentPage++;
+  //    return new LoadMoreItemsResult { Count = (uint)newItems.Count };
+  //  }
+  //  finally
+  //  {
+  //    _isLoading = false;
+  //  }
+  //}
 }

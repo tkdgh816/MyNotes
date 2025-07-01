@@ -15,6 +15,9 @@ internal class BoardViewModel : ViewModelBase
   private readonly NoteService _noteService;
   private readonly NoteViewModelFactory _noteViewModelFactory;
 
+  private List<NoteViewModel> _noteViewModels;
+  public SortedObservableCollection<NoteViewModel> NoteViewModels { get; private set; } = null!;
+
   public BoardViewModel(NavigationBoard navigation, WindowService windowService, DialogService dialogService, NoteService noteService, NoteViewModelFactory noteViewModelFactory)
   {
     Navigation = navigation;
@@ -56,11 +59,6 @@ internal class BoardViewModel : ViewModelBase
 
     NoteViewModels.SortDescriptions.Add(new SortDescription<NoteViewModel>(func: vm => vm.Note.Modified, direction: SortDirection.Descending, keyPropertyName: "Modified"));
   }
-
-  #region NoteViewModels: Notes Collection
-  public SortedObservableCollection<NoteViewModel> NoteViewModels { get; private set; } = null!;
-
-  #endregion
 
   #region Sort
   public NoteSortKey SortKey { get; private set; }
