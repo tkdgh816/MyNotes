@@ -8,11 +8,10 @@ internal abstract class ViewModelFactoryBase<TModel, TViewModel> : IViewModelFac
 
   public abstract TViewModel Resolve(TModel model);
 
-  public virtual TViewModel? Get(TModel model) 
+  public TViewModel? Get(TModel model) 
     => _cache.TryGetValue(model, out var wr) && wr.TryGetTarget(out var vm) ? vm : null;
 
-  public bool Close(TModel model) => _cache.Remove(model);
+  public bool Remove(TModel model) => _cache.Remove(model);
 
   TViewModel IViewModelFactory<TViewModel>.Resolve() => throw new NotSupportedException();
-
 }

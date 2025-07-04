@@ -1460,7 +1460,7 @@
                 <media:AttachedCardShadow CornerRadius="12"
                                           Offset="2,2"
                                           Opacity="0.1"
-                                          BlurRadius="2"/>
+                                          BlurRadius="2" />
               </ui:Effects.Shadow>
             </Rectangle>
 

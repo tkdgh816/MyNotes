@@ -15,7 +15,6 @@ internal class BoardViewModel : ViewModelBase
   private readonly NoteService _noteService;
   private readonly NoteViewModelFactory _noteViewModelFactory;
 
-  private List<NoteViewModel> _noteViewModels;
   public SortedObservableCollection<NoteViewModel> NoteViewModels { get; private set; } = null!;
 
   public BoardViewModel(NavigationBoard navigation, WindowService windowService, DialogService dialogService, NoteService noteService, NoteViewModelFactory noteViewModelFactory)
@@ -41,7 +40,7 @@ internal class BoardViewModel : ViewModelBase
           noteViewModel.Dispose();
       }
       UnregisterMessengers();
-      App.Instance.GetService<BoardViewModelFactory>().Close(Navigation);
+      App.Instance.GetService<BoardViewModelFactory>().Remove(Navigation);
     }
     NoteViewModels.Clear();
     base.Dispose(disposing);
@@ -94,14 +93,10 @@ internal class BoardViewModel : ViewModelBase
   {
     AddNewNoteCommand = new(() =>
     {
-      for (int i = 0; i < 10; i++)
-      {
-        Note newNote = _noteService.CreateNote((NavigationUserBoard)Navigation);
-        newNote.Body = "Test Body";
-        NoteViewModel noteViewModel = _noteViewModelFactory.Resolve(newNote);
-        NoteViewModels.Add(noteViewModel);
-        noteViewModel.CreateWindow();
-      }
+      Note newNote = _noteService.CreateNote((NavigationUserBoard)Navigation);
+      NoteViewModel noteViewModel = _noteViewModelFactory.Resolve(newNote);
+      NoteViewModels.Add(noteViewModel);
+      noteViewModel.CreateWindow();
     });
 
     SearchNotesCommand = new((query) =>
@@ -149,7 +144,7 @@ internal class BoardViewModel : ViewModelBase
       }
     });
 
-    ShowDeleteBoardDialogCommand = new(async () => 
+    ShowDeleteBoardDialogCommand = new(async () =>
     {
       if (Navigation is NavigationUserBoard userBoard)
         await _dialogService.ShowDeleteBoardDialog(userBoard);

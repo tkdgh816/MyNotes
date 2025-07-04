@@ -32,8 +32,11 @@ internal class NoteService([FromKeyedServices("NoteDao")] DbDaoBase daoBase, Tag
       return note;
     else
     {
-      Note newNote = new(noteId, new BoardId(dto.Parent), dto.Title, dto.Created, dto.Modified)
+      Note newNote = new(dto.Title, dto.Modified)
       {
+        Id = noteId,
+        BoardId = new BoardId(dto.Parent),
+        Created = dto.Created,
         Body = dto.Body,
         Background = ToolkitColorHelper.ToColor(dto.Background),
         Backdrop = (BackdropKind)dto.Backdrop,
@@ -54,8 +57,11 @@ internal class NoteService([FromKeyedServices("NoteDao")] DbDaoBase daoBase, Tag
   {
     DateTimeOffset creationTime = DateTimeOffset.UtcNow;
     var settings = _settingsService.GetNoteSettings();
-    Note newNote = new(new NoteId(Guid.NewGuid()), navigation.Id, "New note", creationTime, creationTime)
+    Note newNote = new("New note", creationTime)
     { 
+      Id = new NoteId(Guid.NewGuid()),
+      BoardId = navigation.Id,
+      Created = creationTime,
       Background = settings.Background,
       Backdrop = settings.Backdrop,
       Size = settings.Size,

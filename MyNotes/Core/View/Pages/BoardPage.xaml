@@ -12,8 +12,8 @@
 
   <Page.Resources>
     <!--#region CollectionViewSource -->
-    <CollectionViewSource x:Name="NotesCollectionViewSource" 
-                          Source="{x:Bind ViewModel.NoteViewModels}"/>
+    <CollectionViewSource x:Name="NotesCollectionViewSource"
+                          Source="{x:Bind ViewModel.NoteViewModels}" />
     <!--#endregion -->
 
     <!--#region GridView ItemTemplate: Grid Style-->
@@ -24,9 +24,7 @@
                    RequestedTheme="Light"
                    PointerEntered="Template_RootUserControl_PointerEntered"
                    PointerExited="Template_RootUserControl_PointerExited"
-                   Holding="Template_RootUserControl_Holding"
-                   CanDrag="True"
-                   DragStarting="Template_RootUserControl_DragStarting">
+                   Holding="Template_RootUserControl_Holding">
         <Grid Background="{x:Bind Note.Background, Converter={StaticResource AlphaBlendingWhiteConverter}, Mode=OneWay}"
               CornerRadius="8"
               BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
@@ -36,7 +34,7 @@
           <Grid.Shadow>
             <ThemeShadow />
           </Grid.Shadow>
-          
+
           <Grid.RowDefinitions>
             <RowDefinition Height="32" />
             <RowDefinition />
@@ -64,7 +62,7 @@
                     CornerRadius="8,4,4,4"
                     Visibility="Collapsed"
                     IsTabStop="False"
-                    Command="{x:Bind BookmarkNoteCommand}"/>
+                    Command="{x:Bind BookmarkNoteCommand}" />
 
             <!--Note Title-->
             <TextBlock Grid.Column="1"
@@ -96,9 +94,9 @@
                 <CommandBarFlyout Placement="Bottom"
                                   AlwaysExpanded="True">
                   <AppBarButton Label="View"
-                                Icon="{ui:FontIcon Glyph=&#xE8AD;}" 
+                                Icon="{ui:FontIcon Glyph=&#xE8AD;}"
                                 Command="{x:Bind OpenWindowCommand}"
-                                CommandParameter="{StaticResource BooleanTrue}"/>
+                                CommandParameter="{StaticResource BooleanTrue}" />
                   <AppBarButton Label="Share"
                                 Icon="Share" />
                   <AppBarButton x:Name="Template_RemoveNoteButton"
@@ -108,20 +106,20 @@
                   <CommandBarFlyout.SecondaryCommands>
                     <AppBarButton x:Name="Template_MoveToBoardButton"
                                   Label="Move to board"
-                                  Icon="{ui:FontIcon Glyph=&#xE8DE;}" 
-                                  Command="{x:Bind ShowMoveNoteToBoardDialogCommand}"/>
+                                  Icon="{ui:FontIcon Glyph=&#xE8DE;}"
+                                  Command="{x:Bind ShowMoveNoteToBoardDialogCommand}" />
                     <AppBarButton x:Name="Template_RenameTitleButton"
                                   Label="Rename title"
                                   Icon="{ui:FontIcon Glyph=&#xE8AC;}"
                                   Command="{x:Bind ShowRenameNoteTitleDialogCommand}" />
                     <AppBarButton x:Name="Template_EditTagsButton"
                                   Label="Edit tags"
-                                  Icon="{ui:FontIcon Glyph=&#xE932;}" 
+                                  Icon="{ui:FontIcon Glyph=&#xE932;}"
                                   Command="{x:Bind ShowEditNoteTagsDialogCommmand}" />
                     <AppBarSeparator />
                     <AppBarButton Label="About"
-                                  Icon="{ui:FontIcon Glyph=&#xE946;}" 
-                                  Command="{x:Bind ShowNoteInformationDialogOnMainCommand}"/>
+                                  Icon="{ui:FontIcon Glyph=&#xE946;}"
+                                  Command="{x:Bind ShowNoteInformationDialogOnMainCommand}" />
                   </CommandBarFlyout.SecondaryCommands>
                 </CommandBarFlyout>
               </Button.Flyout>
@@ -321,8 +319,8 @@
                       <CommandBarFlyout.SecondaryCommands>
                         <AppBarButton x:Name="Template_MoveToBoardButton"
                                       Label="Move to board"
-                                      Icon="{ui:FontIcon Glyph=&#xE8DE;}" 
-                                      Command="{x:Bind MoveNoteToBoardCommand}"/>
+                                      Icon="{ui:FontIcon Glyph=&#xE8DE;}"
+                                      Command="{x:Bind MoveNoteToBoardCommand}" />
                         <AppBarButton x:Name="Template_RenameTitleButton"
                                       Label="Rename title"
                                       Icon="{ui:FontIcon Glyph=&#xE8AC;}"
@@ -630,6 +628,8 @@
               ItemContainerStyle="{StaticResource AppGridViewItemContainerStyle210Moderate}"
               SelectionMode="None"
               HorizontalAlignment="Center"
+              CanDragItems="True"
+              DragItemsStarting="View_NotesGridView_DragItemsStarting"
               TabNavigation="Local"
               TabFocusNavigation="Local"
               AllowFocusOnInteraction="False"
@@ -644,7 +644,7 @@
       </GridView.ItemContainerTransitions>-->
     </GridView>
     <!--#endregion-->
-    
+
     <!--#region VisualStateManager -->
     <VisualStateManager.VisualStateGroups>
       <VisualStateGroup x:Name="NotesGridViewHorizontalAlignmentStates">
@@ -658,7 +658,7 @@
           </VisualState.Setters>
         </VisualState>
       </VisualStateGroup>
-      
+
       <VisualStateGroup x:Name="CanAddNoteStates">
         <VisualState x:Name="CanAddNote" />
         <VisualState x:Name="CannotAddNote">

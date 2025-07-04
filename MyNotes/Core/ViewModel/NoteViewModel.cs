@@ -41,7 +41,7 @@ internal class NoteViewModel : ViewModelBase
       ForceUpdateNoteProperties();
       UnregisterEvents();
       UnregisterMessengers();
-      App.Instance.GetService<NoteViewModelFactory>().Close(Note);
+      App.Instance.GetService<NoteViewModelFactory>().Remove(Note);
       App.Instance.GetService<NoteService>().RemoveFromCache(Note);
     }
 
@@ -236,7 +236,7 @@ internal class NoteViewModel : ViewModelBase
       }
     });
 
-    ShowRenameNoteTitleDialogCommand = new(() => _dialogService.ShowRenameNoteTitleDialog(Note));
+    ShowRenameNoteTitleDialogCommand = new(() => _dialogService.ShowRenameNoteTitleDialog(this));
     RenameNoteTitleCommand = new((title) =>
     {
       title = title.Trim();
@@ -244,9 +244,9 @@ internal class NoteViewModel : ViewModelBase
         Note.Title = title;
     });
 
-    ShowEditNoteTagsDialogCommmand = new(() => _dialogService.ShowEditNoteTagsDialog(Note));
-    ShowNoteInformationDialogOnMainCommand = new(() => _dialogService.ShowNoteInformationDialog(Note));
-    ShowNoteInformationDialogCommand = new((xamlRoot) => _dialogService.ShowNoteInformationDialog(Note, xamlRoot));
+    ShowEditNoteTagsDialogCommmand = new(() => _dialogService.ShowEditNoteTagsDialog(this));
+    ShowNoteInformationDialogOnMainCommand = new(() => _dialogService.ShowNoteInformationDialog(this));
+    ShowNoteInformationDialogCommand = new((xamlRoot) => _dialogService.ShowNoteInformationDialog(this, xamlRoot));
 
     AddNoteTagCommand = new((dto) =>
     {

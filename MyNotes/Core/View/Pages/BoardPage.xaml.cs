@@ -237,4 +237,31 @@ internal sealed partial class BoardPage : Page
     args.DragUI.SetContentFromSoftwareBitmap(softwareBitmap, new Point(0, 0));
     defferal.Complete();
   }
+
+  private void View_NotesGridView_DragItemsStarting(object sender, DragItemsStartingEventArgs e)
+  {
+    NoteViewModel noteViewModel = (NoteViewModel)e.Items[0];
+
+    NoteId noteId = noteViewModel.Note.Id;
+    string noteTitle = noteViewModel.Note.Title;
+    string noteBody = noteViewModel.Note.Body;
+    var container = (FrameworkElement)View_NotesGridView.ContainerFromItem(noteViewModel);
+
+    e.Data.SetData(StandardDataFormats.Text, $"[{noteTitle}]\r\n{noteBody}");
+    e.Data.SetData(DataFormats.Note, noteId.Value.ToString());
+
+    //e.AllowedOperations = DataPackageOperation.Move;
+
+    //DragOperationDeferral defferal = e.GetDeferral();
+    //RenderTargetBitmap renderTargetBitmap = new();
+    //await renderTargetBitmap.RenderAsync(container, (int)(container.Width * 0.64), (int)(container.Height * 0.64));
+
+
+    //var pixels = await renderTargetBitmap.GetPixelsAsync();
+
+    //SoftwareBitmap softwareBitmap = new(BitmapPixelFormat.Bgra8, renderTargetBitmap.PixelWidth, renderTargetBitmap.PixelHeight, BitmapAlphaMode.Premultiplied);
+    //softwareBitmap.CopyFromBuffer(pixels);
+    //e.DragUI.SetContentFromSoftwareBitmap(softwareBitmap, new Point(0, 0));
+    //defferal.Complete();
+  }
 }

@@ -2,12 +2,9 @@
 
 internal class Note : ObservableObject
 {
-  public Note(NoteId id, BoardId boardId, string title, DateTimeOffset created, DateTimeOffset modified)
+  public Note(string title, DateTimeOffset modified)
   {
-    Id = id;
-    BoardId = boardId;
     _title = title;
-    Created = created;
     _modified = modified;
   }
 
@@ -16,7 +13,6 @@ internal class Note : ObservableObject
     PropertyChanged += OnPropertyChanged;
   }
 
-  //TEST TO STRING
   public override string ToString() => Title;
 
   static readonly HashSet<string> _propertiesAffectingModified = new() { nameof(Title), nameof(Body), nameof(Background), nameof(Backdrop) };
@@ -26,9 +22,9 @@ internal class Note : ObservableObject
       Modified = DateTimeOffset.UtcNow;
   }
 
-  public NoteId Id { get; private set; }
-  public BoardId BoardId { get; set; }
-  public DateTimeOffset Created { get; private set; }
+  public required NoteId Id { get; init; }
+  public required BoardId BoardId { get; set; }
+  public required DateTimeOffset Created { get; init; }
 
   private DateTimeOffset _modified;
   public DateTimeOffset Modified

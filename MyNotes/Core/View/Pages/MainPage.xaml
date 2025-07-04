@@ -68,7 +68,7 @@
                                       IsExpanded="False"
                                       CanDrag="{x:Bind IsEditable, Mode=OneWay}"
                                       PresenterDragStarting="Template_Board_AppNavigationViewItem_DragStarting"
-                                      AllowDrop="True"
+                                      AllowDrop="{x:Bind IsEditable, Mode=OneWay}"
                                       DragEnter="Template_Board_AppNavigationViewItem_DragEnter"
                                       DragOver="Template_Group_AppNavigationViewItem_DragOver"
                                       DragLeave="Template_Board_AppNavigationViewItem_DragLeave"

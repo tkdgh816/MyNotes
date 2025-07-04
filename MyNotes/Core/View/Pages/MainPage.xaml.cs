@@ -284,7 +284,7 @@ internal sealed partial class MainPage : Page
             {
               _isInsertingIntoHoveredTargetGroup = true;
               _navigationHoldingTimer.Start();
-              targetGroup.InsertChild(0, _draggingSourceBoard!);
+              ViewModel.MoveUserNavigation(_draggingSourceBoard!, targetGroup, NavigationBoardItemPosition.Inside);
             }
           }
           break;
@@ -333,6 +333,8 @@ internal sealed partial class MainPage : Page
           break;
       }
     }
+
+    e.Handled = true;
   }
 
   private void hoveredTargetGroupItem_LayoutUpdated(object? sender, object e)

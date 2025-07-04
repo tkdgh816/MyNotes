@@ -6,12 +6,9 @@ namespace MyNotes.Core.Service;
 
 internal class DialogService
 {
-  public DialogService(NoteViewModelFactory noteViewModelFactory)
-  {
-    _noteViewModelFactory = noteViewModelFactory;
-  }
+  public DialogService()
+  { }
 
-  private readonly NoteViewModelFactory _noteViewModelFactory;
   private XamlRoot? _mainXamlRoot;
   private ContentDialog? _mainDialog;
 
@@ -23,9 +20,8 @@ internal class DialogService
     _mainDialog = dialog;
   }
 
-  public async void ShowEditNoteTagsDialog(Note note)
+  public async void ShowEditNoteTagsDialog(NoteViewModel noteViewModel)
   {
-    NoteViewModel? noteViewModel = _noteViewModelFactory.Get(note);
     if (noteViewModel is not null)
     {
       var dialog = new EditNoteTagsDialog(noteViewModel) { XamlRoot = _mainXamlRoot };
@@ -33,9 +29,8 @@ internal class DialogService
     }
   }
 
-  public async void ShowRenameNoteTitleDialog(Note note)
+  public async void ShowRenameNoteTitleDialog(NoteViewModel noteViewModel)
   {
-    NoteViewModel? noteViewModel = _noteViewModelFactory.Get(note);
     if (noteViewModel is not null)
     {
       var dialog = new RenameNoteTitleDialog(noteViewModel) { XamlRoot = _mainXamlRoot };
@@ -43,9 +38,8 @@ internal class DialogService
     }
   }
 
-  public async void ShowNoteInformationDialog(Note note, XamlRoot? xamlRoot = null)
+  public async void ShowNoteInformationDialog(NoteViewModel noteViewModel, XamlRoot? xamlRoot = null)
   {
-    NoteViewModel? noteViewModel = _noteViewModelFactory.Get(note);
     if (noteViewModel is not null)
     {
       xamlRoot ??= _mainXamlRoot;

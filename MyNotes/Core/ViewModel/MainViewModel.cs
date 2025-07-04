@@ -5,8 +5,6 @@ using MyNotes.Core.Model;
 using MyNotes.Core.Service;
 using MyNotes.Core.Shared;
 
-using WinRT;
-
 namespace MyNotes.Core.ViewModel;
 
 internal class MainViewModel : ViewModelBase
@@ -165,6 +163,10 @@ internal class MainViewModel : ViewModelBase
         break;
       case NavigationBoardItemPosition.After:
         targetGroup?.InsertChild(targetGroup.IndexOfChild(target) + 1, source);
+        break;
+      case NavigationBoardItemPosition.Inside:
+        if (target is NavigationUserGroup group)
+          group.InsertChild(0, source);
         break;
     }
   }

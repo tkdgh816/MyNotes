@@ -23,17 +23,27 @@ internal class DatabaseService
 
   private void CreateTables()
   {
-    CreateBoardsTable();
-    CreateNotesTable();
-    CreateTagsTable();
-    CreateNotesTagsTable();
-  }
-
-  private void CreateBoardsTable()
-  {
     using SqliteConnection connection = Connection;
     connection.Open();
+    using SqliteTransaction transaction = connection.BeginTransaction();
+    try
+    {
+      CreateBoardsTable(connection, transaction);
+      CreateNotesTable(connection, transaction);
+      CreateTagsTable(connection, transaction);
+      CreateNotesTagsTable(connection, transaction);
 
+      transaction.Commit();
+    }
+    catch
+    {
+      transaction.Rollback();
+      Debug.WriteLine("Database transaction failed");
+    }
+  }
+
+  private void CreateBoardsTable(SqliteConnection connection, SqliteTransaction transaction)
+  {
     string createQuery = """
       CREATE TABLE IF NOT EXISTS Boards      
       (
@@ -47,15 +57,12 @@ internal class DatabaseService
       )
       """;
 
-    using SqliteCommand command = new(createQuery, connection);
+    using SqliteCommand command = new(createQuery, connection, transaction);
     command.ExecuteNonQuery();
   }
 
-  private void CreateNotesTable()
+  private void CreateNotesTable(SqliteConnection connection, SqliteTransaction transaction)
   {
-    using SqliteConnection connection = Connection;
-    connection.Open();
-
     string createQuery = """
       CREATE TABLE IF NOT EXISTS Notes
       (
@@ -76,16 +83,23 @@ internal class DatabaseService
       )
       """;
 
-    using SqliteCommand command = new(createQuery, connection);
+    using SqliteCommand command = new(createQuery, connection, transaction);
     command.ExecuteNonQuery();
   }
 
-
-  private void CreateTagsTable()
+  private void CreateNotesFtsTable(SqliteConnection connection, SqliteTransaction transaction)
   {
-    using SqliteConnection connection = Connection;
-    connection.Open();
+    string createQuery = """
+      CREATE VIRTUAL TABLE IF NOT EXISTS NotesFts
+      USING fts5(id, title, body);
+      """;
 
+    using SqliteCommand command = new(createQuery, connection, transaction);
+    command.ExecuteNonQuery();
+  }
+
+  private void CreateTagsTable(SqliteConnection connection, SqliteTransaction transaction)
+  {
     string createQuery = """
       CREATE TABLE IF NOT EXISTS Tags
       (
@@ -95,15 +109,12 @@ internal class DatabaseService
       )
       """;
 
-    using SqliteCommand command = new(createQuery, connection);
+    using SqliteCommand command = new(createQuery, connection, transaction);
     command.ExecuteNonQuery();
   }
 
-  private void CreateNotesTagsTable()
+  private void CreateNotesTagsTable(SqliteConnection connection, SqliteTransaction transaction)
   {
-    using SqliteConnection connection = Connection;
-    connection.Open();
-
     string createQuery = """
       CREATE TABLE IF NOT EXISTS NotesTags
       (
@@ -115,7 +126,7 @@ internal class DatabaseService
       )
       """;
 
-    using SqliteCommand command = new(createQuery, connection);
+    using SqliteCommand command = new(createQuery, connection, transaction);
     command.ExecuteNonQuery();
   }
 

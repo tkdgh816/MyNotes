@@ -4,18 +4,14 @@ using MyNotes.Debugging;
 
 namespace MyNotes.Core.ViewModel;
 
-internal class NoteViewModelFactory : ViewModelFactoryBase<Note, NoteViewModel>
+internal class NoteViewModelFactory(WindowService windowService, DialogService dialogService, NoteService noteService, TagService tagService) : ViewModelFactoryBase<Note, NoteViewModel>
 {
   public override NoteViewModel Resolve(Note note)
   {
-    if (_cache.TryGetValue(note, out WeakReference<NoteViewModel>? wr))
-      if (wr.TryGetTarget(out NoteViewModel? noteViewModel))
-        return noteViewModel;
+    NoteViewModel? viewModel = Get(note);
 
-    var windowService = App.Instance.GetService<WindowService>();
-    var dialogService = App.Instance.GetService<DialogService>();
-    var noteService = App.Instance.GetService<NoteService>();
-    var tagService = App.Instance.GetService<TagService>();
+    if (viewModel is not null)
+      return viewModel;
 
     NoteViewModel newViewModel = new(note, windowService, dialogService, noteService, tagService);
     _cache.Remove(note);
