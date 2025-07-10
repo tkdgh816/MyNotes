@@ -91,7 +91,7 @@ internal class DatabaseService
   {
     string createQuery = """
       CREATE VIRTUAL TABLE IF NOT EXISTS NotesFts
-      USING fts5(id, title, body);
+      USING fts5(id, title, body, tokenize="trigram");
       """;
 
     using SqliteCommand command = new(createQuery, connection, transaction);
@@ -161,7 +161,7 @@ internal class DatabaseService
     }
     else if (tableName == "Notes")
     {
-      string query = "SELECT * FROM Notes";
+      string query = "SELECT * FROM Notes LEFT JOIN NotesFts ON Notes.id = NotesFts.id";
       using SqliteCommand command = new(query, connection);
       using SqliteDataReader reader = command.ExecuteReader();
       int num = 0;

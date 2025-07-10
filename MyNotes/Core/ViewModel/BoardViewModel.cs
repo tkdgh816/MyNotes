@@ -48,13 +48,22 @@ internal class BoardViewModel : ViewModelBase
 
   private void GetNoteViewModels()
   {
-    NoteViewModels = Navigation switch
+    switch (Navigation)
     {
-      NavigationUserBoard userBoard => new(_noteService.GetNotes(userBoard).Select(_noteViewModelFactory.Resolve)),
-      NavigationBookmarks => new(_noteService.GetBookmarkedNotes().Select(_noteViewModelFactory.Resolve)),
-      NavigationTrash => new(_noteService.GetTrashedNotes().Select(_noteViewModelFactory.Resolve)),
-      _ => new(),
-    };
+      case NavigationUserBoard userBoard:
+        NoteViewModels = new(_noteService.GetNotes(userBoard).Select(_noteViewModelFactory.Resolve));
+        break;
+      case NavigationBookmarks _:
+        NoteViewModels = new(_noteService.GetBookmarkedNotes().Select(_noteViewModelFactory.Resolve));
+        break;
+      case NavigationTrash _:
+        NoteViewModels = new(_noteService.GetTrashedNotes().Select(_noteViewModelFactory.Resolve));
+        break;
+      case NavigationSearch search:
+        NoteViewModels = new(_noteService.SearchNotes(search.SearchText).Select(_noteViewModelFactory.Resolve));
+        search.SearchCount = NoteViewModels.Count;
+        break;
+    }
 
     NoteViewModels.SortDescriptions.Add(new SortDescription<NoteViewModel>(func: vm => vm.Note.Modified, direction: SortDirection.Descending, keyPropertyName: "Modified"));
   }

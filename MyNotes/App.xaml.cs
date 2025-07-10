@@ -35,6 +35,7 @@ public partial class App : Application
     services.AddSingleton<WindowService>();
     services.AddSingleton<NavigationService>();
     services.AddSingleton<DatabaseService>();
+    services.AddSingleton<SearchService>();
     services.AddSingleton<NoteService>();
     services.AddSingleton<TagService>();
     services.AddSingleton<DialogService>();

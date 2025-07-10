@@ -48,7 +48,24 @@ internal abstract class NavigationBoard : NavigationItem
 
 internal class NavigationSearch : NavigationBoard
 {
-  public NavigationSearch(string searchText) : base(typeof(SearchPage), searchText, IconManager.FindGlyph("\uE721")) { }
+  public string SearchText { get; }
+
+  private int _searchCount = 0;
+  public int SearchCount
+  {
+    get => _searchCount;
+    set
+    {
+      if (_searchCount != value)
+        Name = $"Search results for \"{SearchText}\" ({value})";
+      SetProperty(ref _searchCount, value);
+    }
+  }
+
+  public NavigationSearch(string searchText) : base(typeof(BoardPage), $"No search results for \"{searchText}\"", IconManager.FindGlyph("\uE721"))
+  {
+    SearchText = searchText;
+  }
 }
 
 internal class NavigationHome : NavigationItem
@@ -58,7 +75,7 @@ internal class NavigationHome : NavigationItem
 
 internal class NavigationTags : NavigationBoard
 {
-  public NavigationTags() : base(typeof(TagsPage), "Tags", IconManager.FindGlyph("\uE8EC")) { }
+  public NavigationTags() : base(typeof(BoardPage), "Tags", IconManager.FindGlyph("\uE8EC")) { }
 }
 
 internal class NavigationTrash : NavigationBoard

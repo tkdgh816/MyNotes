@@ -82,6 +82,8 @@ internal class NoteService([FromKeyedServices("NoteDao")] DbDaoBase daoBase, Tag
     => _noteDao.GetBookmarkedNotes().Result.Select(ToNote);
   public IEnumerable<Note> GetTrashedNotes()
     => _noteDao.GetTrashedNotes().Result.Select(ToNote);
+  public IEnumerable<Note> SearchNotes(string searchText)
+    => _noteDao.SearchNotes(searchText).Result.Select(ToNote);
 
   public void UpdateNote(Note note, NoteUpdateFields updateFields)
   {
