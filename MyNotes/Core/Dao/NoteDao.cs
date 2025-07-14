@@ -9,7 +9,7 @@ using MyNotes.Core.Dto;
 using MyNotes.Core.Service;
 
 namespace MyNotes.Core.Dao;
-internal class NoteDbDao(DatabaseService databaseService, SearchService searchService) : DbDaoBase
+internal class NoteDao(DatabaseService databaseService, SearchService searchService) : DaoBase
 {
   private readonly DatabaseService _databaseService = databaseService;
   private readonly SearchService _searchService = searchService;
@@ -160,7 +160,7 @@ internal class NoteDbDao(DatabaseService databaseService, SearchService searchSe
 
   public async Task<IEnumerable<NoteDto>> GetNotes(GetBoardNotesDto dto)
   {
-    List<NoteDto> notes = new();
+    List<NoteDto> noteDtos = new();
     await using SqliteConnection connection = _databaseService.Connection;
     await connection.OpenAsync();
 
@@ -170,14 +170,14 @@ internal class NoteDbDao(DatabaseService databaseService, SearchService searchSe
 
     await using SqliteDataReader reader = command.ExecuteReader();
     while (await reader.ReadAsync())
-      notes.Add(CreateNoteDto(reader));
+      noteDtos.Add(CreateNoteDto(reader));
 
-    return notes;
+    return noteDtos;
   }
 
   public async Task<IEnumerable<NoteDto>> GetBookmarkedNotes()
   {
-    List<NoteDto> notes = new();
+    List<NoteDto> noteDtos = new();
     await using SqliteConnection connection = _databaseService.Connection;
     await connection.OpenAsync();
 
@@ -186,14 +186,14 @@ internal class NoteDbDao(DatabaseService databaseService, SearchService searchSe
 
     await using SqliteDataReader reader = command.ExecuteReader();
     while (await reader.ReadAsync())
-      notes.Add(CreateNoteDto(reader));
+      noteDtos.Add(CreateNoteDto(reader));
 
-    return notes;
+    return noteDtos;
   }
 
   public async Task<IEnumerable<NoteDto>> GetTrashedNotes()
   {
-    List<NoteDto> notes = new();
+    List<NoteDto> noteDtos = new();
     await using SqliteConnection connection = _databaseService.Connection;
     await connection.OpenAsync();
 
@@ -202,9 +202,9 @@ internal class NoteDbDao(DatabaseService databaseService, SearchService searchSe
 
     await using SqliteDataReader reader = command.ExecuteReader();
     while (await reader.ReadAsync())
-      notes.Add(CreateNoteDto(reader));
+      noteDtos.Add(CreateNoteDto(reader));
 
-    return notes;
+    return noteDtos;
   }
 
   public async Task<IEnumerable<NoteDto>> SearchNotes(string searchText)
@@ -235,7 +235,7 @@ internal class NoteDbDao(DatabaseService databaseService, SearchService searchSe
     }
 
     // 일치하는 노트 데이터베이스에서 가져오기
-    List<NoteDto> notes = new();
+    List<NoteDto> noteDtos = new();
 
     int count = ids.Count;
     if (count > 0)
@@ -262,11 +262,11 @@ internal class NoteDbDao(DatabaseService databaseService, SearchService searchSe
       {
         await using SqliteDataReader reader = command.ExecuteReader();
         while (await reader.ReadAsync())
-          notes.Add(CreateNoteDto(reader));
+          noteDtos.Add(CreateNoteDto(reader));
       }
     }
 
-    return notes;
+    return noteDtos;
   }
 
   private NoteDto CreateNoteDto(SqliteDataReader reader)

@@ -2,7 +2,7 @@
 
 namespace MyNotes.Core.Dao;
 
-internal abstract class DbDaoBase()
+internal abstract class DaoBase()
 {
   protected static T? GetReaderValue<T>(SqliteDataReader reader, string fieldName, T? nullValue = default) where T : notnull
   {

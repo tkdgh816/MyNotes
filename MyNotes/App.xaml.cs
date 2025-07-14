@@ -41,9 +41,9 @@ public partial class App : Application
     services.AddSingleton<DialogService>();
 
     // DAOs
-    services.AddKeyedSingleton<DbDaoBase, BoardDbDao>("BoardDao");
-    services.AddKeyedSingleton<DbDaoBase, NoteDbDao>("NoteDao");
-    services.AddKeyedSingleton<DbDaoBase, TagDbDao>("TagDao");
+    services.AddKeyedSingleton<DaoBase, BoardDao>("BoardDao");
+    services.AddKeyedSingleton<DaoBase, NoteDao>("NoteDao");
+    services.AddKeyedSingleton<DaoBase, TagDao>("TagDao");
 
     // ViewModels
     services.AddSingleton<MainViewModel>();

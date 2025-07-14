@@ -7,13 +7,13 @@ using MyNotes.Core.Model;
 namespace MyNotes.Core.Service;
 internal class TagService
 {
-  public TagService([FromKeyedServices("TagDao")] DbDaoBase daoBase)
+  public TagService([FromKeyedServices("TagDao")] DaoBase daoBase)
   {
-    _tagDao = (TagDbDao)daoBase;
+    _tagDao = (TagDao)daoBase;
     LoadAllTags();
   }
 
-  private readonly TagDbDao _tagDao;
+  private readonly TagDao _tagDao;
 
   private readonly Dictionary<TagId, Tag> _cache = new();
   public IEnumerable<Tag> Tags => _cache.Values;

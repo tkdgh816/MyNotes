@@ -11,12 +11,12 @@ namespace MyNotes.Core.Service;
 
 internal class NavigationService
 {
-  public NavigationService([FromKeyedServices("BoardDao")] DbDaoBase daoBase)
+  public NavigationService([FromKeyedServices("BoardDao")] DaoBase daoBase)
   {
-    _boardDao = (BoardDbDao)daoBase;
+    _boardDao = (BoardDao)daoBase;
   }
 
-  private readonly BoardDbDao _boardDao;
+  private readonly BoardDao _boardDao;
 
   #region NavigationUserBoard와 Database 관련 로직 (트리 생성, 추가, 제거, 업데이트)
   // 데이터베이스에서 트리 구조 가져와서 사용자 보드, 그룹 트리 구조 생성

@@ -9,9 +9,9 @@ using ToolkitColorHelper = CommunityToolkit.WinUI.Helpers.ColorHelper;
 
 namespace MyNotes.Core.Service;
 
-internal class NoteService([FromKeyedServices("NoteDao")] DbDaoBase daoBase, TagService tagService, SettingsService settingsService)
+internal class NoteService([FromKeyedServices("NoteDao")] DaoBase daoBase, TagService tagService, SettingsService settingsService)
 {
-  private readonly NoteDbDao _noteDao = (NoteDbDao)daoBase;
+  private readonly NoteDao _noteDao = (NoteDao)daoBase;
   private readonly TagService _tagService = tagService;
   private readonly SettingsService _settingsService = settingsService;
   private readonly StorageFolder _noteFolder = ApplicationData.Current.LocalFolder.CreateFolderAsync("notes", CreationCollisionOption.OpenIfExists).GetAwaiter().GetResult();

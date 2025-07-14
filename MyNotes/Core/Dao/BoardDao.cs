@@ -4,7 +4,7 @@ using MyNotes.Core.Dto;
 using MyNotes.Core.Service;
 
 namespace MyNotes.Core.Dao;
-internal class BoardDbDao(DatabaseService databaseService) : DbDaoBase
+internal class BoardDao(DatabaseService databaseService) : DaoBase
 {
   private readonly DatabaseService _databaseService = databaseService;
 
