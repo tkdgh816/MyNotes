@@ -9,10 +9,10 @@ using MyNotes.Core.Dto;
 using MyNotes.Core.Service;
 
 namespace MyNotes.Core.Dao;
-internal class NoteDao(DatabaseService databaseService, SearchService searchService) : DaoBase
+internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
 {
   private readonly DatabaseService _databaseService = databaseService;
-  private readonly SearchService _searchService = searchService;
+  
 
   public bool AddNote(NoteDto dto)
   {
@@ -40,22 +40,7 @@ internal class NoteDao(DatabaseService databaseService, SearchService searchServ
     command.Parameters.AddWithValue("@bookmarked", dto.Bookmarked);
     command.Parameters.AddWithValue("@trashed", dto.Trashed);
 
-    if (command.ExecuteNonQuery() > 0)
-    {
-      var doc = new Document()
-      {
-        new StringField("id", dto.Id.ToString(), Field.Store.YES),
-        new TextField("title", dto.Title, Field.Store.YES),
-        new TextField("body", dto.Body, Field.Store.YES)
-      };
-
-      _searchService.Writer.AddDocument(doc);
-      _searchService.Writer.Commit();
-
-      return true;
-    }
-
-    return false;
+    return command.ExecuteNonQuery() > 0;
   }
 
   public bool DeleteNote(DeleteNoteDto dto)
@@ -65,16 +50,7 @@ internal class NoteDao(DatabaseService databaseService, SearchService searchServ
     string query = "DELETE FROM Notes WHERE id = @id";
     using SqliteCommand command = new(query, connection);
     command.Parameters.AddWithValue("@id", dto.Id);
-    if (command.ExecuteNonQuery() > 0)
-    {
-      var term = new Term("id", dto.Id.ToString());
-      _searchService.Writer.DeleteDocuments(term);
-      _searchService.Writer.Commit();
-
-      return true;
-    }
-
-    return false;
+    return command.ExecuteNonQuery() > 0;
   }
 
   private Dictionary<string, object> GetNoteUpdateFieldValue(UpdateNoteDto dto)
@@ -128,35 +104,10 @@ internal class NoteDao(DatabaseService databaseService, SearchService searchServ
     foreach (var field in fields)
       command.Parameters.AddWithValue($"@{field.Key}", field.Value);
 
-    if (command.ExecuteNonQuery() > 0)
-    {
-      if (fields.ContainsKey("title") || fields.ContainsKey("body"))
-      {
-        var indexReader = DirectoryReader.Open(_searchService.Writer, true);
-        var indexSearcher = new IndexSearcher(indexReader);
-        var hits = indexSearcher.Search(new TermQuery(new Term("id", dto.Id.ToString())), 1).ScoreDocs;
-
-        if (hits.Length > 0)
-        {
-          var doc = indexSearcher.Doc(hits[0].Doc);
-
-          var newDoc = new Document()
-          {
-            new StringField("id", dto.Id.ToString(), Field.Store.YES),
-            new TextField("title", dto.Title ?? doc.Get("title"), Field.Store.YES),
-            new TextField("body", dto.Body ?? doc.Get("body"), Field.Store.YES)
-          };
-
-          _searchService.Writer.UpdateDocument(new Term("id", dto.Id.ToString()), newDoc);
-          _searchService.Writer.Commit();
-        }
-      }
-
-      return true;
-    }
-
-    return false;
+    return command.ExecuteNonQuery() > 0;
   }
+
+  
 
   public async Task<IEnumerable<NoteDto>> GetNotes(GetBoardNotesDto dto)
   {
@@ -207,37 +158,11 @@ internal class NoteDao(DatabaseService databaseService, SearchService searchServ
     return noteDtos;
   }
 
-  public async Task<IEnumerable<NoteDto>> SearchNotes(string searchText)
+  public async Task<IEnumerable<NoteDto>> SearchNotes(IList<GetNoteDto> dtos)
   {
-    // 일치 노트 검색
-    using DirectoryReader indexReader = _searchService.Writer.GetReader(true);
-    var indexSearcher = new IndexSearcher(indexReader);
-    List<string> ids = new();
-
-    var parser = new QueryParser(_searchService.LuceneVersion, "body", _searchService.Analyzer);
-    try
-    {
-      var searchQuery = parser.Parse(searchText);
-
-
-      var topDocs = indexSearcher.Search(searchQuery, 10);
-
-
-      foreach (var scoreDoc in topDocs.ScoreDocs)
-      {
-        var doc = indexSearcher.Doc(scoreDoc.Doc);
-        ids.Add(doc.Get("id"));
-      }
-    }
-    catch (ParseException)
-    {
-
-    }
-
-    // 일치하는 노트 데이터베이스에서 가져오기
     List<NoteDto> noteDtos = new();
 
-    int count = ids.Count;
+    int count = dtos.Count;
     if (count > 0)
     {
       await using SqliteConnection connection = _databaseService.Connection;
@@ -253,12 +178,12 @@ internal class NoteDao(DatabaseService databaseService, SearchService searchServ
 
         await using SqliteCommand command = new(query, connection);
         for (int paramsIndex = index; paramsIndex < index + paramsCount; paramsIndex++)
-          command.Parameters.AddWithValue($"@id{paramsIndex}", new Guid(ids[paramsIndex]));
+          command.Parameters.AddWithValue($"@id{paramsIndex}", dtos[paramsIndex].Id);
 
         commands.Add(command);
       }
 
-      foreach(var command in commands)
+      foreach (var command in commands)
       {
         await using SqliteDataReader reader = command.ExecuteReader();
         while (await reader.ReadAsync())

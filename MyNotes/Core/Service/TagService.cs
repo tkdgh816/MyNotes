@@ -7,13 +7,13 @@ using MyNotes.Core.Model;
 namespace MyNotes.Core.Service;
 internal class TagService
 {
-  public TagService([FromKeyedServices("TagDao")] DaoBase daoBase)
+  public TagService([FromKeyedServices("TagDbDao")] DbDaoBase dbDaoBase)
   {
-    _tagDao = (TagDao)daoBase;
+    _tagDbDao = (TagDbDao)dbDaoBase;
     LoadAllTags();
   }
 
-  private readonly TagDao _tagDao;
+  private readonly TagDbDao _tagDbDao;
 
   private readonly Dictionary<TagId, Tag> _cache = new();
   public IEnumerable<Tag> Tags => _cache.Values;
@@ -37,13 +37,13 @@ internal class TagService
   private TagDto ToDto(Tag tag) => new() { Id = tag.Id.Value, Text = tag.Text, Color = (int)tag.Color };
 
   public IEnumerable<Tag> GetTags(NoteId noteId) 
-    => _tagDao.GetTags(new GetNoteTagsDto() { NoteId = noteId.Value }).Result.Select(ToTag);
+    => _tagDbDao.GetTags(new GetNoteTagsDto() { NoteId = noteId.Value }).Result.Select(ToTag);
 
   public bool AddTagToNote(Note note, Tag tag) 
-    => _tagDao.AddTagToNote(new TagToNoteDto() { NoteId = note.Id.Value, TagId = tag.Id.Value });
+    => _tagDbDao.AddTagToNote(new TagToNoteDto() { NoteId = note.Id.Value, TagId = tag.Id.Value });
 
   public bool DeleteTagFromNote(Note note, Tag tag)
-    => _tagDao.DeleteTagFromNote(new TagToNoteDto() { NoteId = note.Id.Value, TagId = tag.Id.Value });
+    => _tagDbDao.DeleteTagFromNote(new TagToNoteDto() { NoteId = note.Id.Value, TagId = tag.Id.Value });
 
   public void LoadAllTags()
   {
@@ -51,7 +51,7 @@ internal class TagService
     //foreach (TagDbDto dto in _tagDao.GetUncachedTags(cachedTagDbDto).Result)
     //  ToTag(dto);
 
-    foreach (TagDto dto in _tagDao.GetAllTags().Result)
+    foreach (TagDto dto in _tagDbDao.GetAllTags().Result)
       ToTag(dto);
   }
 
@@ -64,13 +64,13 @@ internal class TagService
 
     tag = new(new TagId(Guid.NewGuid()), text, color);
     AddToCache(tag);
-    _tagDao.AddTag(ToDto(tag));
+    _tagDbDao.AddTag(ToDto(tag));
     return tag;
   }
 
   public void DeleteTag(Tag tag)
   {
-    if (_tagDao.DeleteTag(new DeleteTagDto() { Id = tag.Id.Value }))
+    if (_tagDbDao.DeleteTag(new DeleteTagDto() { Id = tag.Id.Value }))
       RemoveFromCache(tag);
   }
 }

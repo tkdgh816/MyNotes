@@ -88,6 +88,24 @@ internal class NoteViewModel : ViewModelBase
     { nameof(Note.BoardId), NoteUpdateFields.Parent },
     { nameof(Note.Modified), NoteUpdateFields.Modified },
     { nameof(Note.Title), NoteUpdateFields.Title },
+    { nameof(Note.IsBookmarked), NoteUpdateFields.Bookmarked },
+    { nameof(Note.IsTrashed), NoteUpdateFields.Trashed },
+  };
+
+  public void SetNotePropertyUpdateFieldMap() => _notePropertyUpdateFieldMap = new()
+  {
+    { nameof(Note.BoardId), NoteUpdateFields.Parent },
+    { nameof(Note.Modified), NoteUpdateFields.Modified },
+    { nameof(Note.Title), NoteUpdateFields.Title },
+    { nameof(Note.IsBookmarked), NoteUpdateFields.Bookmarked },
+    { nameof(Note.IsTrashed), NoteUpdateFields.Trashed },
+  };
+
+  public void UnsetNotePropertyUpdateFieldMap() => _notePropertyUpdateFieldMap = new()
+  {
+    { nameof(Note.BoardId), NoteUpdateFields.Parent },
+    { nameof(Note.Modified), NoteUpdateFields.Modified },
+    { nameof(Note.Title), NoteUpdateFields.Title },
     { nameof(Note.Body), NoteUpdateFields.Body },
     { nameof(Note.Background), NoteUpdateFields.Background },
     { nameof(Note.Backdrop), NoteUpdateFields.Backdrop },
@@ -138,8 +156,11 @@ internal class NoteViewModel : ViewModelBase
     }
   }
 
-  public bool IsBodyChanged = false;
-  public void UpdateBody(string body) => Note.Body = body;
+  public void UpdateBody(string body)
+  {
+    Note.Body = body[..Math.Min(body.Length, 1000)];
+    _noteService.UpdateSearchDocument(Note, body);
+  }
 
   private void UpdateNoteProperties()
   {
@@ -159,7 +180,6 @@ internal class NoteViewModel : ViewModelBase
   {
     _changedNoteProperties.Clear();
     _noteUpdateFields = NoteUpdateFields.None;
-    IsBodyChanged = false;
   }
 
   // 본문 저장 파일 가져오기

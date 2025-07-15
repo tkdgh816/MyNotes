@@ -21,6 +21,7 @@ internal sealed partial class NotePage : Page
     ViewModel.SetWindowTitlebar(View_TitleTextGrid);
     RegisterEvents();
     RegisterMessengers();
+    ViewModel.UnsetNotePropertyUpdateFieldMap();
   }
 
   private async void NotePage_Unloaded(object sender, RoutedEventArgs e)
@@ -35,9 +36,11 @@ internal sealed partial class NotePage : Page
     }
     else
     {
-      UpdateBodyText(body);
+      UpdateBody(body);
       await SaveBodyAsync();
     }
+
+    ViewModel.SetNotePropertyUpdateFieldMap();
 
     if (!ViewModel.IsNoteInBoard())
       ViewModel.Dispose();
@@ -45,8 +48,6 @@ internal sealed partial class NotePage : Page
 
   private async Task LoadBodyAsync()
   {
-    View_TextEditorRichEditBox.Document.SetText(TextSetOptions.None, ViewModel.Note.Body);
-
     try
     {
       StorageFile file = await ViewModel.GetFile();
@@ -114,7 +115,7 @@ internal sealed partial class NotePage : Page
   private void OnEditorInputDebounceTimerTick(object? sender, object e)
   {
     View_TextEditorRichEditBox.Document.GetText(TextGetOptions.AdjustCrlf, out string body);
-    UpdateBodyText(body);
+    UpdateBody(body);
   }
   #endregion
 
@@ -124,18 +125,17 @@ internal sealed partial class NotePage : Page
   private void View_TextEditorRichEditBox_TextChanged(object sender, RoutedEventArgs e)
   {
     _editorInputDebounceTimer.Stop();
-    ViewModel.IsBodyChanged = true;
     if (_editorCounter++ > EditorCounterMax)
     {
       _editorCounter = 0;
       View_TextEditorRichEditBox.Document.GetText(TextGetOptions.AdjustCrlf, out string body);
-      UpdateBodyText(body);
+      UpdateBody(body);
     }
     else
       _editorInputDebounceTimer.Start();
   }
 
-  private void UpdateBodyText(string body) => ViewModel.UpdateBody(body);
+  private void UpdateBody(string body) => ViewModel.UpdateBody(body);
 
   private void View_TextEditorRichEditBox_SelectionChanged(object sender, RoutedEventArgs e)
   {

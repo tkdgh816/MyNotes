@@ -17,6 +17,11 @@ internal record NoteDto
   public required bool Trashed { get; init; }
 }
 
+internal record GetNoteDto
+{
+  public required Guid Id { get; init; }
+}
+
 internal record UpdateNoteDto
 {
   public required NoteUpdateFields UpdateFields { get; init; }
@@ -33,16 +38,6 @@ internal record UpdateNoteDto
   public int? PositionY { get; init; }
   public bool? Bookmarked { get; init; }
   public bool? Trashed { get; init; }
-}
-
-internal record GetNoteTagsDto
-{
-  public required Guid NoteId { get; init; }
-}
-
-internal record DeleteNoteDto
-{
-  public required Guid Id { get; init; }
 }
 
 [Flags]
@@ -62,4 +57,26 @@ internal enum NoteUpdateFields
   Bookmarked = 1 << 10,
   Trashed = 1 << 11,
   All = int.MaxValue
+}
+
+internal record GetNoteTagsDto
+{
+  public required Guid NoteId { get; init; }
+}
+
+internal record DeleteNoteDto
+{
+  public required Guid Id { get; init; }
+}
+
+internal record NoteFileDto
+{
+  public required string FileName { get; init; }
+}
+
+internal record NoteSearchDto
+{
+  public required Guid Id { get; init; }
+  public required string Title { get; init; }
+  public required string Body { get; init; }
 }

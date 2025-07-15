@@ -129,7 +129,8 @@
           <!--Note Body-->
           <TextBlock Grid.Row="1"
                      Margin="6"
-                     Text="{x:Bind Note.Body, Mode=OneWay}">
+                     Text="{x:Bind Note.Body, Mode=OneWay}"
+                     TextWrapping="Wrap">
             <interactivity:Interaction.Behaviors>
               <interactivity:EventTriggerBehavior EventName="DoubleTapped">
                 <interactivity:InvokeCommandAction Command="{x:Bind OpenWindowCommand}"

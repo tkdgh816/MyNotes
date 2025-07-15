@@ -9,12 +9,13 @@ using ToolkitColorHelper = CommunityToolkit.WinUI.Helpers.ColorHelper;
 
 namespace MyNotes.Core.Service;
 
-internal class NoteService([FromKeyedServices("NoteDao")] DaoBase daoBase, TagService tagService, SettingsService settingsService)
+internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase, NoteFileDao noteFileDao, NoteSearchDao noteSearchDao, TagService tagService, SettingsService settingsService)
 {
-  private readonly NoteDao _noteDao = (NoteDao)daoBase;
+  private readonly NoteDbDao _dbDao = (NoteDbDao)dbDaoBase;
+  private readonly NoteFileDao _fileDao = noteFileDao;
+  private readonly NoteSearchDao _searchDao = noteSearchDao;
   private readonly TagService _tagService = tagService;
   private readonly SettingsService _settingsService = settingsService;
-  private readonly StorageFolder _noteFolder = ApplicationData.Current.LocalFolder.CreateFolderAsync("notes", CreationCollisionOption.OpenIfExists).GetAwaiter().GetResult();
 
   private readonly Dictionary<NoteId, Note> _cache = new();
   public IEnumerable<Note> Notes => _cache.Values;
@@ -51,14 +52,30 @@ internal class NoteService([FromKeyedServices("NoteDao")] DaoBase daoBase, TagSe
       return newNote;
     }
   }
-  private NoteDto ToDto(Note note) => new() { Id = note.Id.Value, Parent = note.BoardId.Value, Created = note.Created, Modified = note.Modified, Title = note.Title, Body = note.Body, Background = note.Background.ToString(), Backdrop = (int)note.Backdrop, Width = note.Size.Width, Height = note.Size.Height, PositionX = note.Position.X, PositionY = note.Position.Y, Bookmarked = note.IsBookmarked, Trashed = note.IsTrashed };
+  private NoteDto ToNoteDto(Note note) => new()
+  {
+    Id = note.Id.Value,
+    Parent = note.BoardId.Value,
+    Created = note.Created,
+    Modified = note.Modified,
+    Title = note.Title,
+    Body = note.Body,
+    Background = note.Background.ToString(),
+    Backdrop = (int)note.Backdrop,
+    Width = note.Size.Width,
+    Height = note.Size.Height,
+    PositionX = note.Position.X,
+    PositionY = note.Position.Y,
+    Bookmarked = note.IsBookmarked,
+    Trashed = note.IsTrashed
+  };
 
   public Note CreateNote(NavigationUserBoard navigation)
   {
     DateTimeOffset creationTime = DateTimeOffset.UtcNow;
     var settings = _settingsService.GetNoteSettings();
     Note newNote = new("New note", creationTime)
-    { 
+    {
       Id = new NoteId(Guid.NewGuid()),
       BoardId = navigation.Id,
       Created = creationTime,
@@ -68,22 +85,31 @@ internal class NoteService([FromKeyedServices("NoteDao")] DaoBase daoBase, TagSe
       Position = new(-1, -1)
     };
     AddToCache(newNote);
-    _noteDao.AddNote(ToDto(newNote));
+    _dbDao.AddNote(ToNoteDto(newNote));
+    _searchDao.AddSearchDocument(new NoteSearchDto() { Id = newNote.Id.Value, Title = newNote.Title, Body = newNote.Body });
     return newNote;
   }
 
-  public bool DeleteNote(Note note) => _noteDao.DeleteNote(new DeleteNoteDto() { Id = note.Id.Value });
+  public void DeleteNote(Note note)
+  {
+    DeleteNoteDto dto = new() { Id = note.Id.Value };
+    _dbDao.DeleteNote(dto);
+    _searchDao.DeleteSearchDocument(dto);
+  }
 
   public Note? GetNote(NoteId noteId) => _cache.TryGetValue(noteId, out Note? note) ? note : null;
 
   public IEnumerable<Note> GetNotes(NavigationUserBoard navigation)
-    => _noteDao.GetNotes(new GetBoardNotesDto() { Id = navigation.Id.Value }).Result.Select(ToNote);
+    => _dbDao.GetNotes(new GetBoardNotesDto() { Id = navigation.Id.Value }).Result.Select(ToNote);
   public IEnumerable<Note> GetBookmarkedNotes()
-    => _noteDao.GetBookmarkedNotes().Result.Select(ToNote);
+    => _dbDao.GetBookmarkedNotes().Result.Select(ToNote);
   public IEnumerable<Note> GetTrashedNotes()
-    => _noteDao.GetTrashedNotes().Result.Select(ToNote);
+    => _dbDao.GetTrashedNotes().Result.Select(ToNote);
   public IEnumerable<Note> SearchNotes(string searchText)
-    => _noteDao.SearchNotes(searchText).Result.Select(ToNote);
+  {
+    List<GetNoteDto> dtos = new(_searchDao.GetNoteSearchIds(searchText));
+    return _dbDao.SearchNotes(dtos).Result.Select(ToNote);
+  }
 
   public void UpdateNote(Note note, NoteUpdateFields updateFields)
   {
@@ -107,22 +133,26 @@ internal class NoteService([FromKeyedServices("NoteDao")] DaoBase daoBase, TagSe
       Bookmarked = updateFields.HasFlag(NoteUpdateFields.Bookmarked) ? note.IsBookmarked : null,
       Trashed = updateFields.HasFlag(NoteUpdateFields.Trashed) ? note.IsTrashed : null
     };
-    _noteDao.UpdateNote(dto);
+    _dbDao.UpdateNote(dto);
+  }
+
+  public void UpdateSearchDocument(Note note, string body)
+  {
+    NoteSearchDto dto = new()
+    {
+      Id = note.Id.Value,
+      Title = note.Title,
+      Body = body
+    };
+    _searchDao.UpdateNoteSearchDocument(dto);
   }
 
   public Task<StorageFile> GetFile(Note note)
-    => _noteFolder.GetFileAsync($"{note.Id.Value}.rtf").AsTask();
+    => _fileDao.GetFile(new NoteFileDto() { FileName = $"{note.Id.Value}.rtf" });
 
-  public Task<StorageFile> CreateFile(Note note) 
-    => _noteFolder.CreateFileAsync($"{note.Id.Value}.rtf", CreationCollisionOption.OpenIfExists).AsTask();
+  public Task<StorageFile> CreateFile(Note note)
+    => _fileDao.CreateFile(new NoteFileDto() { FileName = $"{note.Id.Value}.rtf" });
 
-  public async Task DeleteFile(Note note)
-  {
-    try
-    {
-      await (await CreateFile(note)).DeleteAsync(StorageDeleteOption.PermanentDelete);
-    }
-    catch (Exception)
-    { }
-  }
+  public Task DeleteFile(Note note)
+    => _fileDao.DeleteFile(new NoteFileDto() { FileName = $"{note.Id.Value}.rtf" });
 }

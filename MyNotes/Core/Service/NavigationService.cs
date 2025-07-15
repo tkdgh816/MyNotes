@@ -11,18 +11,18 @@ namespace MyNotes.Core.Service;
 
 internal class NavigationService
 {
-  public NavigationService([FromKeyedServices("BoardDao")] DaoBase daoBase)
+  public NavigationService([FromKeyedServices("BoardDbDao")] DbDaoBase dbDaoBase)
   {
-    _boardDao = (BoardDao)daoBase;
+    _boardDbDao = (BoardDbDao)dbDaoBase;
   }
 
-  private readonly BoardDao _boardDao;
+  private readonly BoardDbDao _boardDbDao;
 
   #region NavigationUserBoard와 Database 관련 로직 (트리 생성, 추가, 제거, 업데이트)
   // 데이터베이스에서 트리 구조 가져와서 사용자 보드, 그룹 트리 구조 생성
   public void BuildNavigationTree(NavigationUserRootGroup root)
   {
-    var boards = _boardDao.GetBoards().Result;
+    var boards = _boardDbDao.GetBoards().Result;
     Queue<NavigationUserBoard> queue = new();
     queue.Enqueue(root);
     while (queue.Count > 0)
@@ -62,14 +62,14 @@ internal class NavigationService
       IconType = icon.IconType,
       IconValue = icon.IconValue
     };
-    _boardDao.AddBoard(dto);
+    _boardDbDao.AddBoard(dto);
   }
 
   // 데이터베이스에서 사용자 보드, 그룹 제거
   public void DeleteBoard(NavigationUserBoard board)
   {
     DeleteBoardDto dto = new() { Id = board.Id.Value };
-    _boardDao.DeleteBoard(dto);
+    _boardDbDao.DeleteBoard(dto);
   }
 
   // 사용자 보드, 그룹 속성 변경 시 데이터베이스에 업데이트
@@ -89,7 +89,7 @@ internal class NavigationService
       IconType = updateFields.HasFlag(BoardUpdateFields.IconType) ? icon.IconType : null,
       IconValue = updateFields.HasFlag(BoardUpdateFields.IconValue) ? icon.IconValue : null,
     };
-    _boardDao.UpdateBoard(dto);
+    _boardDbDao.UpdateBoard(dto);
   }
   #endregion
 
