@@ -220,9 +220,14 @@
       <TitleBar.RightHeader>
         <Button Style="{StaticResource AppFontIconNormalButtonStyle}"
                 Width="100"
-                Content="&#xEC7A;"
-                Click="ViewWindowsButton_Click"
-                Visibility="Visible" />
+                Click="DebugButton_Click">
+          <Button.ContextFlyout>
+            <MenuFlyout>
+              <MenuFlyoutItem Text="GC"
+                              Click="DebugMenuFlyoutButton_Click" />
+            </MenuFlyout>
+          </Button.ContextFlyout>
+        </Button>
       </TitleBar.RightHeader>
       <!--#endregion -->
     </TitleBar>

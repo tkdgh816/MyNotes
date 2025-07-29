@@ -129,7 +129,7 @@
           <!--Note Body-->
           <TextBlock Grid.Row="1"
                      Margin="6"
-                     Text="{x:Bind Note.Body, Mode=OneWay}"
+                     Text="{x:Bind Note.Preview, Mode=OneWay}"
                      TextWrapping="Wrap">
             <interactivity:Interaction.Behaviors>
               <interactivity:EventTriggerBehavior EventName="DoubleTapped">
@@ -245,7 +245,8 @@
           <Grid Grid.Column="1">
             <!--Note Body-->
             <TextBlock Margin="6"
-                       Text="{x:Bind Note.Body, Mode=OneWay}">
+                       Text="{x:Bind Note.Preview, Mode=OneWay}"
+                       TextWrapping="Wrap">
               <interactivity:Interaction.Behaviors>
                 <interactivity:EventTriggerBehavior EventName="DoubleTapped">
                   <interactivity:InvokeCommandAction Command="{x:Bind OpenWindowCommand}"
@@ -626,7 +627,7 @@
               Grid.Row="1"
               ItemsSource="{Binding Source={StaticResource NotesCollectionViewSource}}"
               ItemTemplate="{StaticResource GridViewItemTemplate_GridStyle}"
-              ItemContainerStyle="{StaticResource AppGridViewItemContainerStyle210Moderate}"
+              ItemContainerStyle="{StaticResource AppGridViewItemContainerStyle270Moderate}"
               SelectionMode="None"
               HorizontalAlignment="Center"
               CanDragItems="True"
@@ -634,16 +635,7 @@
               TabNavigation="Local"
               TabFocusNavigation="Local"
               AllowFocusOnInteraction="False"
-              ContainerContentChanging="View_NotesGridView_ContainerContentChanging">
-      <!--<GridView.ItemContainerTransitions>
-        <TransitionCollection>
-          <AddDeleteThemeTransition />
-          <ContentThemeTransition />
-          <ReorderThemeTransition />
-          <EntranceThemeTransition />
-        </TransitionCollection>
-      </GridView.ItemContainerTransitions>-->
-    </GridView>
+              ContainerContentChanging="View_NotesGridView_ContainerContentChanging" />
     <!--#endregion-->
 
     <!--#region VisualStateManager -->

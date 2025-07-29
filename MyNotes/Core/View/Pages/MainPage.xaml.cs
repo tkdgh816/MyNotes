@@ -363,7 +363,8 @@ internal sealed partial class MainPage : Page
   #endregion
 
   //TEST: View Windows And Pages
-  private void ViewWindowsButton_Click(object sender, RoutedEventArgs e) => ReferenceTracker.ShowReferences();
+  private void DebugButton_Click(object sender, RoutedEventArgs e) => ReferenceTracker.ShowReferences();
+  private void DebugMenuFlyoutButton_Click(object sender, RoutedEventArgs e) => ReferenceTracker.ShowReferencesWithGC();
 }
 
 internal class MainNavigationViewMenuItemTemplateSelector : DataTemplateSelector

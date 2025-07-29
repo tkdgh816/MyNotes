@@ -1,48 +1,76 @@
 ﻿using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading;
 
 namespace MyNotes.Common.Collections;
 
 internal class IncrementalObservableCollection<T> : ObservableCollection<T>, ISupportIncrementalLoading
 {
-  private readonly Func<uint, Task<T[]>> _loadDataFunc;
-  private readonly uint _pageSize;
-  private uint _offset = 0;
+  private readonly Func<uint, Task<IEnumerable<T>>>? _loadItemsTaskFunc;
+  private readonly Func<uint, IAsyncEnumerable<T>>? _loadItemsIAsyncEnumerableFunc;
+
+  private bool _hasMoreItems = true;
   private bool _isLoading = false;
+  private readonly Lock _lockObj = new();
 
-  public IncrementalObservableCollection(Func<uint, Task<T[]>> loadDataFunc, uint pageSize = 20)
+  public IncrementalObservableCollection(Func<uint, Task<IEnumerable<T>>> loadItemsTaskFunc)
+    => _loadItemsTaskFunc = loadItemsTaskFunc;
+
+  public IncrementalObservableCollection(Func<uint, IAsyncEnumerable<T>> loadItemsIAsyncEnumerableFunc)
+   => _loadItemsIAsyncEnumerableFunc = loadItemsIAsyncEnumerableFunc;
+
+  public bool HasMoreItems => _hasMoreItems && !_isLoading;
+
+  private async Task<LoadMoreItemsResult> LoadMoreItemsAsync(uint count)
   {
-    _loadDataFunc = loadDataFunc ?? throw new ArgumentNullException(nameof(loadDataFunc));
-    _pageSize = pageSize;
-  }
-
-  public bool HasMoreItems { get; private set; } = true;
-
-  public bool IsLoading => _isLoading;
-
-  public IAsyncOperation<LoadMoreItemsResult> LoadMoreItemsAsync(uint count)
-  {
-    return AsyncInfo.Run(async cancellationToken =>
+    lock (_lockObj)
     {
-      if (_isLoading || !HasMoreItems)
-        return new LoadMoreItemsResult { Count = 0 };
+      if (_isLoading)
+        return new LoadMoreItemsResult(0);
 
       _isLoading = true;
+    }
 
-      var items = await _loadDataFunc(_offset);
+    try
+    {
+      await Task.Delay(10);
+      uint itemCount = 0;
 
-      foreach (var item in items)
+      if (_loadItemsTaskFunc is not null)
       {
-        Add(item);
+        var enumerator = (await _loadItemsTaskFunc(count)).GetEnumerator();
+
+        while (enumerator.MoveNext())
+        {
+          itemCount++;
+          Add(enumerator.Current);
+        }
       }
+      else if (_loadItemsIAsyncEnumerableFunc is not null)
+      {
+        await foreach (var item in _loadItemsIAsyncEnumerableFunc(count))
+        {
+          itemCount++;
+          Add(item);
+        }
+      }
+      else
+        throw new ArgumentException("LoadItems Func is null");
 
-      _offset += (uint)items.Length;
+      if (itemCount == 0)
+        _hasMoreItems = false;
 
-      if (items.Length < _pageSize)
-        HasMoreItems = false;
-
+      return new LoadMoreItemsResult(itemCount);
+    }
+    catch (Exception)
+    {
+      return new LoadMoreItemsResult(0);
+    }
+    finally
+    {
       _isLoading = false;
-
-      return new LoadMoreItemsResult { Count = (uint)items.Length };
-    });
+    }
   }
+
+  IAsyncOperation<LoadMoreItemsResult> ISupportIncrementalLoading.LoadMoreItemsAsync(uint count)
+    => AsyncInfo.Run((c) => LoadMoreItemsAsync(count));
 }

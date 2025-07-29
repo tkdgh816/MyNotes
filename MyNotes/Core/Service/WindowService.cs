@@ -92,8 +92,8 @@ internal class WindowService
     {
       appWindow.Resize(new SizeInt32()
       {
-        Width = (int)(size.Width * dpiScale),
-        Height = (int)(size.Height * dpiScale)
+        Width = (int)(size.Width),
+        Height = (int)(size.Height)
       });
     }
     else
@@ -103,8 +103,8 @@ internal class WindowService
       {
         X = Math.Clamp(position.X, workArea.X, workArea.Width),
         Y = Math.Clamp(position.Y, workArea.Y, workArea.Height),
-        Width = (int)(size.Width * dpiScale),
-        Height = (int)(size.Height * dpiScale)
+        Width = (int)(size.Width),
+        Height = (int)(size.Height)
       });
     }
 

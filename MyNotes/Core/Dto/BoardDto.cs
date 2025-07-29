@@ -28,11 +28,6 @@ internal record DeleteBoardDto
   public required Guid Id { get; init; }
 }
 
-internal record GetBoardNotesDto
-{
-  public required Guid Id { get; init; }
-}
-
 internal record UpdateBoardDto
 {
   public required BoardUpdateFields UpdateFields { get; init; }

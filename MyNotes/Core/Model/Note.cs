@@ -15,7 +15,7 @@ internal class Note : ObservableObject
 
   public override string ToString() => Title;
 
-  static readonly HashSet<string> _propertiesAffectingModified = new() { nameof(Title), nameof(Body), nameof(Background), nameof(Backdrop) };
+  static readonly HashSet<string> _propertiesAffectingModified = new() { nameof(Title), nameof(Preview), nameof(Background), nameof(Backdrop) };
   private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
   {
     if (e.PropertyName is not null && _propertiesAffectingModified.Contains(e.PropertyName))
@@ -40,11 +40,11 @@ internal class Note : ObservableObject
     set => SetProperty(ref _title, value);
   }
 
-  private string _body = "";
-  public string Body
+  private string _preview = "";
+  public string Preview
   {
-    get => _body;
-    set => SetProperty(ref _body, value);
+    get => _preview;
+    set => SetProperty(ref _preview, value);
   }
 
   private Color _background = Colors.LightGoldenrodYellow;

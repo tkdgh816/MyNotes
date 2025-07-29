@@ -53,8 +53,12 @@ internal class NoteSearchDao(SearchService searchService)
     }
   }
 
-  public IEnumerable<GetNoteDto> GetNoteSearchIds(string searchText)
+  private ScoreDoc? currentDoc;
+  public IEnumerable<GetNoteDto> GetNoteSearchIds(string searchText, int limit, int offset)
   {
+    if (offset == 0)
+      currentDoc = null;
+
     using DirectoryReader indexReader = _searchService.Writer.GetReader(true);
     var indexSearcher = new IndexSearcher(indexReader);
     List<GetNoteDto> dtos = new();
@@ -65,7 +69,7 @@ internal class NoteSearchDao(SearchService searchService)
       var searchQuery = parser.Parse(searchText);
 
 
-      var topDocs = indexSearcher.Search(searchQuery, 10);
+      var topDocs = indexSearcher.SearchAfter(currentDoc, searchQuery, limit);
 
 
       foreach (var scoreDoc in topDocs.ScoreDocs)
@@ -73,6 +77,9 @@ internal class NoteSearchDao(SearchService searchService)
         var doc = indexSearcher.Doc(scoreDoc.Doc);
         dtos.Add(new GetNoteDto() { Id = new Guid(doc.Get("id")) });
       }
+
+      if (topDocs.ScoreDocs.Length > 0)
+        currentDoc = topDocs.ScoreDocs[^1];
     }
     catch (ParseException)
     {

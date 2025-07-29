@@ -41,6 +41,7 @@ internal sealed partial class NotePage : Page
     }
 
     ViewModel.SetNotePropertyUpdateFieldMap();
+    await ViewModel.ForceUpdateNoteProperties();
 
     if (!ViewModel.IsNoteInBoard())
       ViewModel.Dispose();
@@ -57,10 +58,14 @@ internal sealed partial class NotePage : Page
         View_TextEditorRichEditBox.Document.LoadFromStream(TextSetOptions.FormatRtf, stream);
       }
       catch (Exception)
-      { }
+      {
+        throw;
+      }
     }
     catch (Exception)
-    { }
+    {
+      View_TextEditorRichEditBox.Document.SetText(TextSetOptions.None, TextGenerator.GenerateTexts(400));
+    }
   }
 
   private async Task SaveBodyAsync()
@@ -87,7 +92,7 @@ internal sealed partial class NotePage : Page
 
   private void View_TextEditorRichEditBox_Loaded(object sender, RoutedEventArgs e)
   {
-    View_TextEditorRichEditBox.Document.SetText(TextSetOptions.None, ViewModel.Note.Body);
+    View_TextEditorRichEditBox.Document.SetText(TextSetOptions.None, ViewModel.Note.Preview);
   }
 
   private void View_TitleTextBox_LostFocus(object sender, RoutedEventArgs e)
@@ -130,6 +135,7 @@ internal sealed partial class NotePage : Page
       _editorCounter = 0;
       View_TextEditorRichEditBox.Document.GetText(TextGetOptions.AdjustCrlf, out string body);
       UpdateBody(body);
+      _ = SaveBodyAsync();
     }
     else
       _editorInputDebounceTimer.Start();

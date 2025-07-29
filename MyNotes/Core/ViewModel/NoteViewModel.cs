@@ -38,11 +38,9 @@ internal class NoteViewModel : ViewModelBase
   {
     if (disposing)
     {
-      ForceUpdateNoteProperties();
       UnregisterEvents();
       UnregisterMessengers();
       App.Instance.GetService<NoteViewModelFactory>().Remove(Note);
-      App.Instance.GetService<NoteService>().RemoveFromCache(Note);
     }
 
     base.Dispose(disposing);
@@ -106,7 +104,7 @@ internal class NoteViewModel : ViewModelBase
     { nameof(Note.BoardId), NoteUpdateFields.Parent },
     { nameof(Note.Modified), NoteUpdateFields.Modified },
     { nameof(Note.Title), NoteUpdateFields.Title },
-    { nameof(Note.Body), NoteUpdateFields.Body },
+    { nameof(Note.Preview), NoteUpdateFields.Preview },
     { nameof(Note.Background), NoteUpdateFields.Background },
     { nameof(Note.Backdrop), NoteUpdateFields.Backdrop },
     { nameof(Note.Size), NoteUpdateFields.Width | NoteUpdateFields.Height },
@@ -117,7 +115,7 @@ internal class NoteViewModel : ViewModelBase
 
   private void OnNoteDebounceTimerTick(object? sender, object e)
   {
-    UpdateNoteProperties();
+    _ = UpdateNoteProperties();
     ApplyDebouncedChangesToView();
     _noteDebounceTimer.Stop();
   }
@@ -158,21 +156,21 @@ internal class NoteViewModel : ViewModelBase
 
   public void UpdateBody(string body)
   {
-    Note.Body = body[..Math.Min(body.Length, 1000)];
+    Note.Preview = body[..Math.Min(body.Length, 1000)];
     _noteService.UpdateSearchDocument(Note, body);
   }
 
-  private void UpdateNoteProperties()
+  private async Task UpdateNoteProperties()
   {
-    _noteService.UpdateNote(Note, _noteUpdateFields);
+    await _noteService.UpdateNote(Note, _noteUpdateFields);
     foreach (string changedPropertyName in _changedNoteProperties)
       OnPropertyChanged(changedPropertyName);
     ClearNotePropertyChangedFlags();
   }
 
-  public void ForceUpdateNoteProperties()
+  public async Task ForceUpdateNoteProperties()
   {
-    _noteService.UpdateNote(Note, NoteUpdateFields.All);
+    await _noteService.UpdateNote(Note, NoteUpdateFields.All);
     ClearNotePropertyChangedFlags();
   }
 
@@ -233,6 +231,7 @@ internal class NoteViewModel : ViewModelBase
       WeakReferenceMessenger.Default.Send(new Message<NoteViewModel>(this), Tokens.RemoveNoteFromBoard);
     });
 
+    // TODO: Delete와 Move시 Note와 NoteViewModel 명시적 Dispose해야 함
     DeleteNoteCommand = new(() =>
     {
       _noteService.DeleteNote(Note);
@@ -246,12 +245,12 @@ internal class NoteViewModel : ViewModelBase
         MoveNoteToBoardCommand?.Execute(boardId);
     });
 
-    MoveNoteToBoardCommand = new((boardId) =>
+    MoveNoteToBoardCommand = new(async (boardId) =>
     {
       if (boardId != Note.BoardId)
       {
         Note.BoardId = boardId;
-        _noteService.UpdateNote(Note, NoteUpdateFields.Parent);
+        await _noteService.UpdateNote(Note, NoteUpdateFields.Parent);
         WeakReferenceMessenger.Default.Send(new Message<NoteViewModel>(this), Tokens.RemoveNoteFromBoard);
       }
     });

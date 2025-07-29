@@ -1,4 +1,6 @@
-﻿using MyNotes.Common.Collections;
+﻿using Microsoft.UI.Dispatching;
+
+using MyNotes.Common.Collections;
 using MyNotes.Common.Commands;
 using MyNotes.Common.Messaging;
 using MyNotes.Core.Model;
@@ -15,7 +17,10 @@ internal class BoardViewModel : ViewModelBase
   private readonly NoteService _noteService;
   private readonly NoteViewModelFactory _noteViewModelFactory;
 
-  public SortedObservableCollection<NoteViewModel> NoteViewModels { get; private set; } = null!;
+  public IncrementalObservableCollection<NoteViewModel> NoteViewModels { get; private set; } = null!;
+  //public ObservableCollection<NoteViewModel> NoteViewModels { get; private set; } = new();
+  public List<Note> Notes { get; private set; } = new();
+  private bool _isCompleted = false;
 
   public BoardViewModel(NavigationBoard navigation, WindowService windowService, DialogService dialogService, NoteService noteService, NoteViewModelFactory noteViewModelFactory)
   {
@@ -39,33 +44,109 @@ internal class BoardViewModel : ViewModelBase
         if (!_windowService.IsNoteWindowActive(noteViewModel.Note))
           noteViewModel.Dispose();
       }
+
+      NoteViewModels.Clear();
       UnregisterMessengers();
       App.Instance.GetService<BoardViewModelFactory>().Remove(Navigation);
     }
-    NoteViewModels.Clear();
+
     base.Dispose(disposing);
   }
 
+  private int _loadedNoteCount = 0;
+
   private void GetNoteViewModels()
   {
+    //GetNoteViewModelsBatch0();
+    //GetNoteViewModelsStream0();
+
+    if (Navigation is NavigationUserBoard)
+    {
+      Task.Run(async () =>
+      {
+        await foreach (var note in _noteService.GetNotesStreamAsync(Navigation))
+          Notes.Add(note);
+        _isCompleted = true;
+      });
+    }
+    NoteViewModels = new(GetNoteViewModelsBatch1);
+    //NoteViewModels = new(GetNoteViewModelsBatch2);
+    //NoteViewModels = new(GetNoteViewModelsStream1);
+  }
+
+  private async void GetNoteViewModelsBatch0()
+  {
+    var notes = Navigation switch
+    {
+      NavigationSearch search => await _noteService.SearchNotesBatchAsync(search.SearchText),
+      _ => await _noteService.GetNotesBatchAsync(Navigation)
+    };
+
+    foreach (var vm in notes.Select(_noteViewModelFactory.Resolve))
+      NoteViewModels.Add(vm);
+  }
+
+  private async void GetNoteViewModelsStream0()
+  {
+    var notes = Navigation switch
+    {
+      NavigationSearch search => _noteService.SearchNotesStreamAsync(search.SearchText),
+      _ => _noteService.GetNotesStreamAsync(Navigation),
+    };
+
+    await foreach (var note in notes)
+      NoteViewModels.Add(_noteViewModelFactory.Resolve(note));
+  }
+
+  private async Task<IEnumerable<NoteViewModel>> GetNoteViewModelsBatch1(uint count)
+  {
+    List<NoteViewModel> vms = new();
     switch (Navigation)
     {
-      case NavigationUserBoard userBoard:
-        NoteViewModels = new(_noteService.GetNotes(userBoard).Select(_noteViewModelFactory.Resolve));
-        break;
-      case NavigationBookmarks _:
-        NoteViewModels = new(_noteService.GetBookmarkedNotes().Select(_noteViewModelFactory.Resolve));
-        break;
-      case NavigationTrash _:
-        NoteViewModels = new(_noteService.GetTrashedNotes().Select(_noteViewModelFactory.Resolve));
-        break;
       case NavigationSearch search:
-        NoteViewModels = new(_noteService.SearchNotes(search.SearchText).Select(_noteViewModelFactory.Resolve));
-        search.SearchCount = NoteViewModels.Count;
+        var notes = await _noteService.SearchNotesBatchAsync(search.SearchText, (int)count, _loadedNoteCount);
+        vms = [.. notes.Select(_noteViewModelFactory.Resolve)];
+        _loadedNoteCount += vms.Count;
+        break;
+      default:
+        uint index = 0;
+        while (index < count)
+        {
+          if (!_isCompleted)
+            await Task.Delay(100);
+          else if (_loadedNoteCount >= Notes.Count)
+            break;
+          else
+          {
+            vms.Add(_noteViewModelFactory.Resolve(Notes[_loadedNoteCount++]));
+            index++;
+          }
+        }
         break;
     }
+    return vms;
+  }
 
-    NoteViewModels.SortDescriptions.Add(new SortDescription<NoteViewModel>(func: vm => vm.Note.Modified, direction: SortDirection.Descending, keyPropertyName: "Modified"));
+  private async Task<IEnumerable<NoteViewModel>> GetNoteViewModelsBatch2(uint count)
+  {
+    var notes = Navigation switch
+    {
+      NavigationSearch search => await _noteService.SearchNotesBatchAsync(search.SearchText, (int)count, NoteViewModels.Count),
+      _ => await _noteService.GetNotesBatchAsync(Navigation, (int)count, NoteViewModels.Count)
+    };
+    return notes.Select(_noteViewModelFactory.Resolve);
+  }
+
+  private async IAsyncEnumerable<NoteViewModel> GetNoteViewModelsStream1(uint count)
+  {
+    var notes = Navigation switch
+    {
+      NavigationSearch search => _noteService.SearchNotesStreamAsync(search.SearchText, (int)count, NoteViewModels.Count),
+      _ => _noteService.GetNotesStreamAsync(Navigation, (int)count, NoteViewModels.Count),
+    };
+
+    await foreach (var note in notes)
+      yield return _noteViewModelFactory.Resolve(note);
   }
 
   #region Sort
@@ -74,17 +155,6 @@ internal class BoardViewModel : ViewModelBase
 
   private void SortNoteViewModels()
   {
-    SortDescription<NoteViewModel> sortDescription = SortKey switch
-    {
-      NoteSortKey.Created => new(func: vm => vm.Note.Created, direction: SortDirection),
-      NoteSortKey.Title => new(func: vm => vm.Note.Title, direction: SortDirection, keyPropertyName: "Title"),
-      NoteSortKey.Modified or _ => new(func: vm => vm.Note.Modified, direction: SortDirection, keyPropertyName: "Modified"),
-    };
-
-    NoteViewModels.SortDescriptions.Clear();
-    NoteViewModels.SortDescriptions.Add(sortDescription);
-    NoteViewModels.Refresh();
-
     WeakReferenceMessenger.Default.Send(new Message<IEnumerable<NoteViewModel>>(NoteViewModels, this), Tokens.RefreshSource);
   }
   #endregion
@@ -104,7 +174,7 @@ internal class BoardViewModel : ViewModelBase
     {
       Note newNote = _noteService.CreateNote((NavigationUserBoard)Navigation);
       NoteViewModel noteViewModel = _noteViewModelFactory.Resolve(newNote);
-      NoteViewModels.Add(noteViewModel);
+      NoteViewModels.Insert(0, noteViewModel);
       noteViewModel.CreateWindow();
     });
 
@@ -116,7 +186,7 @@ internal class BoardViewModel : ViewModelBase
       }
       else
       {
-        var source = NoteViewModels.Where(vm => vm.Note.Title.Contains(query) || vm.Note.Body.Contains(query));
+        var source = NoteViewModels.Where(vm => vm.Note.Title.Contains(query) || vm.Note.Preview.Contains(query));
         WeakReferenceMessenger.Default.Send(new Message<IEnumerable<NoteViewModel>>(source, this), Tokens.ChangeSourceFiltered);
       }
     });

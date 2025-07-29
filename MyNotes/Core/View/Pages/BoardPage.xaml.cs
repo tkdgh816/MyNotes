@@ -217,7 +217,7 @@ internal sealed partial class BoardPage : Page
 
     NoteId noteId = noteViewModel.Note.Id;
     string noteTitle = noteViewModel.Note.Title;
-    string noteBody = noteViewModel.Note.Body;
+    string noteBody = noteViewModel.Note.Preview;
     var container = (FrameworkElement)View_NotesGridView.ContainerFromItem(noteViewModel);
 
     args.Data.SetData(StandardDataFormats.Text, $"[{noteTitle}]\r\n{noteBody}");
@@ -244,7 +244,7 @@ internal sealed partial class BoardPage : Page
 
     NoteId noteId = noteViewModel.Note.Id;
     string noteTitle = noteViewModel.Note.Title;
-    string noteBody = noteViewModel.Note.Body;
+    string noteBody = noteViewModel.Note.Preview;
     var container = (FrameworkElement)View_NotesGridView.ContainerFromItem(noteViewModel);
 
     e.Data.SetData(StandardDataFormats.Text, $"[{noteTitle}]\r\n{noteBody}");

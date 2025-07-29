@@ -13,7 +13,8 @@ internal class DatabaseService
     _connectionString = new SqliteConnectionStringBuilder()
     {
       DataSource = Path.Combine(databaseFolder.Path, "data.sqlite"),
-      ForeignKeys = true
+      ForeignKeys = true,
+      DefaultTimeout = 60
     }.ToString();
 
     CreateTables();
@@ -71,7 +72,7 @@ internal class DatabaseService
       created         TEXT NOT NULL,
       modified        TEXT NOT NULL,
       title           TEXT NOT NULL DEFAULT '',
-      body            TEXT NOT NULL DEFAULT '',
+      preview         TEXT NOT NULL DEFAULT '',
       background      TEXT NOT NULL,
       backdrop        INTEGER NOT NULL,
       width           INTEGER NOT NULL,
@@ -81,17 +82,6 @@ internal class DatabaseService
       bookmarked      INTEGER NOT NULL DEFAULT 0,
       trashed         INTEGER NOT NULL DEFAULT 0
       )
-      """;
-
-    using SqliteCommand command = new(createQuery, connection, transaction);
-    command.ExecuteNonQuery();
-  }
-
-  private void CreateNotesFtsTable(SqliteConnection connection, SqliteTransaction transaction)
-  {
-    string createQuery = """
-      CREATE VIRTUAL TABLE IF NOT EXISTS NotesFts
-      USING fts5(id, title, body, tokenize="trigram");
       """;
 
     using SqliteCommand command = new(createQuery, connection, transaction);
@@ -161,14 +151,13 @@ internal class DatabaseService
     }
     else if (tableName == "Notes")
     {
-      string query = "SELECT * FROM Notes LEFT JOIN NotesFts ON Notes.id = NotesFts.id";
+      string query = "SELECT * FROM Notes";
       using SqliteCommand command = new(query, connection);
       using SqliteDataReader reader = command.ExecuteReader();
       int num = 0;
       while (reader.Read())
       {
-        string body = (string)reader["body"];
-        string subBody = body[..Math.Min(100, body.Length)].ReplaceLineEndings(" ");
+        string preview = reader["preview"].ToString()!;
         yield return
           $"""
           [ {num++} ]
@@ -177,7 +166,7 @@ internal class DatabaseService
           created || {reader["created"]}
           modified || {reader["modified"]}
           title || {reader["title"]}
-          body || {subBody}
+          preview({preview.Length}) || {preview}
           background || {reader["background"]}
           backdrop || {reader["backdrop"]}
           width || {reader["width"]}

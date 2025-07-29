@@ -50,19 +50,7 @@ internal class NavigationSearch : NavigationBoard
 {
   public string SearchText { get; }
 
-  private int _searchCount = 0;
-  public int SearchCount
-  {
-    get => _searchCount;
-    set
-    {
-      if (_searchCount != value)
-        Name = $"Search results for \"{SearchText}\" ({value})";
-      SetProperty(ref _searchCount, value);
-    }
-  }
-
-  public NavigationSearch(string searchText) : base(typeof(BoardPage), $"No search results for \"{searchText}\"", IconManager.FindGlyph("\uE721"))
+  public NavigationSearch(string searchText) : base(typeof(BoardPage), $"Search results for \"{searchText}\"", IconManager.FindGlyph("\uE721"))
   {
     SearchText = searchText;
   }

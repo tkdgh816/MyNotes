@@ -38,7 +38,7 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
         Id = noteId,
         BoardId = new BoardId(dto.Parent),
         Created = dto.Created,
-        Body = dto.Body,
+        Preview = dto.Preview,
         Background = ToolkitColorHelper.ToColor(dto.Background),
         Backdrop = (BackdropKind)dto.Backdrop,
         Size = new SizeInt32(dto.Width, dto.Height),
@@ -59,7 +59,7 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
     Created = note.Created,
     Modified = note.Modified,
     Title = note.Title,
-    Body = note.Body,
+    Preview = note.Preview,
     Background = note.Background.ToString(),
     Backdrop = (int)note.Backdrop,
     Width = note.Size.Width,
@@ -74,19 +74,36 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
   {
     DateTimeOffset creationTime = DateTimeOffset.UtcNow;
     var settings = _settingsService.GetNoteSettings();
+    List<Color> colors =
+      [
+        ToolkitColorHelper.ToColor("#FFFAF7A3"),
+        ToolkitColorHelper.ToColor("#FFD5FACC"),
+        ToolkitColorHelper.ToColor("#FF9CFADB"),
+        ToolkitColorHelper.ToColor("#FFFFC4D1"),
+        ToolkitColorHelper.ToColor("#FFEEDBFA"),
+        ToolkitColorHelper.ToColor("#FFA5E5FA"),
+        ToolkitColorHelper.ToColor("#FF93BDFF"),
+        ToolkitColorHelper.ToColor("#FFFFB988"),
+        ToolkitColorHelper.ToColor("#FFF7F7EC"),
+        ToolkitColorHelper.ToColor("#FFC1C4C1"),
+        ToolkitColorHelper.ToColor("#FFDBE6FA"),
+        ToolkitColorHelper.ToColor("#FFEBDABA"),
+        ToolkitColorHelper.ToColor("#FFEFFA87")
+      ];
+    Random random = new();
     Note newNote = new("New note", creationTime)
     {
       Id = new NoteId(Guid.NewGuid()),
       BoardId = navigation.Id,
       Created = creationTime,
-      Background = settings.Background,
+      Background = colors[random.Next(colors.Count)],
       Backdrop = settings.Backdrop,
       Size = settings.Size,
       Position = new(-1, -1)
     };
     AddToCache(newNote);
     _dbDao.AddNote(ToNoteDto(newNote));
-    _searchDao.AddSearchDocument(new NoteSearchDto() { Id = newNote.Id.Value, Title = newNote.Title, Body = newNote.Body });
+    _searchDao.AddSearchDocument(new NoteSearchDto() { Id = newNote.Id.Value, Title = newNote.Title, Body = newNote.Preview });
     return newNote;
   }
 
@@ -99,19 +116,73 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
 
   public Note? GetNote(NoteId noteId) => _cache.TryGetValue(noteId, out Note? note) ? note : null;
 
-  public IEnumerable<Note> GetNotes(NavigationUserBoard navigation)
-    => _dbDao.GetNotes(new GetBoardNotesDto() { Id = navigation.Id.Value }).Result.Select(ToNote);
-  public IEnumerable<Note> GetBookmarkedNotes()
-    => _dbDao.GetBookmarkedNotes().Result.Select(ToNote);
-  public IEnumerable<Note> GetTrashedNotes()
-    => _dbDao.GetTrashedNotes().Result.Select(ToNote);
-  public IEnumerable<Note> SearchNotes(string searchText)
+  private GetNotesDto GetNotesDto(NavigationBoard navigation, int limit, int offset) =>
+    navigation switch
+    {
+      NavigationUserBoard userBoard => new()
+      {
+        GetFields = NoteGetFields.Parent | NoteGetFields.Trashed,
+        Limit = limit,
+        Offset = offset,
+        Parent = userBoard.Id.Value,
+        Trashed = false
+      },
+      NavigationBookmarks _ => new()
+      {
+        GetFields = NoteGetFields.Bookmarked | NoteGetFields.Trashed,
+        Limit = limit,
+        Offset = offset,
+        Bookmarked = true,
+        Trashed = false
+      },
+      NavigationTrash _ => new()
+      {
+        GetFields = NoteGetFields.Trashed,
+        Limit = limit,
+        Offset = offset,
+        Trashed = true
+      },
+      _ => throw new NotImplementedException(),
+    };
+
+  public async IAsyncEnumerable<Note> GetNotesStreamAsync(NavigationBoard navigation, int count = -1, int startIndex = -1)
   {
-    List<GetNoteDto> dtos = new(_searchDao.GetNoteSearchIds(searchText));
-    return _dbDao.SearchNotes(dtos).Result.Select(ToNote);
+    GetNotesDto dto = GetNotesDto(navigation, count, startIndex);
+
+    //await foreach (var noteDto in _dbDao.GetNotesChannelStreamAsync(dto))
+    //  yield return ToNote(noteDto);
+
+    await foreach (var noteDto in await _dbDao.GetNotesStreamAsync(dto))
+      yield return ToNote(noteDto);
   }
 
-  public void UpdateNote(Note note, NoteUpdateFields updateFields)
+
+  public async IAsyncEnumerable<Note> SearchNotesStreamAsync(string searchText, int count = 1000, int startIndex = 0)
+  {
+    List<GetNoteDto> dtos = new(_searchDao.GetNoteSearchIds(searchText, count, startIndex));
+
+    //await foreach (var noteDto in _dbDao.SearchNotesChannelStreamAsync(dtos))
+    //  yield return ToNote(noteDto);
+
+    await foreach (var noteDto in await _dbDao.SearchNotesStreamAsync(dtos))
+      yield return ToNote(noteDto);
+  }
+
+  public async Task<IEnumerable<Note>> GetNotesBatchAsync(NavigationBoard navigation, int count = -1, int startIndex = -1)
+  {
+    GetNotesDto dto = GetNotesDto(navigation, count, startIndex);
+
+    return (await _dbDao.GetNotesBatchAsync(dto)).Select(ToNote);
+  }
+
+  public async Task<IEnumerable<Note>> SearchNotesBatchAsync(string searchText, int count = 1000, int startIndex = 0)
+  {
+    List<GetNoteDto> dtos = new(_searchDao.GetNoteSearchIds(searchText, count, startIndex));
+
+    return (await _dbDao.SearchNotesBatchAsync(dtos)).Select(ToNote);
+  }
+
+  public async Task UpdateNote(Note note, NoteUpdateFields updateFields)
   {
     if (updateFields == NoteUpdateFields.None)
       return;
@@ -123,7 +194,7 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
       Parent = updateFields.HasFlag(NoteUpdateFields.Parent) ? note.BoardId.Value : null,
       Modified = updateFields.HasFlag(NoteUpdateFields.Modified) ? note.Modified : null,
       Title = updateFields.HasFlag(NoteUpdateFields.Title) ? note.Title : null,
-      Body = updateFields.HasFlag(NoteUpdateFields.Body) ? note.Body : null,
+      Preview = updateFields.HasFlag(NoteUpdateFields.Preview) ? note.Preview : null,
       Background = updateFields.HasFlag(NoteUpdateFields.Background) ? note.Background.ToString() : null,
       Backdrop = updateFields.HasFlag(NoteUpdateFields.Backdrop) ? (int)note.Backdrop : null,
       Width = updateFields.HasFlag(NoteUpdateFields.Width) ? note.Size.Width : null,
@@ -133,7 +204,7 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
       Bookmarked = updateFields.HasFlag(NoteUpdateFields.Bookmarked) ? note.IsBookmarked : null,
       Trashed = updateFields.HasFlag(NoteUpdateFields.Trashed) ? note.IsTrashed : null
     };
-    _dbDao.UpdateNote(dto);
+    await _dbDao.UpdateNoteAsync(dto);
   }
 
   public void UpdateSearchDocument(Note note, string body)
