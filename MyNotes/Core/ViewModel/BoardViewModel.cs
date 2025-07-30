@@ -109,12 +109,13 @@ internal class BoardViewModel : ViewModelBase
         _loadedNoteCount += vms.Count;
         break;
       default:
+        if (!_isCompleted)
+          await Task.Delay(100);
+
         uint index = 0;
         while (index < count)
-        {
-          if (!_isCompleted)
-            await Task.Delay(100);
-          else if (_loadedNoteCount >= Notes.Count)
+        {          
+          if (_loadedNoteCount >= Notes.Count)
             break;
           else
           {

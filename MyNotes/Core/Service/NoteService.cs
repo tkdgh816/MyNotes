@@ -125,7 +125,9 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
         Limit = limit,
         Offset = offset,
         Parent = userBoard.Id.Value,
-        Trashed = false
+        Trashed = false,
+        SortField = NoteSortField.Modified,
+        SortDirection = NoteSortDirection.Ascending
       },
       NavigationBookmarks _ => new()
       {

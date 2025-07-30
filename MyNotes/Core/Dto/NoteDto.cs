@@ -30,6 +30,8 @@ internal record GetNotesDto
   public Guid? Parent { get; init; }
   public bool? Bookmarked { get; init; }
   public bool? Trashed { get; init; }
+  public NoteSortField? SortField { get; init; }
+  public NoteSortDirection? SortDirection { get; init; }
 }
 
 [Flags]
@@ -41,6 +43,10 @@ internal enum NoteGetFields
   Trashed = 1 << 2,
   All = int.MaxValue
 }
+
+internal enum NoteSortField { Created, Modified, Title }
+
+internal enum NoteSortDirection { Ascending, Descending }
 
 internal record UpdateNoteDto
 {
