@@ -17,7 +17,7 @@ internal sealed partial class EditNoteTagsDialog : ContentDialog
   private readonly TagService _tagService;
 
   private bool _preventDefaultTagColorChange = false;
-  private TagColor _defaultTagColor = TagColor.Transparent;
+  private TagColor _defaultTagColor = TagColor.White;
 
   private void View_AddTagAutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
   {

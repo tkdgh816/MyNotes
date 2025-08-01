@@ -23,8 +23,7 @@
                    Margin="6"
                    RequestedTheme="Light"
                    PointerEntered="Template_RootUserControl_PointerEntered"
-                   PointerExited="Template_RootUserControl_PointerExited"
-                   Holding="Template_RootUserControl_Holding">
+                   PointerExited="Template_RootUserControl_PointerExited">
         <Grid Background="{x:Bind Note.Background, Converter={StaticResource AlphaBlendingWhiteConverter}, Mode=OneWay}"
               CornerRadius="8"
               BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
@@ -460,25 +459,24 @@
             <MenuFlyoutSeparator />
 
             <!-- Sort & Ordering -->
-            <MenuFlyoutSubItem Text="Ordering"
+            <MenuFlyoutSubItem x:Name="View_SortMenuFlyoutSubItem"
+                               Text="Ordering"
                                Icon="Sort">
-              <RadioMenuFlyoutItem GroupName="SortKey"
+              <RadioMenuFlyoutItem GroupName="SortField"
                                    Text="Modified"
-                                   IsChecked="True"
-                                   Command="{x:Bind ViewModel.ChangeSortKeyCommand}"
+                                   Command="{x:Bind ViewModel.ChangeSortFieldCommand}"
                                    CommandParameter="Modified" />
-              <RadioMenuFlyoutItem GroupName="SortKey"
+              <RadioMenuFlyoutItem GroupName="SortField"
                                    Text="Created"
-                                   Command="{x:Bind ViewModel.ChangeSortKeyCommand}"
+                                   Command="{x:Bind ViewModel.ChangeSortFieldCommand}"
                                    CommandParameter="Created" />
-              <RadioMenuFlyoutItem GroupName="SortKey"
+              <RadioMenuFlyoutItem GroupName="SortField"
                                    Text="Title"
-                                   Command="{x:Bind ViewModel.ChangeSortKeyCommand}"
+                                   Command="{x:Bind ViewModel.ChangeSortFieldCommand}"
                                    CommandParameter="Title" />
               <MenuFlyoutSeparator />
               <RadioMenuFlyoutItem GroupName="SortDirection"
                                    Text="Ascending"
-                                   IsChecked="True"
                                    Command="{x:Bind ViewModel.ChangeSortDirectionCommand}"
                                    CommandParameter="Ascending" />
               <RadioMenuFlyoutItem GroupName="SortDirection"
@@ -496,8 +494,8 @@
                   <RadioButtons x:Name="View_StyleChangeRadioButtons"
                                 Header="View Style"
                                 HeaderTemplate="{StaticResource AppBoldTextHeaderTemplate}"
-                                SelectedIndex="0"
-                                MaxColumns="2">
+                                MaxColumns="2"
+                                SelectionChanged="View_StyleChangeRadioButtons_SelectionChanged">
                     <RadioButtons.Resources>
                       <SolidColorBrush x:Key="ToggleButtonBackground"
                                        Color="{StaticResource SubtleFillColorTransparent}" />
@@ -509,10 +507,9 @@
                                        Color="{StaticResource SubtleFillColorDisabled}" />
                     </RadioButtons.Resources>
 
-                    <RadioButton Tag="GridStyle"
-                                 IsChecked="True"
-                                 Style="{StaticResource DefaultToggleButtonStyle}"
-                                 Click="View_StyleChangeRadioButton_Click">
+                    <RadioButton GroupName="Style"
+                                 Tag="Grid"
+                                 Style="{StaticResource DefaultToggleButtonStyle}">
                       <StackPanel Orientation="Horizontal"
                                   Spacing="8">
                         <FontIcon Glyph="&#xF0E2;"
@@ -521,9 +518,9 @@
                       </StackPanel>
                     </RadioButton>
 
-                    <RadioButton Tag="ListStyle"
-                                 Style="{StaticResource DefaultToggleButtonStyle}"
-                                 Click="View_StyleChangeRadioButton_Click">
+                    <RadioButton GroupName="Style"
+                                 Tag="List"
+                                 Style="{StaticResource DefaultToggleButtonStyle}">
                       <StackPanel Orientation="Horizontal"
                                   Spacing="8">
                         <FontIcon Glyph="&#xE71D;"
@@ -546,15 +543,14 @@
                             Header="Size"
                             HeaderTemplate="{StaticResource AppBoldTextHeaderTemplate}"
                             Orientation="Horizontal"
-                            TickFrequency="30"
+                            TickFrequency="40"
                             TickPlacement="Outside"
-                            Minimum="150"
-                            Maximum="270"
-                            Value="210"
+                            Minimum="160"
+                            Maximum="320"
+                            Value="{x:Bind SizeSliderValue, Mode=TwoWay}"
                             Width="240"
                             SnapsTo="Ticks"
-                            IsThumbToolTipEnabled="False"
-                            ValueChanged="View_StyleSizeChangeSlider_ValueChanged" />
+                            IsThumbToolTipEnabled="False" />
                     <Grid Grid.Row="1">
                       <TextBlock Text="Small"
                                  HorizontalAlignment="Left"
@@ -583,11 +579,10 @@
                             TickPlacement="Outside"
                             Minimum="0"
                             Maximum="100"
-                            Value="50"
+                            Value="{x:Bind RatioSliderValue, Mode=TwoWay}"
                             Width="240"
                             SnapsTo="Ticks"
-                            IsThumbToolTipEnabled="False"
-                            ValueChanged="View_StyleRatioChangeSlider_ValueChanged" />
+                            IsThumbToolTipEnabled="False" />
                     <Grid Grid.Row="1">
                       <TextBlock Text="Short&#10;(4:3)"
                                  HorizontalAlignment="Left"
@@ -608,8 +603,10 @@
             </MenuFlyoutSubItem>
             <MenuFlyoutSeparator />
 
-            <MenuFlyoutItem Text="Remove notes"
-                            Icon="Delete" />
+            <MenuFlyoutItem x:Name="View_RemoveNotesMenuFlyoutItem"
+                            Text="Remove notes"
+                            Icon="Delete"
+                            Click="View_RemoveNotesMenuFlyoutItem_Click"/>
 
             <MenuFlyoutItem Text="Delete board"
                             Icon="Delete"
@@ -626,8 +623,6 @@
     <GridView x:Name="View_NotesGridView"
               Grid.Row="1"
               ItemsSource="{Binding Source={StaticResource NotesCollectionViewSource}}"
-              ItemTemplate="{StaticResource GridViewItemTemplate_GridStyle}"
-              ItemContainerStyle="{StaticResource AppGridViewItemContainerStyle270Moderate}"
               SelectionMode="None"
               HorizontalAlignment="Center"
               CanDragItems="True"
@@ -664,6 +659,9 @@
           </Storyboard>
         </VisualState>
       </VisualStateGroup>
+      
+      
+      
       <VisualStateGroup x:Name="SearchBoxStates">
         <VisualState x:Name="SearchBoxSearching">
           <Storyboard>

@@ -1,4 +1,7 @@
-﻿namespace MyNotes.Core.Dto;
+﻿using MyNotes.Common.Collections;
+using MyNotes.Core.Model;
+
+namespace MyNotes.Core.Dto;
 internal record NoteDto
 {
   public required Guid Id { get; init; }
@@ -31,7 +34,7 @@ internal record GetNotesDto
   public bool? Bookmarked { get; init; }
   public bool? Trashed { get; init; }
   public NoteSortField? SortField { get; init; }
-  public NoteSortDirection? SortDirection { get; init; }
+  public SortDirection? SortDirection { get; init; }
 }
 
 [Flags]
@@ -43,10 +46,6 @@ internal enum NoteGetFields
   Trashed = 1 << 2,
   All = int.MaxValue
 }
-
-internal enum NoteSortField { Created, Modified, Title }
-
-internal enum NoteSortDirection { Ascending, Descending }
 
 internal record UpdateNoteDto
 {

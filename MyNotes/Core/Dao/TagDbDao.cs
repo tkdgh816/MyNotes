@@ -8,53 +8,55 @@ internal class TagDbDao(DatabaseService databaseService) : DbDaoBase
 {
   private readonly DatabaseService _databaseService = databaseService;
 
-  public async Task<IEnumerable<TagDto>> GetTags(GetNoteTagsDto dto)
-  {
-    List<TagDto> tags = new();
-    await using SqliteConnection connection = _databaseService.Connection;
-    await connection.OpenAsync();
-
-    string query = """
-      SELECT * FROM Tags
-      INNER JOIN NotesTags ON Tags.id = NotesTags.tag_id
-      WHERE NotesTags.note_id = @note_id
-      """;
-    await using SqliteCommand command = new(query, connection);
-
-    command.Parameters.AddWithValue("@note_id", dto.NoteId);
-
-    await using SqliteDataReader reader = command.ExecuteReader();
-    while (await reader.ReadAsync())
+  public Task<IEnumerable<TagDto>> GetNoteTags(GetNoteTagsDto dto)
+    => Task.Run(async () =>
     {
-      var id = GetReaderValue<Guid>(reader, "id");
-      var tag = GetReaderValue<string>(reader, "text")!;
-      var color = GetReaderValue<int>(reader, "color");
-      tags.Add(new TagDto() { Id = id, Text = tag, Color = color });
-    }
+      List<TagDto> tags = new();
+      await using SqliteConnection connection = _databaseService.Connection;
+      await connection.OpenAsync();
 
-    return tags;
-  }
+      string query = """
+        SELECT * FROM Tags
+        INNER JOIN NotesTags ON Tags.id = NotesTags.tag_id
+        WHERE NotesTags.note_id = @note_id
+        """;
+      await using SqliteCommand command = new(query, connection);
 
-  public async Task<IEnumerable<TagDto>> GetAllTags()
-  {
-    await using SqliteConnection connection = _databaseService.Connection;
-    await connection.OpenAsync();
+      command.Parameters.AddWithValue("@note_id", dto.NoteId);
 
-    string query = "SELECT * FROM Tags";
-    await using SqliteCommand command = new(query, connection);
+      await using SqliteDataReader reader = await command.ExecuteReaderAsync();
+      while (await reader.ReadAsync())
+      {
+        var id = GetReaderValue<Guid>(reader, "id");
+        var tag = GetReaderValue<string>(reader, "text")!;
+        var color = GetReaderValue<int>(reader, "color");
+        tags.Add(new TagDto() { Id = id, Text = tag, Color = color });
+      }
 
-    List<TagDto> tagDbDtos = new();
-    await using SqliteDataReader reader = command.ExecuteReader();
-    while (await reader.ReadAsync())
+      return (IEnumerable<TagDto>)tags;
+    });
+
+  public Task<IEnumerable<TagDto>> GetAllTags()
+    => Task.Run(async () =>
     {
-      Guid id = GetReaderValue<Guid>(reader, "id");
-      string text = GetReaderValue<string>(reader, "text")!;
-      int color = GetReaderValue<int>(reader, "color");
-      tagDbDtos.Add(new() { Id = id, Text = text, Color = color });
-    }
+      await using SqliteConnection connection = _databaseService.Connection;
+      await connection.OpenAsync();
 
-    return tagDbDtos;
-  }
+      string query = "SELECT * FROM Tags";
+      await using SqliteCommand command = new(query, connection);
+
+      List<TagDto> tagDbDtos = new();
+      await using SqliteDataReader reader = await command.ExecuteReaderAsync();
+      while (await reader.ReadAsync())
+      {
+        Guid id = GetReaderValue<Guid>(reader, "id");
+        string text = GetReaderValue<string>(reader, "text")!;
+        int color = GetReaderValue<int>(reader, "color");
+        tagDbDtos.Add(new() { Id = id, Text = text, Color = color });
+      }
+
+      return (IEnumerable<TagDto>)tagDbDtos;
+    });
 
   public bool AddTag(TagDto dto)
   {

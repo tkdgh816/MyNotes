@@ -156,7 +156,7 @@ internal class NoteViewModel : ViewModelBase
 
   public void UpdateBody(string body)
   {
-    Note.Preview = body[..Math.Min(body.Length, 1000)];
+    Note.Preview = body[..Math.Min(body.Length, 1500)];
     _noteService.UpdateSearchDocument(Note, body);
   }
 

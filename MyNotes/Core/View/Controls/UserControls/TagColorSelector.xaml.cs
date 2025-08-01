@@ -9,7 +9,7 @@ internal sealed partial class TagColorSelector : Button
     InitializeComponent();
   }
 
-  public static readonly DependencyProperty TagColorProperty = DependencyProperty.Register("TagColor", typeof(TagColor), typeof(TagColorSelector), new PropertyMetadata(TagColor.Transparent, OnTagColorChanged));
+  public static readonly DependencyProperty TagColorProperty = DependencyProperty.Register("TagColor", typeof(TagColor), typeof(TagColorSelector), new PropertyMetadata(TagColor.White, OnTagColorChanged));
   public TagColor TagColor
   {
     get => (TagColor)GetValue(TagColorProperty);
@@ -25,7 +25,7 @@ internal sealed partial class TagColorSelector : Button
   public List<TagColor> Colors { get; } = [.. Enum.GetValues<TagColor>()];
 
   private void GridView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    => TagColor = ((GridView)sender).SelectedItem is TagColor tagColor ? tagColor : TagColor.Transparent;
+    => TagColor = ((GridView)sender).SelectedItem is TagColor tagColor ? tagColor : TagColor.White;
 
   public event TypedEventHandler<TagColorSelector, TagColorChangedEventArgs>? TagColorChanged;
 }

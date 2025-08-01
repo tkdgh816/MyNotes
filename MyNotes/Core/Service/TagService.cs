@@ -37,7 +37,7 @@ internal class TagService
   private TagDto ToDto(Tag tag) => new() { Id = tag.Id.Value, Text = tag.Text, Color = (int)tag.Color };
 
   public IEnumerable<Tag> GetTags(NoteId noteId) 
-    => _tagDbDao.GetTags(new GetNoteTagsDto() { NoteId = noteId.Value }).Result.Select(ToTag);
+    => _tagDbDao.GetNoteTags(new GetNoteTagsDto() { NoteId = noteId.Value }).Result.Select(ToTag);
 
   public bool AddTagToNote(Note note, Tag tag) 
     => _tagDbDao.AddTagToNote(new TagToNoteDto() { NoteId = note.Id.Value, TagId = tag.Id.Value });

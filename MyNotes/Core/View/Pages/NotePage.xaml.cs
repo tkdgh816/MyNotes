@@ -64,7 +64,7 @@ internal sealed partial class NotePage : Page
     }
     catch (Exception)
     {
-      View_TextEditorRichEditBox.Document.SetText(TextSetOptions.None, TextGenerator.GenerateTexts(400));
+      View_TextEditorRichEditBox.Document.SetText(TextSetOptions.None, TextGenerator.GenerateTexts(1000));
     }
   }
 

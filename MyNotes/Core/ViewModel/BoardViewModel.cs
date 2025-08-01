@@ -1,4 +1,6 @@
-﻿using Microsoft.UI.Dispatching;
+﻿using CommunityToolkit.WinUI;
+
+using Microsoft.UI.Dispatching;
 
 using MyNotes.Common.Collections;
 using MyNotes.Common.Commands;
@@ -12,6 +14,7 @@ namespace MyNotes.Core.ViewModel;
 internal class BoardViewModel : ViewModelBase
 {
   public NavigationBoard Navigation { get; }
+  private readonly SettingsService _settingsService;
   private readonly WindowService _windowService;
   private readonly DialogService _dialogService;
   private readonly NoteService _noteService;
@@ -19,17 +22,20 @@ internal class BoardViewModel : ViewModelBase
 
   public IncrementalObservableCollection<NoteViewModel> NoteViewModels { get; private set; } = null!;
   //public ObservableCollection<NoteViewModel> NoteViewModels { get; private set; } = new();
-  public List<Note> Notes { get; private set; } = new();
+  public SortedCollection<Note> Notes { get; private set; } = null!;
   private bool _isCompleted = false;
 
-  public BoardViewModel(NavigationBoard navigation, WindowService windowService, DialogService dialogService, NoteService noteService, NoteViewModelFactory noteViewModelFactory)
+  public BoardViewModel(NavigationBoard navigation, SettingsService settingsService, WindowService windowService, DialogService dialogService, NoteService noteService, NoteViewModelFactory noteViewModelFactory)
   {
     Navigation = navigation;
+    _settingsService = settingsService;
     _windowService = windowService;
     _dialogService = dialogService;
     _noteService = noteService;
     _noteViewModelFactory = noteViewModelFactory;
 
+    InitializeSettings();
+    GetNotes();
     GetNoteViewModels();
     SetCommands();
     RegisterMessengers();
@@ -53,22 +59,36 @@ internal class BoardViewModel : ViewModelBase
     base.Dispose(disposing);
   }
 
+  public NoteSortField SortField { get; private set; } = NoteSortField.Created;
+  public SortDirection SortDirection { get; private set; } = SortDirection.Ascending;
+
+  public void InitializeSettings()
+  {
+    var settings = _settingsService.GetBoardSettings();
+    SortField = settings.SortField;
+    SortDirection = settings.SortDirection;
+  }
+
   private int _loadedNoteCount = 0;
+
+  private void GetNotes()
+  {
+    Notes = new(GetNoteComparer());
+    if (Navigation is NavigationUserBoard)
+    {
+      Task.Run(async () =>
+      {
+        await foreach (var note in _noteService.GetNotesStreamAsync(Navigation, sortField: SortField, sortDirection: SortDirection))
+          Notes.Add(note);
+        _isCompleted = true;
+      });
+    }
+  }
 
   private void GetNoteViewModels()
   {
     //GetNoteViewModelsBatch0();
     //GetNoteViewModelsStream0();
-
-    if (Navigation is NavigationUserBoard)
-    {
-      Task.Run(async () =>
-      {
-        await foreach (var note in _noteService.GetNotesStreamAsync(Navigation))
-          Notes.Add(note);
-        _isCompleted = true;
-      });
-    }
     NoteViewModels = new(GetNoteViewModelsBatch1);
     //NoteViewModels = new(GetNoteViewModelsBatch2);
     //NoteViewModels = new(GetNoteViewModelsStream1);
@@ -114,7 +134,7 @@ internal class BoardViewModel : ViewModelBase
 
         uint index = 0;
         while (index < count)
-        {          
+        {
           if (_loadedNoteCount >= Notes.Count)
             break;
           else
@@ -151,19 +171,30 @@ internal class BoardViewModel : ViewModelBase
   }
 
   #region Sort
-  public NoteSortKey SortKey { get; private set; }
-  public SortDirection SortDirection { get; private set; }
+  private Comparer<Note> GetNoteComparer()
+  {
+    int direction = SortDirection == SortDirection.Ascending ? 1 : -1;
+    return SortField switch
+    {
+      NoteSortField.Created => Comparer<Note>.Create((x, y) => x.Created.CompareTo(y.Created) * direction),
+      NoteSortField.Title => Comparer<Note>.Create((x, y) => x.Title.CompareTo(y.Title) * direction),
+      NoteSortField.Modified => Comparer<Note>.Create((x, y) => x.Modified.CompareTo(y.Modified) * direction),
+      _ => throw new ArgumentOutOfRangeException("Invalid sort field")
+    };
+  }
 
   private void SortNoteViewModels()
   {
-    WeakReferenceMessenger.Default.Send(new Message<IEnumerable<NoteViewModel>>(NoteViewModels, this), Tokens.RefreshSource);
+    GetNotes();
+    _loadedNoteCount = 0;
+    NoteViewModels.Clear();
   }
   #endregion
 
   #region Commands
   public Command? AddNewNoteCommand { get; private set; }
   public Command<string>? SearchNotesCommand { get; private set; }
-  public Command<string>? ChangeSortKeyCommand { get; private set; }
+  public Command<string>? ChangeSortFieldCommand { get; private set; }
   public Command<string>? ChangeSortDirectionCommand { get; private set; }
   public Command? ShowRenameBoardDialogCommand { get; private set; }
   public Command? ShowDeleteBoardDialogCommand { get; private set; }
@@ -173,10 +204,18 @@ internal class BoardViewModel : ViewModelBase
   {
     AddNewNoteCommand = new(() =>
     {
-      Note newNote = _noteService.CreateNote((NavigationUserBoard)Navigation);
-      NoteViewModel noteViewModel = _noteViewModelFactory.Resolve(newNote);
-      NoteViewModels.Insert(0, noteViewModel);
-      noteViewModel.CreateWindow();
+      for (int i = 0; i < 20; i++)
+      {
+        Note newNote = _noteService.CreateNote((NavigationUserBoard)Navigation);
+        NoteViewModel noteViewModel = _noteViewModelFactory.Resolve(newNote);
+        NoteViewModels.Insert(0, noteViewModel);
+        noteViewModel.CreateWindow();
+        DispatcherQueue.GetForCurrentThread().EnqueueAsync(async () =>
+        {
+          await Task.Delay(2000);
+          noteViewModel.CloseWindowCommand?.Execute();
+        });
+      }
     });
 
     SearchNotesCommand = new((query) =>
@@ -192,12 +231,13 @@ internal class BoardViewModel : ViewModelBase
       }
     });
 
-    ChangeSortKeyCommand = new((key) =>
+    ChangeSortFieldCommand = new((key) =>
     {
-      if (Enum.TryParse<NoteSortKey>(key, out var sortKey))
+      if (Enum.TryParse<NoteSortField>(key, out var sortField))
       {
-        SortKey = sortKey;
+        SortField = sortField;
         SortNoteViewModels();
+        _settingsService.SetBoardSettings(AppSettingsKeys.BoardNoteSortField, (int)sortField);
       }
     });
     ChangeSortDirectionCommand = new((direction) =>
@@ -206,6 +246,7 @@ internal class BoardViewModel : ViewModelBase
       {
         SortDirection = sortDirection;
         SortNoteViewModels();
+        _settingsService.SetBoardSettings(AppSettingsKeys.BoardNoteSortDirection, (int)sortDirection);
       }
     });
 

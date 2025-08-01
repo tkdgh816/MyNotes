@@ -2,7 +2,9 @@
 
 using Microsoft.Data.Sqlite;
 
+using MyNotes.Common.Collections;
 using MyNotes.Core.Dto;
+using MyNotes.Core.Model;
 using MyNotes.Core.Service;
 
 namespace MyNotes.Core.Dao;
@@ -11,7 +13,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
   private readonly DatabaseService _databaseService = databaseService;
 
   #region Create
-  public bool AddNote(NoteDto dto)
+  public bool CreateNote(NoteDto dto)
   {
     using SqliteConnection connection = _databaseService.Connection;
     connection.Open();
@@ -140,7 +142,10 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
 
     await using SqliteDataReader reader = await command.ExecuteReaderAsync();
     while (await reader.ReadAsync())
+    {
+      //await Task.Delay(50);
       yield return CreateNoteDto(reader);
+    }
   }
 
   private async IAsyncEnumerable<NoteDto> SearchNotesStream(IList<GetNoteDto> dtos)
@@ -384,7 +389,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     return fields;
   }
 
-  private string GetOrderByClause(NoteSortField? field, NoteSortDirection? direction)
+  private string GetOrderByClause(NoteSortField? field, SortDirection? direction)
   {
     if (field is null || direction is null)
       return "";
@@ -397,8 +402,8 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     };
     orderByClause += direction switch
     {
-      NoteSortDirection.Descending => "DESC",
-      NoteSortDirection.Ascending or _ => "ASC"
+      SortDirection.Descending => "DESC",
+      SortDirection.Ascending or _ => "ASC"
     };
     return orderByClause;
   }

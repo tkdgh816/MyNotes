@@ -36,7 +36,7 @@ internal class Tag : ObservableObject, IEquatable<Tag>, IComparable<Tag>
 internal enum TagColor
 {
   // Color           Background Foreground
-  Transparent,    // #09000000, #E4000000
+  White,          // #FFFFFFFF, #FF202020
   Red,            // #FFFFEBEB, #FFD60000 
   Orange,         // #FFFFF3E0, #FFE68A00
   Yellow,         // #FFFFFBE6, #FFB39500

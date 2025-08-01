@@ -1,4 +1,5 @@
-﻿using MyNotes.Core.Dto;
+﻿using MyNotes.Common.Collections;
+using MyNotes.Core.Dto;
 using MyNotes.Core.Model;
 using MyNotes.Core.Shared;
 
@@ -12,25 +13,32 @@ internal class SettingsService
   private readonly ApplicationDataContainer _localSettingsContainer = ApplicationData.Current.LocalSettings;
   private readonly ApplicationDataContainer _globalSettingsContainer;
   private readonly ApplicationDataContainer _noteSettingsContainer;
+  private readonly ApplicationDataContainer _boardSettingsContainer;
   public IPropertySet GlobalSettings => _globalSettingsContainer.Values;
   public IPropertySet NoteSettings => _noteSettingsContainer.Values;
+  public IPropertySet BoardSettings => _boardSettingsContainer.Values;
 
   public SettingsService()
   {
     _globalSettingsContainer = _localSettingsContainer.CreateContainer("Global", ApplicationDataCreateDisposition.Always);
     _noteSettingsContainer = _localSettingsContainer.CreateContainer("Note", ApplicationDataCreateDisposition.Always);
+    _boardSettingsContainer = _localSettingsContainer.CreateContainer("Board", ApplicationDataCreateDisposition.Always);
     InitializeSettings();
   }
 
   private void InitializeSettings()
   {
-    _globalSettingsContainer.Values.TryAdd(AppSettingsKeys.AppTheme, (int)AppTheme.Default);
-    _globalSettingsContainer.Values.TryAdd(AppSettingsKeys.AppLanguage, (int)AppLanguage.Default);
-    _globalSettingsContainer.Values.TryAdd(AppSettingsKeys.StartupLaunch, false);
+    GlobalSettings.TryAdd(AppSettingsKeys.AppTheme, (int)AppTheme.Default);
+    GlobalSettings.TryAdd(AppSettingsKeys.AppLanguage, (int)AppLanguage.Default);
+    GlobalSettings.TryAdd(AppSettingsKeys.StartupLaunch, false);
 
-    _noteSettingsContainer.Values.TryAdd(AppSettingsKeys.NoteBackground, "#FFFAFAD2");
-    _noteSettingsContainer.Values.TryAdd(AppSettingsKeys.NoteBackdrop, (int)BackdropKind.None);
-    _noteSettingsContainer.Values.TryAdd(AppSettingsKeys.NoteSize, new Size(300, 300));
+    NoteSettings.TryAdd(AppSettingsKeys.NoteBackground, "#FFFAFAD2");
+    NoteSettings.TryAdd(AppSettingsKeys.NoteBackdrop, (int)BackdropKind.None);
+    NoteSettings.TryAdd(AppSettingsKeys.NoteSize, new Size(300, 300));
+
+    BoardSettings.TryAdd(AppSettingsKeys.BoardNoteSortField, (int)NoteSortField.Created);
+    BoardSettings.TryAdd(AppSettingsKeys.BoardNoteSortDirection, (int)SortDirection.Ascending);
+    BoardSettings.TryAdd(AppSettingsKeys.BoardViewStyle, (int)BoardViewStyle.Grid_240_50);
   }
 
   public GetGlobalSettingsDto GetGlobalSettings()
@@ -61,6 +69,20 @@ internal class SettingsService
     };
   }
 
+  public GetBoardSettingsDto GetBoardSettings()
+  {
+    var sortField = (int)BoardSettings[AppSettingsKeys.BoardNoteSortField];
+    var sortDirection = (int)BoardSettings[AppSettingsKeys.BoardNoteSortDirection];
+    var viewStyle = (int)BoardSettings[AppSettingsKeys.BoardViewStyle];
+
+    return new()
+    {
+      SortField = (NoteSortField)sortField,
+      SortDirection = (SortDirection)sortDirection,
+      ViewStyle = (BoardViewStyle)viewStyle
+    };
+  }
+
   public void SetGlobalSettings(string key, object value)
   {
     if (_globalSettingsContainer.Values.ContainsKey(key))
@@ -71,5 +93,11 @@ internal class SettingsService
   {
     if (_noteSettingsContainer.Values.ContainsKey(key))
       _noteSettingsContainer.Values[key] = value;
+  }
+
+  public void SetBoardSettings(string key, object value)
+  {
+    if (_boardSettingsContainer.Values.ContainsKey(key))
+      _boardSettingsContainer.Values[key] = value;
   }
 }

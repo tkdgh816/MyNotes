@@ -1,4 +1,5 @@
-﻿using MyNotes.Core.View;
+﻿using MyNotes.Common.Collections;
+using MyNotes.Core.View;
 
 namespace MyNotes.Core.Model;
 
@@ -173,3 +174,15 @@ internal class NavigationUserRootGroup : NavigationUserGroup
 }
 
 internal enum TreeTraversalOrder { Pre, Post }
+
+internal enum BoardViewStyle
+{
+  // Grid
+  Grid_160_0, Grid_160_50, Grid_160_100,
+  Grid_200_0, Grid_200_50, Grid_200_100,
+  Grid_240_0, Grid_240_50, Grid_240_100,
+  Grid_280_0, Grid_280_50, Grid_280_100,
+  Grid_320_0, Grid_320_50, Grid_320_100,
+  // List
+  List_160, List_200, List_240, List_280, List_320
+}

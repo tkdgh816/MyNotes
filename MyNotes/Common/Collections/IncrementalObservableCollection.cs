@@ -73,4 +73,10 @@ internal class IncrementalObservableCollection<T> : ObservableCollection<T>, ISu
 
   IAsyncOperation<LoadMoreItemsResult> ISupportIncrementalLoading.LoadMoreItemsAsync(uint count)
     => AsyncInfo.Run((c) => LoadMoreItemsAsync(count));
+
+  protected override void ClearItems()
+  {
+    base.ClearItems();
+    _hasMoreItems = true;
+  }
 }

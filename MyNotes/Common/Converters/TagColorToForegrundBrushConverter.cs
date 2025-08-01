@@ -8,7 +8,7 @@ internal class TagColorToForegroundBrushConverter : IValueConverter
 {
   static readonly Dictionary<TagColor, SolidColorBrush> _pairs = new()
   {
-    {TagColor.Transparent, new SolidColorBrush(ToolkitHelper.ToColor("#E4000000"))},
+    {TagColor.White, new SolidColorBrush(ToolkitHelper.ToColor("#FF202020"))},
     {TagColor.Red,  new SolidColorBrush(ToolkitHelper.ToColor("#FFD60000"))},
     {TagColor.Orange,  new SolidColorBrush(ToolkitHelper.ToColor("#FFE68A00"))},
     {TagColor.Yellow,  new SolidColorBrush(ToolkitHelper.ToColor("#FFB39500"))},
@@ -20,7 +20,7 @@ internal class TagColorToForegroundBrushConverter : IValueConverter
   };
 
   public static SolidColorBrush Convert(object value)
-    => value is TagColor tagColor && _pairs.TryGetValue(tagColor, out var brush) ? brush : _pairs[TagColor.Transparent];
+    => value is TagColor tagColor && _pairs.TryGetValue(tagColor, out var brush) ? brush : _pairs[TagColor.White];
 
 
   public object Convert(object value, Type targetType, object parameter, string language)

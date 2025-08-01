@@ -94,4 +94,4 @@ internal class Note : ObservableObject
 
 internal enum BackdropKind { None, Acrylic, Mica }
 
-internal enum NoteSortKey { Modified, Created, Title, Tag }
+internal enum NoteSortField { Created, Modified, Title }

@@ -10,7 +10,9 @@ internal class ToPointOverBrushConverter : IValueConverter
     Color color = brush.Color;
     
     var hsv = ToolkitColorHelper.ToHsv(color);
-    if (hsv.V > 0.08)
+    if (hsv.H == 0 && hsv.S == 0)
+      hsv.V -= 0.08;
+    else if (hsv.V > 0.08)
       hsv.S += 0.08;
     else
       hsv.A += 0.08;

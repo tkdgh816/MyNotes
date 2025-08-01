@@ -17,236 +17,106 @@
     </StackPanel>
 
     <Grid Grid.Row="1"
-          RowSpacing="12">
+          RowSpacing="12"
+          Padding="8">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto" />
         <RowDefinition />
       </Grid.RowDefinitions>
-      <StackPanel Grid.Row="0"
-                  Orientation="Horizontal"
-                  HorizontalAlignment="Left"
-                  Spacing="6">
-        <StackPanel Spacing="6"
-                    Background="{StaticResource SubtleFillColorSecondary}"
-                    CornerRadius="{StaticResource ControlCornerRadius}"
-                    Padding="12,0,12,12">
-          <RadioButtons x:Name="DatabaseTableRadioButtons"
-                        SelectedIndex="2"
-                        MaxColumns="3">
-            <RadioButton Content="Boards" />
-            <RadioButton Content="Notes" />
-            <RadioButton Content="All" />
-          </RadioButtons>
-          <StackPanel Orientation="Horizontal"
-                      Spacing="8">
-            <Button x:Name="ReadTableButton"
-                    Content="Read all data"
-                    Click="ReadTableButton_Click" />
-            <Button x:Name="DeleteDataButton"
-                    Content="Delete all data"
-                    Click="DeleteDataButton_Click" />
-            <Button x:Name="DropTableButton"
-                    Content="Drop table"
-                    Click="DropTableButton_Click" />
-          </StackPanel>
-          <StackPanel Orientation="Horizontal"
-                      Spacing="8">
-
-          </StackPanel>
-        </StackPanel>
-
-        <StackPanel Spacing="6"
-                    Background="{StaticResource SubtleFillColorSecondary}"
-                    CornerRadius="{StaticResource ControlCornerRadius}"
-                    Padding="12">
-          <Button x:Name="TestWindowButton"
-                  Content="Test Window"
-                  Click="TestWindowButton_Click" />
-          <Button x:Name="ViewWindowsButton"
-                  Content="View windows"
-                  Click="ViewWindowsButton_Click" />
-        </StackPanel>
-
-        <StackPanel Spacing="6"
-                    Background="{StaticResource SubtleFillColorSecondary}"
-                    CornerRadius="{StaticResource ControlCornerRadius}"
-                    Padding="12">
-          <StackPanel Orientation="Horizontal"
-                      Spacing="12">
-            <Border Background="{x:Bind BackdropColorPicker.Color, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}"
-                    Width="40"
-                    Height="40">
-              <Border Background="{x:Bind BackgroundColorPicker.Color, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}"
-                      Margin="5">
-                <TextBlock Text="Text"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Center"
-                           Foreground="{x:Bind ForegroundColorPicker.Color, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}" />
-              </Border>
+      
+      <StackPanel Spacing="6"
+                  Background="{StaticResource SubtleFillColorSecondary}"
+                  CornerRadius="{StaticResource ControlCornerRadius}"
+                  Padding="12">
+        <StackPanel Orientation="Horizontal"
+                    Spacing="12">
+          <Border Background="{x:Bind BackdropColorPicker.Color, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}"
+                  Width="80"
+                  Height="80">
+            <Border Background="{x:Bind BackgroundColorPicker.Color, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}"
+                    Margin="5">
+              <TextBlock Text="Text"
+                         VerticalAlignment="Center"
+                         HorizontalAlignment="Center"
+                         Foreground="{x:Bind ForegroundColorPicker.Color, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}" />
             </Border>
-            <Grid ColumnSpacing="12">
-              <Grid.RowDefinitions>
-                <RowDefinition />
-                <RowDefinition />
-              </Grid.RowDefinitions>
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
-                <ColumnDefinition />
-                <ColumnDefinition />
-              </Grid.ColumnDefinitions>
-              <TextBlock Grid.Row="0"
-                         Grid.Column="0"
-                         TextAlignment="Center"
-                         Text="Contrast" />
-              <TextBlock x:Name="ContrastTestTextBlock"
-                         Grid.Row="1"
-                         Grid.Column="0"
-                         TextAlignment="Center" />
-              <TextBlock Grid.Row="0"
-                         Grid.Column="1"
-                         TextAlignment="Center"
-                         Text="Regular(4.5:1)" />
-              <TextBlock x:Name="RegularTestTextBlock"
-                         Grid.Row="1"
-                         Grid.Column="1"
-                         TextAlignment="Center" />
-              <TextBlock Grid.Row="0"
-                         Grid.Column="2"
-                         TextAlignment="Center"
-                         Text="Large(3:1)" />
-              <TextBlock x:Name="LargeTestTextBlock"
-                         Grid.Row="1"
-                         Grid.Column="2"
-                         TextAlignment="Center" />
-              <TextBlock Grid.Row="0"
-                         Grid.Column="3"
-                         TextAlignment="Center"
-                         Text="Luminance(Backdrop)" />
-              <TextBlock x:Name="LuminanceTestTextBlock"
-                         Grid.Row="1"
-                         Grid.Column="3"
-                         TextAlignment="Center" />
-            </Grid>
-          </StackPanel>
-          <StackPanel Orientation="Horizontal"
-                      Spacing="6">
-            <Button Content="Backdrop">
-              <Button.Flyout>
-                <Flyout Placement="Bottom">
-                  <ColorPicker x:Name="BackdropColorPicker"
-                               IsAlphaEnabled="True"
-                               ColorChanged="ColorPicker_ColorChanged" />
-                </Flyout>
-              </Button.Flyout>
-            </Button>
-            <Button Content="Background">
-              <Button.Flyout>
-                <Flyout Placement="Bottom">
-                  <ColorPicker x:Name="BackgroundColorPicker"
-                               IsAlphaEnabled="True"
-                               ColorChanged="ColorPicker_ColorChanged" />
-                </Flyout>
-              </Button.Flyout>
-            </Button>
-            <Button Content="Foreground">
-              <Button.Flyout>
-                <Flyout Placement="Bottom">
-                  <ColorPicker x:Name="ForegroundColorPicker"
-                               IsAlphaEnabled="True"
-                               ColorChanged="ColorPicker_ColorChanged" />
-                </Flyout>
-              </Button.Flyout>
-            </Button>
-          </StackPanel>
+          </Border>
+          <Grid ColumnSpacing="12">
+            <Grid.RowDefinitions>
+              <RowDefinition />
+              <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition />
+              <ColumnDefinition />
+              <ColumnDefinition />
+              <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0"
+                       Grid.Column="0"
+                       TextAlignment="Center"
+                       Text="Contrast" />
+            <TextBlock x:Name="ContrastTestTextBlock"
+                       Grid.Row="1"
+                       Grid.Column="0"
+                       TextAlignment="Center" />
+            <TextBlock Grid.Row="0"
+                       Grid.Column="1"
+                       TextAlignment="Center"
+                       Text="Regular(4.5:1)" />
+            <TextBlock x:Name="RegularTestTextBlock"
+                       Grid.Row="1"
+                       Grid.Column="1"
+                       TextAlignment="Center" />
+            <TextBlock Grid.Row="0"
+                       Grid.Column="2"
+                       TextAlignment="Center"
+                       Text="Large(3:1)" />
+            <TextBlock x:Name="LargeTestTextBlock"
+                       Grid.Row="1"
+                       Grid.Column="2"
+                       TextAlignment="Center" />
+            <TextBlock Grid.Row="0"
+                       Grid.Column="3"
+                       TextAlignment="Center"
+                       Text="Luminance(Backdrop)" />
+            <TextBlock x:Name="LuminanceTestTextBlock"
+                       Grid.Row="1"
+                       Grid.Column="3"
+                       TextAlignment="Center" />
+          </Grid>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal"
+                    Spacing="6">
+          <Button Content="Backdrop">
+            <Button.Flyout>
+              <Flyout Placement="Bottom">
+                <ColorPicker x:Name="BackdropColorPicker"
+                             IsAlphaEnabled="True"
+                             ColorChanged="ColorPicker_ColorChanged" />
+              </Flyout>
+            </Button.Flyout>
+          </Button>
+          <Button Content="Background">
+            <Button.Flyout>
+              <Flyout Placement="Bottom">
+                <ColorPicker x:Name="BackgroundColorPicker"
+                             IsAlphaEnabled="True"
+                             ColorChanged="ColorPicker_ColorChanged" />
+              </Flyout>
+            </Button.Flyout>
+          </Button>
+          <Button Content="Foreground">
+            <Button.Flyout>
+              <Flyout Placement="Bottom">
+                <ColorPicker x:Name="ForegroundColorPicker"
+                             IsAlphaEnabled="True"
+                             ColorChanged="ColorPicker_ColorChanged" />
+              </Flyout>
+            </Button.Flyout>
+          </Button>
         </StackPanel>
       </StackPanel>
-
-      <Grid ColumnSpacing="4"
-            Grid.Row="1">
-        <Grid.RowDefinitions>
-          <RowDefinition />
-          <RowDefinition Height="4" />
-          <RowDefinition Height="Auto"
-                         MaxHeight="100" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition />
-          <ColumnDefinition />
-        </Grid.ColumnDefinitions>
-
-        <ScrollViewer Grid.Row="0"
-                      Grid.Column="0"
-                      Padding="0,4">
-          <Grid ColumnSpacing="4">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition />
-              <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            <TextBlock x:Name="ReadTableTextBlock0"
-                       Grid.Column="0"
-                       IsTextSelectionEnabled="True"
-                       Margin="12,0" />
-            <TextBlock x:Name="ReadTableTextBlock1"
-                       Grid.Column="1"
-                       IsTextSelectionEnabled="True"
-                       Margin="12,0" />
-          </Grid>
-        </ScrollViewer>
-
-        <ScrollViewer Grid.Row="0"
-                      Grid.Column="1"
-                      Padding="0,4">
-          <Grid RowSpacing="4"
-                ColumnSpacing="4">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition />
-              <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            <TextBlock x:Name="ReadTableTextBlock2"
-                       Grid.Column="0"
-                       IsTextSelectionEnabled="True"
-                       Margin="12,0" />
-            <TextBlock x:Name="ReadTableTextBlock3"
-                       Grid.Column="1"
-                       IsTextSelectionEnabled="True"
-                       Margin="12,0" />
-          </Grid>
-        </ScrollViewer>
-
-        <Border Grid.Row="1"
-                Grid.ColumnSpan="2"
-                Background="{StaticResource SubtleFillColorSecondary}" />
-        
-        <ScrollViewer Grid.Row="2"
-                      Grid.Column="0"
-                      Padding="0,4">
-          <TextBlock x:Name="ReadTableTextBlock4"
-                     IsTextSelectionEnabled="True"
-                     TextWrapping="Wrap"
-                     Margin="12,0" />
-        </ScrollViewer>
-        <ScrollViewer Grid.Row="2"
-                      Grid.Column="1"
-                      Padding="0,4">
-          <TextBlock x:Name="ReadTableTextBlock5"
-                     IsTextSelectionEnabled="True"
-                     TextWrapping="Wrap"
-                     Margin="12,0" />
-        </ScrollViewer>
-
-        <controls:GridSplitter Grid.Row="0"
-                               Grid.Column="1"
-                               Grid.RowSpan="3"
-                               Width="16"
-                               HorizontalAlignment="Left"
-                               ResizeBehavior="BasedOnAlignment"
-                               ResizeDirection="Columns">
-          <controls:GridSplitter.RenderTransform>
-            <TranslateTransform X="-7" />
-          </controls:GridSplitter.RenderTransform>
-        </controls:GridSplitter>
-      </Grid>
     </Grid>
   </Grid>
 </Page>

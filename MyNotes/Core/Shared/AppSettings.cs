@@ -8,6 +8,10 @@ internal static class AppSettingsKeys
   public const string NoteBackground = "NoteBackground";
   public const string NoteBackdrop = "NoteBackdrop";
   public const string NoteSize = "NoteSize";
+
+  public const string BoardNoteSortField = "BoardNotesSortField";
+  public const string BoardNoteSortDirection = "BoardNotesSortDirection";
+  public const string BoardViewStyle = "BoardViewStyle";
 }
 
 internal enum AppTheme { Default, Light, Dark }
