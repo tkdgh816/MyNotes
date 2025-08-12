@@ -77,7 +77,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
       return (IEnumerable<NoteDto>)noteDtos;
     });
 
-  public Task<List<NoteDto>> SearchNotesBatchAsync(IList<GetNoteDto> dtos) =>
+  public Task<List<NoteDto>> SearchNotesBatchAsync(IList<GetNoteSearchDto> dtos) =>
     Task.Run(async () =>
     {
       List<NoteDto> noteDtos = new();
@@ -143,12 +143,12 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     await using SqliteDataReader reader = await command.ExecuteReaderAsync();
     while (await reader.ReadAsync())
     {
-      //await Task.Delay(50);
+      //await Task.Delay(10);
       yield return CreateNoteDto(reader);
     }
   }
 
-  private async IAsyncEnumerable<NoteDto> SearchNotesStream(IList<GetNoteDto> dtos)
+  private async IAsyncEnumerable<NoteDto> SearchNotesStream(IList<GetNoteSearchDto> dtos)
   {
     int count = dtos.Count;
     if (count > 0)
@@ -182,9 +182,68 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     }
   }
 
+  public async IAsyncEnumerable<NoteDto> SearchNotesStream(IAsyncEnumerable<GetNoteSearchDto> dtos)
+  {
+    List<SqliteCommand> commands = new();
+
+    int batchSize = 50;
+
+    List<GetNoteSearchDto> dtoBuffer = new(batchSize);
+
+    await foreach (var dto in dtos)
+    {
+      dtoBuffer.Add(dto);
+      if (dtoBuffer.Count == batchSize)
+      {
+        await foreach (var noteDto in SearchNotesInner(dtoBuffer, batchSize))
+          yield return noteDto;
+        dtoBuffer.Clear();
+      }
+    }
+    if (dtoBuffer.Count > 0)
+    {
+      await foreach (var noteDto in SearchNotesInner(dtoBuffer, dtoBuffer.Count))
+        yield return noteDto;
+    }
+  }
+
+  private async IAsyncEnumerable<NoteDto> SearchNotesInner(List<GetNoteSearchDto> dtoBuffer, int batchSize)
+  {
+    await using SqliteConnection connection = _databaseService.Connection;
+    await connection.OpenAsync();
+
+    string inClause = string.Join(", ", Enumerable.Range(0, batchSize).Select((num) => $"@id{num}"));
+    string query = $"SELECT * FROM Notes WHERE id IN ({inClause}) AND trashed = @trashed";
+
+    await using SqliteCommand command = new(query, connection);
+    command.Parameters.AddWithValue("@trashed", 0);
+    for (int index = 0; index < batchSize; index++)
+      command.Parameters.AddWithValue($"@id{index}", dtoBuffer[index].Id);
+    await using SqliteDataReader reader = await command.ExecuteReaderAsync();
+
+    int maxLength = 5000;
+    while (await reader.ReadAsync())
+    {
+      var dto = dtoBuffer.Find((item) => item.Id == new Guid(GetReaderValue<string>(reader, "id")!));
+      string searchPreview = "";
+      if (dto is not null)
+      {
+        int index = dto.Body.IndexOf(dto.SearchText, StringComparison.CurrentCultureIgnoreCase);
+        int length = dto.Body.Length;
+        if (index <= 0 || length <= maxLength)
+          searchPreview = dto.Body[0..length];
+        else if (index + maxLength >= length)
+          searchPreview = dto.Body[(length - maxLength)..length];
+        else
+          searchPreview = dto.Body[index..(index + maxLength)];
+      }
+      yield return CreateNoteDto(reader, searchPreview);
+    }
+  }
+
   public Task<IAsyncEnumerable<NoteDto>> GetNotesStreamAsync(GetNotesDto dto) => Task.Run(() => GetNotesStream(dto));
 
-  public Task<IAsyncEnumerable<NoteDto>> SearchNotesStreamAsync(IList<GetNoteDto> dtos) => Task.Run(() => SearchNotesStream(dtos));
+  public Task<IAsyncEnumerable<NoteDto>> SearchNotesStreamAsync(IList<GetNoteSearchDto> dtos) => Task.Run(() => SearchNotesStream(dtos));
   #endregion
 
   #region Read: Channel Stream
@@ -231,7 +290,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     return channel.Reader.ReadAllAsync();
   }
 
-  public IAsyncEnumerable<NoteDto> SearchNotesChannelStreamAsync(IList<GetNoteDto> dtos)
+  public IAsyncEnumerable<NoteDto> SearchNotesChannelStreamAsync(IList<GetNoteSearchDto> dtos)
   {
     var channel = Channel.CreateUnbounded<NoteDto>();
 
@@ -318,7 +377,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
   #endregion
 
   #region Helpers & Converters
-  private NoteDto CreateNoteDto(SqliteDataReader reader)
+  private NoteDto CreateNoteDto(SqliteDataReader reader, string searchPreview = "")
   {
     var id = new Guid(GetReaderValue<string>(reader, "id")!);
     var parent = new Guid(GetReaderValue<string>(reader, "parent")!);
@@ -335,7 +394,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     var bookmarked = GetReaderValue<bool>(reader, "bookmarked");
     var trashed = GetReaderValue<bool>(reader, "trashed");
 
-    NoteDto noteDbDto = new() { Id = id, Parent = parent, Created = created, Modified = modified, Title = title, Preview = preview, Background = background, Backdrop = backdrop, Width = width, Height = height, PositionX = positionX, PositionY = positionY, Bookmarked = bookmarked, Trashed = trashed };
+    NoteDto noteDbDto = new() { Id = id, Parent = parent, Created = created, Modified = modified, Title = title, Preview = preview, SearchPreview = searchPreview, Background = background, Backdrop = backdrop, Width = width, Height = height, PositionX = positionX, PositionY = positionY, Bookmarked = bookmarked, Trashed = trashed };
     return noteDbDto;
   }
 

@@ -21,7 +21,7 @@ internal sealed partial class NotePage : Page
     ViewModel.SetWindowTitlebar(View_TitleTextGrid);
     RegisterEvents();
     RegisterMessengers();
-    ViewModel.UnsetNotePropertyUpdateFieldMap();
+    ViewModel.SetNotePropertyUpdateFieldMap(true);
   }
 
   private async void NotePage_Unloaded(object sender, RoutedEventArgs e)
@@ -324,4 +324,13 @@ internal sealed partial class NotePage : Page
 
   // Debbuging: Reference Tracker
   private void View_ReferenceTrackerMenuFlyoutItem_Click(object sender, RoutedEventArgs e) => ReferenceTracker.ShowReferences();
+
+  private async void View_SaveKeyboardAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+  {
+    args.Handled = true;
+    View_TextEditorRichEditBox.Document.GetText(TextGetOptions.AdjustCrlf, out string body);
+    UpdateBody(body);
+    await ViewModel.ForceUpdateNoteProperties();
+  }
 }
+

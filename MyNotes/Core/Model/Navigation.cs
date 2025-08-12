@@ -51,7 +51,7 @@ internal class NavigationSearch : NavigationBoard
 {
   public string SearchText { get; }
 
-  public NavigationSearch(string searchText) : base(typeof(BoardPage), $"Search results for \"{searchText}\"", IconManager.FindGlyph("\uE721"))
+  public NavigationSearch(string searchText) : base(typeof(SearchPage), $"Search results for \"{searchText}\"", IconManager.FindGlyph("\uE721"))
   {
     SearchText = searchText;
   }
@@ -178,11 +178,13 @@ internal enum TreeTraversalOrder { Pre, Post }
 internal enum BoardViewStyle
 {
   // Grid
-  Grid_160_0, Grid_160_50, Grid_160_100,
-  Grid_200_0, Grid_200_50, Grid_200_100,
-  Grid_240_0, Grid_240_50, Grid_240_100,
-  Grid_280_0, Grid_280_50, Grid_280_100,
-  Grid_320_0, Grid_320_50, Grid_320_100,
+  Grid_200_0, Grid_200_50, Grid_200_100, Grid_200_150, Grid_200_200,
+  Grid_240_0, Grid_240_50, Grid_240_100, Grid_240_150, Grid_240_200,
+  Grid_280_0, Grid_280_50, Grid_280_100, Grid_280_150, Grid_280_200,
+  Grid_320_0, Grid_320_50, Grid_320_100, Grid_320_150, Grid_320_200,
+  Grid_360_0, Grid_360_50, Grid_360_100, Grid_360_150, Grid_360_200,
+  Grid_400_0, Grid_400_50, Grid_400_100, Grid_400_150, Grid_400_200,
+  Grid_440_0, Grid_440_50, Grid_440_100, Grid_440_150, Grid_440_200,
   // List
-  List_160, List_200, List_240, List_280, List_320
+  List_200, List_240, List_280, List_320, List_360, List_400, List_440
 }

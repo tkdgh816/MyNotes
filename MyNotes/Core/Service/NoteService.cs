@@ -24,14 +24,21 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
   public void AddToCache(Note note)
   {
     if (_cache.TryAdd(note.Id, note))
+    { 
       note.Initialize();
+      ReferenceTracker.NoteReferences.Add(new(note.Title, note));
+    }
   }
   public void RemoveFromCache(Note note) => _cache.Remove(note.Id);
-  private Note ToNote(NoteDto dto)
+  private Note ToNote(NoteDto dto, bool overwriteSearchPreview = false)
   {
     NoteId noteId = new(dto.Id);
     if (_cache.TryGetValue(noteId, out Note? note))
+    {
+      if (overwriteSearchPreview)
+        note.SearchPreview = dto.SearchPreview;
       return note;
+    }
     else
     {
       Note newNote = new(dto.Title, dto.Modified)
@@ -40,6 +47,7 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
         BoardId = new BoardId(dto.Parent),
         Created = dto.Created,
         Preview = dto.Preview,
+        SearchPreview = dto.SearchPreview,
         Background = ToolkitColorHelper.ToColor(dto.Background),
         Backdrop = (BackdropKind)dto.Backdrop,
         Size = new SizeInt32(dto.Width, dto.Height),
@@ -49,7 +57,6 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
         Tags = new(_tagService.GetTags(noteId))
       };
       AddToCache(newNote);
-      ReferenceTracker.NoteReferences.Add(new(newNote.Title, newNote));
       return newNote;
     }
   }
@@ -61,6 +68,7 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
     Modified = note.Modified,
     Title = note.Title,
     Preview = note.Preview,
+    SearchPreview = note.SearchPreview,
     Background = note.Background.ToString(),
     Backdrop = (int)note.Backdrop,
     Width = note.Size.Width,
@@ -75,18 +83,27 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
   {
     DateTimeOffset creationTime = DateTimeOffset.UtcNow;
     var settings = _settingsService.GetNoteSettings();
-    
-    Note newNote = new(TextGenerator.GenerateTitle(), creationTime)
+
+    NoteDto dto = new()
     {
-      Id = new NoteId(Guid.NewGuid()),
-      BoardId = navigation.Id,
+      Id = Guid.NewGuid(),
+      Parent = navigation.Id.Value,
       Created = creationTime,
-      Background = ColorGenerator.GenerateColor(),
-      Backdrop = settings.Backdrop,
-      Size = settings.Size,
-      Position = new(-1, -1)
+      Modified = creationTime,
+      Title = TextGenerator.GenerateTitle(),
+      Preview = "",
+      SearchPreview = "",
+      Background = ColorGenerator.GenerateColor().ToString(),
+      Backdrop = (int)settings.Backdrop,
+      Width = settings.Size.Width,
+      Height = settings.Size.Height,
+      PositionX = -1,
+      PositionY = -1,
+      Bookmarked = false,
+      Trashed = false
     };
-    AddToCache(newNote);
+    Note newNote = ToNote(dto);
+
     _dbDao.CreateNote(ToNoteDto(newNote));
     _searchDao.AddSearchDocument(new NoteSearchDto() { Id = newNote.Id.Value, Title = newNote.Title, Body = newNote.Preview });
     return newNote;
@@ -150,27 +167,29 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
 
   public async IAsyncEnumerable<Note> SearchNotesStreamAsync(string searchText, int count = 1000, int startIndex = 0, NoteSortField? sortField = null, SortDirection? sortDirection = null)
   {
-    List<GetNoteDto> dtos = new(_searchDao.GetNoteSearchIds(searchText, count, startIndex));
+    //List<GetNoteDto> dtos = new(_searchDao.GetNoteSearchIds(searchText, count, startIndex));
 
     //await foreach (var noteDto in _dbDao.SearchNotesChannelStreamAsync(dtos))
     //  yield return ToNote(noteDto);
 
-    await foreach (var noteDto in await _dbDao.SearchNotesStreamAsync(dtos))
-      yield return ToNote(noteDto);
+    //await foreach (var noteDto in await _dbDao.SearchNotesStreamAsync(dtos))
+    //  yield return ToNote(noteDto);
+    await foreach (var noteDto in _dbDao.SearchNotesStream(_searchDao.GetNoteSearchIdsStream(searchText, count, startIndex)))
+      yield return ToNote(noteDto, true);
   }
 
   public async Task<IEnumerable<Note>> GetNotesBatchAsync(NavigationBoard navigation, int count = -1, int startIndex = -1, NoteSortField? sortField = null, SortDirection? sortDirection = null)
   {
     GetNotesDto dto = GetNotesDto(navigation, count, startIndex, sortField, sortDirection);
 
-    return (await _dbDao.GetNotesBatchAsync(dto)).Select(ToNote);
+    return (await _dbDao.GetNotesBatchAsync(dto)).Select(item => ToNote(item));
   }
 
   public async Task<IEnumerable<Note>> SearchNotesBatchAsync(string searchText, int count = 1000, int startIndex = 0, NoteSortField? sortField = null, SortDirection? sortDirection = null)
   {
-    List<GetNoteDto> dtos = new(_searchDao.GetNoteSearchIds(searchText, count, startIndex));
+    List<GetNoteSearchDto> dtos = new(_searchDao.GetNoteSearchIds(searchText, count, startIndex));
 
-    return (await _dbDao.SearchNotesBatchAsync(dtos)).Select(ToNote);
+    return (await _dbDao.SearchNotesBatchAsync(dtos)).Select(item => ToNote(item, true));
   }
 
   public async Task UpdateNote(Note note, NoteUpdateFields updateFields)

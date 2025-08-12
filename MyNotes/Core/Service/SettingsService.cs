@@ -38,7 +38,7 @@ internal class SettingsService
 
     BoardSettings.TryAdd(AppSettingsKeys.BoardNoteSortField, (int)NoteSortField.Created);
     BoardSettings.TryAdd(AppSettingsKeys.BoardNoteSortDirection, (int)SortDirection.Ascending);
-    BoardSettings.TryAdd(AppSettingsKeys.BoardViewStyle, (int)BoardViewStyle.Grid_240_50);
+    BoardSettings.TryAdd(AppSettingsKeys.BoardViewStyle, (int)BoardViewStyle.Grid_320_100);
   }
 
   public GetGlobalSettingsDto GetGlobalSettings()

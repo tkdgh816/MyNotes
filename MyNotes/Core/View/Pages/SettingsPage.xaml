@@ -5,21 +5,45 @@
       xmlns:ui="using:CommunityToolkit.WinUI"
       xmlns:controls="using:CommunityToolkit.WinUI.Controls">
 
-  <Grid>
+  <Grid x:Name="View_RootGrid">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition />
     </Grid.RowDefinitions>
 
-    <StackPanel Orientation="Horizontal"
-                Spacing="8">
-      <TextBlock Text="Settings"
-                 Style="{StaticResource TitleTextBlockStyle}" />
-    </StackPanel>
+    <!--#region Navigation Header -->
+    <Grid x:Name="View_HeaderGrid"
+          Margin="0,0,4,0"
+          Padding="4"
+          CornerRadius="{StaticResource ControlCornerRadius}"
+          Canvas.ZIndex="1">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+
+      <!--#region Title -->
+      <TextBlock Grid.Column="0"
+                 Text="Settings"
+                 Style="{StaticResource TitleTextBlockStyle}"
+                 Margin="4,0" />
+
+      <!--#endregion -->
+
+      <StackPanel Grid.Column="1"
+                  Orientation="Horizontal">
+        <!--#region More Button -->
+        <Button x:Name="View_MoreButton"
+                Style="{StaticResource AppFontIconMediumButtonStyle}"
+                Content="&#xE712;" />
+        <!--#endregion-->
+      </StackPanel>
+    </Grid>
+    <!--#endregion-->
 
     <ScrollViewer x:Name="View_ScrollViewer"
                   Grid.Row="1">
-      <StackPanel Padding="0,0,18,12"
+      <StackPanel Padding="4,0,18,12"
                   Spacing="12">
         <!--#region Appearence -->
         <StackPanel Spacing="4">
@@ -42,32 +66,41 @@
           </controls:SettingsCard>
 
           <!-- Language -->
-          <controls:SettingsCard Header="Language (requires relaunch)"
-                                 HeaderIcon="{ui:FontIcon Glyph=&#xF2B7;}">
-            <controls:SettingsCard.Description>
-              <StackPanel Spacing="4">
+          <StackPanel>
+            <controls:SettingsCard x:Name="View_LanguageSettingsCard"
+                                   Header="Language (requires relaunch)"
+                                   HeaderIcon="{ui:FontIcon Glyph=&#xF2B7;}">
+              <controls:SettingsCard.Description>
                 <TextBlock Text="Selects a display language for this app" />
-                <InfoBar x:Name="LanguageInfoBar"
-                         IsOpen="True"
-                         Severity="Warning"
-                         Message="App need to be relaunced in order to apply your new display language"
-                         IsClosable="False"
-                         Visibility="Visible">
-                  <InfoBar.ActionButton>
-                    <Button Content="Relaunch" />
-                  </InfoBar.ActionButton>
-                </InfoBar>
-              </StackPanel>
-            </controls:SettingsCard.Description>
-            <ComboBox SelectedIndex="{x:Bind ViewModel.AppLanguage, Converter={StaticResource AppLanguageToIntConverter}, Mode=TwoWay}">
-              <ComboBoxItem Content="Use System Default"
-                            Tag="system" />
-              <ComboBoxItem Content="English"
-                            Tag="en-US" />
-              <ComboBoxItem Content="한국어"
-                            Tag="ko-KR" />
-            </ComboBox>
-          </controls:SettingsCard>
+              </controls:SettingsCard.Description>
+              <ComboBox SelectedIndex="{x:Bind ViewModel.AppLanguage, Converter={StaticResource AppLanguageToIntConverter}, Mode=TwoWay}"
+                        SelectionChanged="View_LanguageComboBox_SelectionChanged">
+                <ComboBoxItem Content="Use System Default"
+                              Tag="system" />
+                <ComboBoxItem Content="English"
+                              Tag="en-US" />
+                <ComboBoxItem Content="한국어"
+                              Tag="ko-KR" />
+              </ComboBox>
+            </controls:SettingsCard>
+            <InfoBar x:Name="View_LanguageInfoBar"
+                     IsOpen="True"
+                     Severity="Warning"
+                     Message="App need to be relaunced in order to apply your new display language"
+                     IsClosable="False"
+                     Visibility="Collapsed"
+                     CornerRadius="0,0,4,4"
+                     BorderThickness="1,0,1,1"
+                     Canvas.ZIndex="-1">
+              <InfoBar.ActionButton>
+                <Button Content="Relaunch"
+                        HorizontalAlignment="Right" />
+              </InfoBar.ActionButton>
+              <InfoBar.RenderTransform>
+                <TranslateTransform x:Name="View_LanguageInfoBar_TranslateTransform" />
+              </InfoBar.RenderTransform>
+            </InfoBar>
+          </StackPanel>
         </StackPanel>
         <!--#endregion-->
 
@@ -83,8 +116,8 @@
                                  HeaderIcon="{ui:FontIcon Glyph=&#xE7C4;}"
                                  Description="Run app at system startup">
             <Button Content="Register for startup"
-                    Style="{ThemeResource AccentButtonStyle}" 
-                    Click="RunAtStartupButton_Click"/>
+                    Style="{ThemeResource AccentButtonStyle}"
+                    Click="RunAtStartupButton_Click" />
           </controls:SettingsCard>
 
           <!-- Taskbar -->
@@ -93,7 +126,7 @@
                                  Description="Pin to taskbar">
             <Button Content="Pin"
                     Style="{ThemeResource AccentButtonStyle}"
-                    Click="PinToTaskbarButton_Click"/>
+                    Click="PinToTaskbarButton_Click" />
           </controls:SettingsCard>
         </StackPanel>
         <!--#endregion-->
@@ -197,5 +230,29 @@
 
       </StackPanel>
     </ScrollViewer>
+
+    <VisualStateManager.VisualStateGroups>
+      <VisualStateGroup x:Name="LanguageChangedStates">
+        <VisualState x:Name="LanguageNotChanged" />
+        <VisualState x:Name="LanguageChanged">
+          <VisualState.Setters>
+            <Setter Target="View_LanguageSettingsCard.CornerRadius"
+                    Value="4,4,0,0" />
+            <Setter Target="View_LanguageInfoBar.Visibility"
+                    Value="Visible" />
+          </VisualState.Setters>
+          <Storyboard>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetName="View_LanguageInfoBar_TranslateTransform"
+                                           Storyboard.TargetProperty="Y">
+              <DiscreteDoubleKeyFrame KeyTime="0"
+                                      Value="-24" />
+              <SplineDoubleKeyFrame KeyTime="0:0:0.15"
+                                    KeySpline="0.2,0.7 0.5,1.0"
+                                    Value="0" />
+            </DoubleAnimationUsingKeyFrames>
+          </Storyboard>
+        </VisualState>
+      </VisualStateGroup>
+    </VisualStateManager.VisualStateGroups>
   </Grid>
 </Page>

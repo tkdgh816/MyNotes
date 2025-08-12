@@ -1,6 +1,8 @@
-using MyNotes.Common.Messaging;
+using System.Text;
+
+using CommunityToolkit.WinUI;
+
 using MyNotes.Core.Model;
-using MyNotes.Core.Service;
 using MyNotes.Core.Shared;
 using MyNotes.Core.ViewModel;
 
@@ -15,45 +17,38 @@ internal sealed partial class BoardPage : Page
     InitializeComponent();
 
     this.Unloaded += BoardPage_Unloaded;
-
-    _settingsService = App.Instance.GetService<SettingsService>();
-    InitializeSettings();
   }
 
   public NavigationBoard Navigation { get; private set; } = null!;
   public BoardViewModel ViewModel { get; private set; } = null!;
-  private readonly SettingsService _settingsService;
 
   protected override void OnNavigatedTo(NavigationEventArgs e)
   {
     base.OnNavigatedTo(e);
     Navigation = (NavigationBoard)e.Parameter;
     ViewModel = App.Instance.GetService<BoardViewModelFactory>().Resolve(Navigation);
-    //this.DataContext = ViewModel;
 
+    InitializeSettings();
     RegisterEvents();
-    RegisterMessengers();
   }
 
   private void BoardPage_Unloaded(object sender, RoutedEventArgs e)
   {
     UnregisterEvents();
-    UnregisterMessengers();
     ViewModel.Dispose();
   }
 
   private void InitializeSettings()
   {
-    var settings = _settingsService.GetBoardSettings();
     foreach (var item in View_SortMenuFlyoutSubItem.Items.OfType<RadioMenuFlyoutItem>())
     {
       if (item.GroupName == "SortField")
-        item.IsChecked = item.Text == settings.SortField.ToString();
+        item.IsChecked = item.Text == ViewModel.SortField.ToString();
       else if (item.GroupName == "SortDirection")
-        item.IsChecked = item.Text == settings.SortDirection.ToString();
+        item.IsChecked = item.Text == ViewModel.SortDirection.ToString();
     }
 
-    var styleName = settings.ViewStyle.ToString().Split('_');
+    var styleName = ViewModel.ViewStyle.ToString().Split('_');
 
     View_StyleChangeRadioButtons.SelectedIndex = (styleName[0] == "Grid") ? 0 : 1;
 
@@ -65,65 +60,59 @@ internal sealed partial class BoardPage : Page
 
     ChangeViewStyle(styleName[0]);
     ChangeViewSize();
+
+    ViewModel.NoteViewModels.MoreItemsLoaded += (s, e) =>
+    {
+      if (_isEditMode)
+      {
+        if (ViewModel.IsChecked == true)
+          View_NotesGridView.SelectAll();
+      }
+    };
   }
 
   #region Handling Events
-  private void RegisterEvents()
-  {
-    _viewStyleSliderDebounceTimer.Tick += OnViewStyleSliderTimerTick;
-  }
+  public event PropertyChangedEventHandler? PropertyChanged;
 
-  private void UnregisterEvents()
-  {
-    _viewStyleSliderDebounceTimer.Tick -= OnViewStyleSliderTimerTick;
-  }
+  private void RegisterEvents() => _viewStyleSliderDebounceTimer.Tick += OnViewStyleSliderTimerTick;
+  private void UnregisterEvents() => _viewStyleSliderDebounceTimer.Tick -= OnViewStyleSliderTimerTick;
   #endregion
 
   #region Timers
   private readonly DispatcherTimer _viewStyleSliderDebounceTimer = new() { Interval = TimeSpan.FromMilliseconds(500) };
-
   private void OnViewStyleSliderTimerTick(object? sender, object e) => ChangeViewSize();
   #endregion
 
   #region Change UI and VisualStates
   private void Template_RootUserControl_PointerEntered(object sender, PointerRoutedEventArgs e)
-    => VisualStateManager.GoToState((Control)sender, "HoverStateHovering", false);
-
-  private void Template_RootUserControl_PointerExited(object sender, PointerRoutedEventArgs e)
-    => VisualStateManager.GoToState((Control)sender, "HoverStateNormal", false);
-
-  private void View_SearchButton_Click(object sender, RoutedEventArgs e)
-  => VisualStateManager.GoToState(this, "SearchBoxSearching", false);
-
-  private void View_SearchAutoSuggestBox_LostFocus(object sender, RoutedEventArgs e)
-    => VisualStateManager.GoToState(this, "SearchBoxNormal", false);
-
-  private void View_SearchAutoSuggestBox_LayoutUpdated(object sender, object e)
   {
-    if (View_SearchAutoSuggestBox.Visibility is Visibility.Visible)
-      View_SearchAutoSuggestBox.Focus(FocusState.Programmatic);
+    if (!_isEditMode)
+      VisualStateManager.GoToState((Control)sender, "HoverStateHovering", false);
   }
 
-  private void View_NotesGridView_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
+  private void Template_RootUserControl_PointerExited(object sender, PointerRoutedEventArgs e)
   {
-    if (args.InRecycleQueue)
-      return;
+    if (!_isEditMode)
+      VisualStateManager.GoToState((Control)sender, "HoverStateNormal", false);
+  }
 
-    if (args.ItemContainer is GridViewItem container)
-    {
-      if (container.ContentTemplateRoot is Control rootControl)
-      {
-        container.GotFocus += (s, e) => VisualStateManager.GoToState(rootControl, "HoverStateHovering", false);
-        container.LostFocus += (s, e) => VisualStateManager.GoToState(rootControl, "HoverStateNormal", false);
-      }
-    }
+  private void OnHoverStateHovering(object sender, RoutedEventArgs args)
+  {
+    if (sender is GridViewItem container && container.ContentTemplateRoot is Control rootControl)
+      VisualStateManager.GoToState(rootControl, "HoverStateHovering", false);
+    Debug.WriteLine("Hovering");
+  }
+  private void OnHoverStateNormal(object sender, RoutedEventArgs args)
+  {
+    if (sender is GridViewItem container && container.ContentTemplateRoot is Control rootControl)
+      VisualStateManager.GoToState(rootControl, "HoverStateNormal", false);
   }
   #endregion
 
   #region Change View Style
-  private void View_StyleChangeRadioButtons_SelectionChanged(object sender, SelectionChangedEventArgs e)
+  private void View_StyleChangeRadioButton_Click(object sender, RoutedEventArgs e)
   {
-    ChangeViewStyle(View_StyleChangeRadioButtons.SelectedIndex <= 0 ? "Grid" : "List");
+    ChangeViewStyle((string)((RadioButton)sender).Tag);
     ChangeViewSize();
   }
 
@@ -178,56 +167,83 @@ internal sealed partial class BoardPage : Page
     View_NotesGridView.ItemContainerStyle = (Style)((App)Application.Current).Resources[$"AppGridViewItemContainerStyle_{styleNameSuffix}"];
 
     if (Enum.TryParse<BoardViewStyle>(styleNameSuffix, out var viewStyle))
-      _settingsService.SetBoardSettings(AppSettingsKeys.BoardViewStyle, (int)viewStyle);
+      ViewModel.SetBoardSettings(AppSettingsKeys.BoardViewStyle, (int)viewStyle);
   }
   #endregion
 
   private void View_IconPicker_IconChanged(IconPicker sender, IconChangedEventArgs args)
     => ViewModel.ChangeIconCommand?.Execute(args.NewIcon);
 
-  #region Messengers
-  private void RegisterMessengers()
-  {
-    WeakReferenceMessenger.Default.Register<Message<IEnumerable<NoteViewModel>>, string>(this, Tokens.ChangeSourceFiltered, new((recipient, message) =>
-    {
-      if (message.Sender == ViewModel)
-      {
-        NotesCollectionViewSource.Source = message.Content;
-        VisualStateManager.GoToState(this, "CannotAddNote", false);
-      }
-    }));
-
-    WeakReferenceMessenger.Default.Register<Message<IEnumerable<NoteViewModel>>, string>(this, Tokens.ChangeSourceUnfiltered, new((recipient, message) =>
-    {
-      if (message.Sender == ViewModel)
-      {
-        NotesCollectionViewSource.Source = message.Content;
-        VisualStateManager.GoToState(this, "CanAddNote", false);
-      }
-    }));
-  }
-
-  private void UnregisterMessengers()
-  {
-    WeakReferenceMessenger.Default.UnregisterAll(this);
-  }
-  #endregion
-
   private void View_NotesGridView_DragItemsStarting(object sender, DragItemsStartingEventArgs e)
   {
-    NoteViewModel noteViewModel = (NoteViewModel)e.Items[0];
+    var notes = e.Items.Cast<NoteViewModel>().Select(vm => vm.Note);
+    if (!notes.Any())
+      return;
 
-    NoteId noteId = noteViewModel.Note.Id;
-    string noteTitle = noteViewModel.Note.Title;
-    string noteBody = noteViewModel.Note.Preview;
-    var container = (FrameworkElement)View_NotesGridView.ContainerFromItem(noteViewModel);
+    StringBuilder text = new();
+    foreach (var note in notes)
+    {
+      text.AppendLine($"[{note.Title}]");
+      text.AppendLine(note.Preview);
+      text.AppendLine();
+    }
 
-    e.Data.SetData(StandardDataFormats.Text, $"[{noteTitle}]\r\n{noteBody}");
-    e.Data.SetData(DataFormats.Note, noteId.Value.ToString());
+    e.Data.SetData(StandardDataFormats.Text, text.ToString());
+    e.Data.SetData(DataFormats.Note, string.Join(':', notes.Select(note => note.Id.ToString())));
   }
 
-  private void View_RemoveNotesMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+  private bool _isEditMode;
+  private void View_EditNotesMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
   {
-    View_NotesGridView.SelectionMode = ListViewSelectionMode.Multiple;
+    _isEditMode = true;
+    View_HeaderGrid.Translation = new(0, 0, 16);
+    VisualStateManager.GoToState(this, "EditModeEdit", false);
+  }
+
+  private void View_RevertAppBarButton_Click(object sender, RoutedEventArgs e)
+  {
+    _isEditMode = false;
+    View_HeaderGrid.Translation = new(0, 0, 0);
+    VisualStateManager.GoToState(this, "EditModeNormal", false);
+  }
+
+  private void View_NotesGridView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+  {
+    if (_isEditMode)
+    {
+      int selectedCount = View_NotesGridView.SelectedItems.Count;
+      View_SelectAllAppBarToggleButton.IsChecked = selectedCount > 0 && selectedCount == ViewModel.NoteViewModels.Count;
+    }
+  }
+
+  private void View_NotesGridView_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
+  {
+    var noteViewModel = (NoteViewModel)args.Item;
+    var container = (GridViewItem)args.ItemContainer;
+    var templateRoot = (UserControl)container.ContentTemplateRoot;
+
+    if (args.InRecycleQueue)
+    {
+      container.GotFocus -= OnHoverStateHovering;
+      container.LostFocus -= OnHoverStateNormal;
+    }
+    else
+    {
+      container.GotFocus += OnHoverStateHovering;
+      container.LostFocus += OnHoverStateNormal;
+    }
+  }
+
+  private void View_NotesGridView_ChoosingItemContainer(ListViewBase sender, ChoosingItemContainerEventArgs args)
+  {
+
+  }
+
+  private void View_SelectAllAppBarToggleButton_Click(object sender, RoutedEventArgs e)
+  {
+    if (ViewModel.IsChecked == true)
+      View_NotesGridView.SelectAll();
+    else
+      View_NotesGridView.DeselectAll();
   }
 }

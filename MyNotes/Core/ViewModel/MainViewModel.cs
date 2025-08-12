@@ -22,7 +22,7 @@ internal class MainViewModel : ViewModelBase
     _noteViewModelFactory = noteViewModelFactory;
 
     _navigationService.BuildNavigationTree(UserRootNavigation);
-    //_navigationService.SetCurrentNavigation((NavigationItem)CoreMenus[0]);
+    _navigationService.SetCurrentNavigation((NavigationItem)CoreNavigations[0]);
 
     MenuItems = [CoreNavigations, UserNavigations];
 

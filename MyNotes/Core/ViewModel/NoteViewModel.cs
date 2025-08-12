@@ -22,6 +22,7 @@ internal class NoteViewModel : ViewModelBase
     _dialogService = dialogService;
     _noteService = noteService;
     _tagService = tagService;
+    SetNotePropertyUpdateFieldMap();
     RegisterEvents();
     SetCommands();
     RegisterMessengers();
@@ -81,37 +82,30 @@ internal class NoteViewModel : ViewModelBase
 
   private HashSet<string> _changedNoteProperties = new();
   private NoteUpdateFields _noteUpdateFields = NoteUpdateFields.None;
-  private Dictionary<string, NoteUpdateFields> _notePropertyUpdateFieldMap = new()
-  {
-    { nameof(Note.BoardId), NoteUpdateFields.Parent },
-    { nameof(Note.Modified), NoteUpdateFields.Modified },
-    { nameof(Note.Title), NoteUpdateFields.Title },
-    { nameof(Note.IsBookmarked), NoteUpdateFields.Bookmarked },
-    { nameof(Note.IsTrashed), NoteUpdateFields.Trashed },
-  };
+  private static readonly Dictionary<string, NoteUpdateFields> _notePropertyUpdateFieldMapInBoard = new()
+    {
+      { nameof(Note.BoardId), NoteUpdateFields.Parent },
+      { nameof(Note.Modified), NoteUpdateFields.Modified },
+      { nameof(Note.Title), NoteUpdateFields.Title },
+      { nameof(Note.IsBookmarked), NoteUpdateFields.Bookmarked },
+      { nameof(Note.IsTrashed), NoteUpdateFields.Trashed },
+    };
+  private static readonly Dictionary<string, NoteUpdateFields> _notePropertyUpdateFieldMapInNote = new()
+    {
+      { nameof(Note.BoardId), NoteUpdateFields.Parent },
+      { nameof(Note.Modified), NoteUpdateFields.Modified },
+      { nameof(Note.Title), NoteUpdateFields.Title },
+      { nameof(Note.Preview), NoteUpdateFields.Preview },
+      { nameof(Note.Background), NoteUpdateFields.Background },
+      { nameof(Note.Backdrop), NoteUpdateFields.Backdrop },
+      { nameof(Note.Size), NoteUpdateFields.Width | NoteUpdateFields.Height },
+      { nameof(Note.Position), NoteUpdateFields.PositionX | NoteUpdateFields.PositionY },
+      { nameof(Note.IsBookmarked), NoteUpdateFields.Bookmarked },
+      { nameof(Note.IsTrashed), NoteUpdateFields.Trashed },
+    };
+  private Dictionary<string, NoteUpdateFields> _notePropertyUpdateFieldMap = _notePropertyUpdateFieldMapInBoard;
 
-  public void SetNotePropertyUpdateFieldMap() => _notePropertyUpdateFieldMap = new()
-  {
-    { nameof(Note.BoardId), NoteUpdateFields.Parent },
-    { nameof(Note.Modified), NoteUpdateFields.Modified },
-    { nameof(Note.Title), NoteUpdateFields.Title },
-    { nameof(Note.IsBookmarked), NoteUpdateFields.Bookmarked },
-    { nameof(Note.IsTrashed), NoteUpdateFields.Trashed },
-  };
-
-  public void UnsetNotePropertyUpdateFieldMap() => _notePropertyUpdateFieldMap = new()
-  {
-    { nameof(Note.BoardId), NoteUpdateFields.Parent },
-    { nameof(Note.Modified), NoteUpdateFields.Modified },
-    { nameof(Note.Title), NoteUpdateFields.Title },
-    { nameof(Note.Preview), NoteUpdateFields.Preview },
-    { nameof(Note.Background), NoteUpdateFields.Background },
-    { nameof(Note.Backdrop), NoteUpdateFields.Backdrop },
-    { nameof(Note.Size), NoteUpdateFields.Width | NoteUpdateFields.Height },
-    { nameof(Note.Position), NoteUpdateFields.PositionX | NoteUpdateFields.PositionY },
-    { nameof(Note.IsBookmarked), NoteUpdateFields.Bookmarked },
-    { nameof(Note.IsTrashed), NoteUpdateFields.Trashed },
-  };
+  public void SetNotePropertyUpdateFieldMap(bool isNoteWindowActive = false) => _notePropertyUpdateFieldMap = isNoteWindowActive ? _notePropertyUpdateFieldMapInNote : _notePropertyUpdateFieldMapInBoard;
 
   private void OnNoteDebounceTimerTick(object? sender, object e)
   {
@@ -130,11 +124,11 @@ internal class NoteViewModel : ViewModelBase
   private void OnNoteChanged(object? sender, PropertyChangedEventArgs e)
   {
     string? propertyName = e.PropertyName;
-    if (propertyName is null)
+    if (propertyName is null || !_notePropertyUpdateFieldMap.TryGetValue(propertyName, out NoteUpdateFields fieldValue))
       return;
     _noteDebounceTimer.Stop();
     _changedNoteProperties.Add(propertyName);
-    _noteUpdateFields |= _notePropertyUpdateFieldMap[propertyName];
+    _noteUpdateFields |= fieldValue;
     _noteDebounceTimer.Start();
   }
 
@@ -156,7 +150,7 @@ internal class NoteViewModel : ViewModelBase
 
   public void UpdateBody(string body)
   {
-    Note.Preview = body[..Math.Min(body.Length, 1500)];
+    Note.Preview = body[..Math.Min(body.Length, 5000)];
     _noteService.UpdateSearchDocument(Note, body);
   }
 
@@ -194,6 +188,7 @@ internal class NoteViewModel : ViewModelBase
   public Command<int>? SetWindowBackdropCommand { get; private set; }
   public Command? BookmarkNoteCommand { get; private set; }
   public Command? RemoveNoteCommand { get; private set; }
+  public Command? RestoreNoteCommand { get; private set; }
   public Command? DeleteNoteCommand { get; private set; }
   public Command? ShowMoveNoteToBoardDialogCommand { get; private set; }
   public Command<BoardId>? MoveNoteToBoardCommand { get; private set; }
@@ -228,6 +223,12 @@ internal class NoteViewModel : ViewModelBase
     RemoveNoteCommand = new(() =>
     {
       Note.IsTrashed = true;
+      WeakReferenceMessenger.Default.Send(new Message<NoteViewModel>(this), Tokens.RemoveNoteFromBoard);
+    });
+
+    RestoreNoteCommand = new(() =>
+    {
+      Note.IsTrashed = false;
       WeakReferenceMessenger.Default.Send(new Message<NoteViewModel>(this), Tokens.RemoveNoteFromBoard);
     });
 

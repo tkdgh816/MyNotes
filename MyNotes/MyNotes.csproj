@@ -23,6 +23,7 @@
     <None Remove="Assets\Square44x44Logo.targetsize-24_altform-lightunplated.png" />
     <None Remove="Core\View\Controls\UserControls\IconPicker.xaml" />
     <None Remove="Core\View\Controls\UserControls\TagColorSelector.xaml" />
+    <None Remove="Core\View\Dialogs\RemoveNoteDialog.xaml" />
     <None Remove="Core\View\Dialogs\TestDialog.xaml" />
     <None Remove="Core\View\NoteWindow.xaml" />
     <None Remove="Core\View\Pages\BookmarksPage.xaml" />
@@ -64,8 +65,8 @@
     <ProjectCapability Include="Msix" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Common\Helpers\" />
     <Folder Include="Common\Extensions\" />
+    <Folder Include="Common\Helpers\" />
     <Folder Include="Strings\ko-KR\" />
     <Folder Include="Strings\en-US\" />
   </ItemGroup>
@@ -74,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="CommunityToolkit.WinUI.Behaviors" Version="8.2.250402" />
     <PackageReference Include="CommunityToolkit.WinUI.Collections" Version="8.2.250402" />
     <PackageReference Include="CommunityToolkit.WinUI.Controls.Primitives" Version="8.2.250402" />
     <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.250402" />
@@ -94,6 +96,9 @@
   </ItemGroup>
   <ItemGroup>
     <Page Update="Core\View\Controls\UserControls\TagColorSelector.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Core\View\Dialogs\RemoveNoteDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <None Update="Debugging\Test\Test.xaml">
@@ -219,5 +224,6 @@
 
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
 </Project>

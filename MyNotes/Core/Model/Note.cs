@@ -1,4 +1,6 @@
-﻿namespace MyNotes.Core.Model;
+﻿using Microsoft.UI.Xaml.Documents;
+
+namespace MyNotes.Core.Model;
 
 internal class Note : ObservableObject
 {
@@ -46,6 +48,15 @@ internal class Note : ObservableObject
     get => _preview;
     set => SetProperty(ref _preview, value);
   }
+
+  private string _searchPreview = "";
+  public string SearchPreview
+  {
+    get => _searchPreview;
+    set => SetProperty(ref _searchPreview, value);
+  }
+
+  public List<TextRange> HighlighterRanges { get; } = new();
 
   private Color _background = Colors.LightGoldenrodYellow;
   public Color Background

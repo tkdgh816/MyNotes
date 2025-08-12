@@ -1,4 +1,7 @@
-﻿## BoardPage의 모드
-- MultiSelect: 삭제, 태그 일괄 변경
-- CanAddNote: 노트 추가 가능
-- Search: 보드 내 검색
+﻿## 검색 로직
+- searchText
+- Body의 총 길이
+- TextBlock에 표시될 수 있는 글자 수
+- 첫 위치가 앞쪽, 중간, 뒤쪽
+- 위치 + 표시수 <= 글자수: 앞쪽
+- 위치 + 표시수 > 글자수: 글자수 - 표시수

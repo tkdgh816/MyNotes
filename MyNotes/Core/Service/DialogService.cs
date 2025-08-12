@@ -14,12 +14,6 @@ internal class DialogService
 
   public void SetMainXamlRoot(XamlRoot xamlRoot) => _mainXamlRoot = xamlRoot;
 
-  private void ChangeNewDialog(ContentDialog dialog)
-  {
-    _mainDialog?.Hide();
-    _mainDialog = dialog;
-  }
-
   public async void ShowEditNoteTagsDialog(NoteViewModel noteViewModel)
   {
     if (noteViewModel is not null)
@@ -93,6 +87,12 @@ internal class DialogService
     else
       result = (false, null, null);
     return result;
+  }
+
+  public async Task<bool> ShowRemoveNoteDialog(int noteCount)
+  {
+    var dialog = new RemoveNoteDialog(noteCount) { XamlRoot = _mainXamlRoot };
+    return await dialog.ShowAsync() == ContentDialogResult.Primary;
   }
 
   public async Task<(bool DialogResult, BoardId? Id)> ShowMoveNoteToBoardDialog()

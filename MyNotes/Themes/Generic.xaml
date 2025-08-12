@@ -22,7 +22,10 @@
   <Visibility x:Key="VisibilityVisible">Visible</Visibility>
   <Visibility x:Key="VisibilityCollapsed">Collapsed</Visibility>
   <converters:BoolNegationConverter x:Key="BoolNegationConverter" />
-  <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+  <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" 
+                                        IsInverted="False"/>
+  <converters:BoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"
+                                        IsInverted="True" />
   <converters:EmptyStringToBoolConverter x:Key="EmptyStringToBoolConverter" />
   <converters:NullToBoolConverter x:Key="NullToBoolConverter" />
   <converters:NotNullToBoolConverter x:Key="NotNullToBoolConverter" />
@@ -1731,31 +1734,6 @@
             Value="Stretch" />
   </Style>
 
-  <Style x:Key="AppGridViewItemContainerStyle_Grid_160"
-         TargetType="GridViewItem"
-         BasedOn="{StaticResource AppGridViewItemContainerStyle}">
-    <Setter Property="Width"
-            Value="160" />
-  </Style>
-  <Style x:Key="AppGridViewItemContainerStyle_Grid_160_0"
-         TargetType="GridViewItem"
-         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_160}">
-    <Setter Property="Height"
-            Value="120" />
-  </Style>
-  <Style x:Key="AppGridViewItemContainerStyle_Grid_160_50"
-         TargetType="GridViewItem"
-         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_160}">
-    <Setter Property="Height"
-            Value="160" />
-  </Style>
-  <Style x:Key="AppGridViewItemContainerStyle_Grid_160_100"
-         TargetType="GridViewItem"
-         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_160}">
-    <Setter Property="Height"
-            Value="200" />
-  </Style>
-
   <Style x:Key="AppGridViewItemContainerStyle_Grid_200"
          TargetType="GridViewItem"
          BasedOn="{StaticResource AppGridViewItemContainerStyle}">
@@ -1766,21 +1744,33 @@
          TargetType="GridViewItem"
          BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_200}">
     <Setter Property="Height"
-            Value="150" />
+            Value="100" />
   </Style>
   <Style x:Key="AppGridViewItemContainerStyle_Grid_200_50"
          TargetType="GridViewItem"
          BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_200}">
     <Setter Property="Height"
-            Value="200" />
+            Value="150" />
   </Style>
   <Style x:Key="AppGridViewItemContainerStyle_Grid_200_100"
          TargetType="GridViewItem"
          BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_200}">
     <Setter Property="Height"
+            Value="200" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_200_150"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_200}">
+    <Setter Property="Height"
             Value="250" />
   </Style>
-
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_200_200"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_200}">
+    <Setter Property="Height"
+            Value="300" />
+  </Style>
+  
   <Style x:Key="AppGridViewItemContainerStyle_Grid_240"
          TargetType="GridViewItem"
          BasedOn="{StaticResource AppGridViewItemContainerStyle}">
@@ -1791,19 +1781,31 @@
          TargetType="GridViewItem"
          BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_240}">
     <Setter Property="Height"
-            Value="180" />
+            Value="120" />
   </Style>
   <Style x:Key="AppGridViewItemContainerStyle_Grid_240_50"
          TargetType="GridViewItem"
          BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_240}">
     <Setter Property="Height"
-            Value="240" />
+            Value="180" />
   </Style>
   <Style x:Key="AppGridViewItemContainerStyle_Grid_240_100"
          TargetType="GridViewItem"
          BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_240}">
     <Setter Property="Height"
+            Value="240" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_240_150"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_240}">
+    <Setter Property="Height"
             Value="300" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_240_200"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_240}">
+    <Setter Property="Height"
+            Value="360" />
   </Style>
 
   <Style x:Key="AppGridViewItemContainerStyle_Grid_280"
@@ -1816,19 +1818,31 @@
          TargetType="GridViewItem"
          BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_280}">
     <Setter Property="Height"
-            Value="210" />
+            Value="140" />
   </Style>
   <Style x:Key="AppGridViewItemContainerStyle_Grid_280_50"
          TargetType="GridViewItem"
          BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_280}">
     <Setter Property="Height"
-            Value="280" />
+            Value="210" />
   </Style>
   <Style x:Key="AppGridViewItemContainerStyle_Grid_280_100"
          TargetType="GridViewItem"
          BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_280}">
     <Setter Property="Height"
+            Value="280" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_280_150"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_280}">
+    <Setter Property="Height"
             Value="350" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_280_200"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_280}">
+    <Setter Property="Height"
+            Value="420" />
   </Style>
 
   <Style x:Key="AppGridViewItemContainerStyle_Grid_320"
@@ -1841,50 +1855,185 @@
          TargetType="GridViewItem"
          BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_320}">
     <Setter Property="Height"
-            Value="240" />
+            Value="160" />
   </Style>
   <Style x:Key="AppGridViewItemContainerStyle_Grid_320_50"
          TargetType="GridViewItem"
          BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_320}">
     <Setter Property="Height"
-            Value="320" />
+            Value="240" />
   </Style>
   <Style x:Key="AppGridViewItemContainerStyle_Grid_320_100"
          TargetType="GridViewItem"
          BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_320}">
     <Setter Property="Height"
+            Value="320" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_320_150"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_320}">
+    <Setter Property="Height"
             Value="400" />
   </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_320_200"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_320}">
+    <Setter Property="Height"
+            Value="480" />
+  </Style>
 
-  <Style x:Key="AppGridViewItemContainerStyle_List_160"
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_360"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle}">
+    <Setter Property="Width"
+            Value="360" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_360_0"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_360}">
+    <Setter Property="Height"
+            Value="180" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_360_50"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_360}">
+    <Setter Property="Height"
+            Value="270" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_360_100"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_360}">
+    <Setter Property="Height"
+            Value="360" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_360_150"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_360}">
+    <Setter Property="Height"
+            Value="450" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_360_200"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_360}">
+    <Setter Property="Height"
+            Value="540" />
+  </Style>
+
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_400"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle}">
+    <Setter Property="Width"
+            Value="400" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_400_0"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_400}">
+    <Setter Property="Height"
+            Value="200" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_400_50"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_400}">
+    <Setter Property="Height"
+            Value="300" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_400_100"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_400}">
+    <Setter Property="Height"
+            Value="400" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_400_150"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_400}">
+    <Setter Property="Height"
+            Value="500" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_400_200"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_400}">
+    <Setter Property="Height"
+            Value="600" />
+  </Style>
+
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_440"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle}">
+    <Setter Property="Width"
+            Value="440" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_440_0"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_440}">
+    <Setter Property="Height"
+            Value="220" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_440_50"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_440}">
+    <Setter Property="Height"
+            Value="330" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_440_100"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_440}">
+    <Setter Property="Height"
+            Value="440" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_440_150"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_440}">
+    <Setter Property="Height"
+            Value="550" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_Grid_440_200"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle_Grid_440}">
+    <Setter Property="Height"
+            Value="660" />
+  </Style>
+  
+  <Style x:Key="AppGridViewItemContainerStyle_List_200"
          TargetType="GridViewItem"
          BasedOn="{StaticResource AppGridViewItemContainerStyle}">
     <Setter Property="Height"
             Value="64" />
   </Style>
-  <Style x:Key="AppGridViewItemContainerStyle_List_200"
+  <Style x:Key="AppGridViewItemContainerStyle_List_240"
          TargetType="GridViewItem"
          BasedOn="{StaticResource AppGridViewItemContainerStyle}">
     <Setter Property="Height"
             Value="102" />
   </Style>
-  <Style x:Key="AppGridViewItemContainerStyle_List_240"
+  <Style x:Key="AppGridViewItemContainerStyle_List_280"
          TargetType="GridViewItem"
          BasedOn="{StaticResource AppGridViewItemContainerStyle}">
     <Setter Property="Height"
             Value="140" />
   </Style>
-  <Style x:Key="AppGridViewItemContainerStyle_List_280"
+  <Style x:Key="AppGridViewItemContainerStyle_List_320"
          TargetType="GridViewItem"
          BasedOn="{StaticResource AppGridViewItemContainerStyle}">
     <Setter Property="Height"
             Value="178" />
   </Style>
-  <Style x:Key="AppGridViewItemContainerStyle_List_320"
+  <Style x:Key="AppGridViewItemContainerStyle_List_360"
          TargetType="GridViewItem"
          BasedOn="{StaticResource AppGridViewItemContainerStyle}">
     <Setter Property="Height"
             Value="216" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_List_400"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle}">
+    <Setter Property="Height"
+            Value="254" />
+  </Style>
+  <Style x:Key="AppGridViewItemContainerStyle_List_440"
+         TargetType="GridViewItem"
+         BasedOn="{StaticResource AppGridViewItemContainerStyle}">
+    <Setter Property="Height"
+            Value="292" />
   </Style>
   <!--#endregion-->
 

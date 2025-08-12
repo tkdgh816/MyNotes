@@ -16,6 +16,7 @@ internal class SettingsViewModel : ViewModelBase
     var globalSettings = _settingsService.GetGlobalSettings();
     var noteSettings = _settingsService.GetNoteSettings();
     (_appTheme, _appLanguage) = (globalSettings.AppTheme, globalSettings.AppLanguage);
+    InitialAppLanguage = _appLanguage;
     (_noteBackground, _noteBackdrop) = (noteSettings.Background, noteSettings.Backdrop);
     (_noteWidth, _noteHeight) = (noteSettings.Size.Width, noteSettings.Size.Height);
   }
@@ -52,6 +53,7 @@ internal class SettingsViewModel : ViewModelBase
       };
     }
   }
+  public AppLanguage InitialAppLanguage { get; }
 
   private Color _noteBackground;
   public Color NoteBackground

@@ -1,4 +1,6 @@
-﻿using Lucene.Net.Documents;
+﻿using System.Threading.Channels;
+
+using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.QueryParsers.Classic;
 using Lucene.Net.Search;
@@ -53,33 +55,30 @@ internal class NoteSearchDao(SearchService searchService)
     }
   }
 
-  private ScoreDoc? currentDoc;
-  public IEnumerable<GetNoteDto> GetNoteSearchIds(string searchText, int limit, int offset)
+  private ScoreDoc? _currentDoc;
+  public IEnumerable<GetNoteSearchDto> GetNoteSearchIds(string searchText, int limit, int offset)
   {
     if (offset == 0)
-      currentDoc = null;
+      _currentDoc = null;
 
     using DirectoryReader indexReader = _searchService.Writer.GetReader(true);
     var indexSearcher = new IndexSearcher(indexReader);
-    List<GetNoteDto> dtos = new();
+    List<GetNoteSearchDto> dtos = new();
 
     var parser = new QueryParser(_searchService.LuceneVersion, "body", _searchService.Analyzer);
     try
     {
       var searchQuery = parser.Parse(searchText);
-
-
-      var topDocs = indexSearcher.SearchAfter(currentDoc, searchQuery, limit);
-
+      var topDocs = indexSearcher.SearchAfter(_currentDoc, searchQuery, limit);
 
       foreach (var scoreDoc in topDocs.ScoreDocs)
       {
         var doc = indexSearcher.Doc(scoreDoc.Doc);
-        dtos.Add(new GetNoteDto() { Id = new Guid(doc.Get("id")) });
+        dtos.Add(new GetNoteSearchDto() { SearchText = searchText, Id = new Guid(doc.Get("id")), Body = doc.Get("body") });
       }
 
       if (topDocs.ScoreDocs.Length > 0)
-        currentDoc = topDocs.ScoreDocs[^1];
+        _currentDoc = topDocs.ScoreDocs[^1];
     }
     catch (ParseException)
     {
@@ -87,5 +86,46 @@ internal class NoteSearchDao(SearchService searchService)
     }
 
     return dtos;
+  }
+
+  public IAsyncEnumerable<GetNoteSearchDto> GetNoteSearchIdsStream(string searchText, int limit, int offset)
+  {
+    if (offset == 0)
+      _currentDoc = null;
+
+    var channel = Channel.CreateUnbounded<GetNoteSearchDto>();
+    Task.Run(async () =>
+    {
+      using DirectoryReader indexReader = _searchService.Writer.GetReader(true);
+      var indexSearcher = new IndexSearcher(indexReader);
+      List<GetNoteSearchDto> dtos = new();
+
+      var parser = new QueryParser(_searchService.LuceneVersion, "body", _searchService.Analyzer);
+      try
+      {
+        var searchQuery = parser.Parse(searchText);
+        var topDocs = indexSearcher.SearchAfter(_currentDoc, searchQuery, limit);
+
+        foreach (var scoreDoc in topDocs.ScoreDocs)
+        {
+          var doc = indexSearcher.Doc(scoreDoc.Doc);
+          await channel.Writer.WriteAsync(new GetNoteSearchDto() { SearchText = searchText, Id = new Guid(doc.Get("id")), Body = doc.Get("body") });
+        }
+
+        if (topDocs.ScoreDocs.Length > 0)
+          _currentDoc = topDocs.ScoreDocs[^1];
+      }
+      catch (ParseException)
+      {
+
+      }
+      finally
+      {
+        Debug.WriteLine("Completed");
+        channel.Writer.Complete();
+      }
+    });
+
+    return channel.Reader.ReadAllAsync();
   }
 }

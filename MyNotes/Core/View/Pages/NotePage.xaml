@@ -8,7 +8,15 @@
       xmlns:interactivity="using:Microsoft.Xaml.Interactivity">
 
   <Grid x:Name="View_RootGrid"
-        Background="{x:Bind ViewModel.Note.Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}">
+        Background="{x:Bind ViewModel.Note.Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}"
+        KeyboardAcceleratorPlacementMode="Hidden">
+    <Grid.KeyboardAccelerators>
+      <KeyboardAccelerator x:Name="View_SaveKeyboardAccelerator"
+                           Key="S"
+                           Modifiers="Control"
+                           Invoked="View_SaveKeyboardAccelerator_Invoked" />
+    </Grid.KeyboardAccelerators>
+    
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition />

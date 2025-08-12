@@ -9,7 +9,7 @@
                Title="{x:Bind ViewModel.Note.Title, Converter={StaticResource StringWrapperConverter}, ConverterParameter='Tags for: |%|'}"
                CloseButtonText="Close"
                Style="{StaticResource DefaultContentDialogStyle}">
-  <Grid Width="350"
+  <Grid Width="320"
         MaxHeight="300"
         RowSpacing="12">
     <Grid.RowDefinitions>

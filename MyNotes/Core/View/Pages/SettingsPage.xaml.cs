@@ -29,4 +29,12 @@ internal sealed partial class SettingsPage : Page
     //if (!isPinned)
     //  await TaskbarManager.GetDefault().RequestPinCurrentAppAsync();
   }
+
+  private void View_LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+  {
+    if (ViewModel.AppLanguage == ViewModel.InitialAppLanguage)
+      VisualStateManager.GoToState(this, "LanguageNotChanged", false);
+    else
+      VisualStateManager.GoToState(this, "LanguageChanged", false);
+  }
 }

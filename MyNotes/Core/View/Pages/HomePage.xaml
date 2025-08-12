@@ -4,17 +4,41 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:controls="using:CommunityToolkit.WinUI.Controls">
 
-  <Grid>
+  <Grid x:Name="View_RootGrid">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition />
     </Grid.RowDefinitions>
 
-    <StackPanel Orientation="Horizontal"
-                Spacing="8">
-      <TextBlock Text="Home"
-                 Style="{StaticResource TitleTextBlockStyle}" />
-    </StackPanel>
+    <!--#region Navigation Header -->
+    <Grid x:Name="View_HeaderGrid"
+          Margin="0,0,4,0"
+          Padding="4"
+          CornerRadius="{StaticResource ControlCornerRadius}"
+          Canvas.ZIndex="1">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+
+      <!--#region Title -->
+      <TextBlock Grid.Column="0"
+                 Text="Home"
+                 Style="{StaticResource TitleTextBlockStyle}"
+                 Margin="4,0" />
+
+      <!--#endregion -->
+
+      <StackPanel Grid.Column="1"
+                  Orientation="Horizontal">
+        <!--#region More Button -->
+        <Button x:Name="View_MoreButton"
+                Style="{StaticResource AppFontIconMediumButtonStyle}"
+                Content="&#xE712;" />
+        <!--#endregion-->
+      </StackPanel>
+    </Grid>
+    <!--#endregion-->
 
     <Grid Grid.Row="1"
           RowSpacing="12"

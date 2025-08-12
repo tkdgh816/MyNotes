@@ -40,6 +40,9 @@ internal sealed partial class MainPage : Page
     // 서비스에 뷰 내부 컨트롤 전달
     _navigationService.AttachView(View_NavigationView, View_NavigationContent_RootFrame);
     _dialogService.SetMainXamlRoot(this.XamlRoot);
+
+    // 초기 화면 페이지 설정
+    View_NavigationView.SelectedItem = _navigationService.CurrentNavigation;
   }
 
   private void MainPage_Unloaded(object sender, RoutedEventArgs e)
@@ -214,7 +217,7 @@ internal sealed partial class MainPage : Page
           else
           {
             e.AcceptedOperation = DataPackageOperation.Move;
-            e.DragUIOverride.Caption = $"Move note to {targetBoard.Name}";
+            e.DragUIOverride.Caption = $"Move notes to {targetBoard.Name}";
           }
           break;
       }
@@ -325,8 +328,9 @@ internal sealed partial class MainPage : Page
           }
           break;
         case DataFormats.Note:
-          string id = (string)await e.DataView.GetDataAsync(format);
-          ViewModel.MoveNoteToBoard(new NoteId(new Guid(id)), targetBoard.Id);
+          string ids = (string)await e.DataView.GetDataAsync(format);
+          foreach(var id in ids.Split(":"))
+            ViewModel.MoveNoteToBoard(new NoteId(new Guid(id)), targetBoard.Id);
           break;
         case var _ when format == StandardDataFormats.Text:
           Debug.WriteLine($"{format}: {await e.DataView.GetDataAsync(format)}");

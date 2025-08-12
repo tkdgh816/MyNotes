@@ -12,6 +12,8 @@ internal class IncrementalObservableCollection<T> : ObservableCollection<T>, ISu
   private bool _isLoading = false;
   private readonly Lock _lockObj = new();
 
+  public event EventHandler<MoreItemsLoadedEventArgs>? MoreItemsLoaded;
+
   public IncrementalObservableCollection(Func<uint, Task<IEnumerable<T>>> loadItemsTaskFunc)
     => _loadItemsTaskFunc = loadItemsTaskFunc;
 
@@ -30,10 +32,10 @@ internal class IncrementalObservableCollection<T> : ObservableCollection<T>, ISu
       _isLoading = true;
     }
 
+    uint itemCount = 0;
     try
     {
       await Task.Delay(10);
-      uint itemCount = 0;
 
       if (_loadItemsTaskFunc is not null)
       {
@@ -58,25 +60,25 @@ internal class IncrementalObservableCollection<T> : ObservableCollection<T>, ISu
 
       if (itemCount == 0)
         _hasMoreItems = false;
-
-      return new LoadMoreItemsResult(itemCount);
     }
     catch (Exception)
-    {
-      return new LoadMoreItemsResult(0);
-    }
-    finally
-    {
-      _isLoading = false;
-    }
+    { }
+      
+    _isLoading = false;
+    MoreItemsLoaded?.Invoke(this, new MoreItemsLoadedEventArgs(itemCount));
+    return new LoadMoreItemsResult(itemCount);
   }
 
-  IAsyncOperation<LoadMoreItemsResult> ISupportIncrementalLoading.LoadMoreItemsAsync(uint count)
-    => AsyncInfo.Run((c) => LoadMoreItemsAsync(count));
+  IAsyncOperation<LoadMoreItemsResult> ISupportIncrementalLoading.LoadMoreItemsAsync(uint count) => AsyncInfo.Run((c) => LoadMoreItemsAsync(count));
 
   protected override void ClearItems()
   {
     base.ClearItems();
     _hasMoreItems = true;
   }
+}
+
+internal class MoreItemsLoadedEventArgs(uint count) : EventArgs
+{
+  public uint Count { get; } = count;
 }

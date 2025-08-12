@@ -10,6 +10,7 @@ internal record NoteDto
   public required DateTimeOffset Modified { get; init; }
   public required string Title { get; init; }
   public required string Preview { get; init; }
+  public required string SearchPreview { get; init; }
   public required string Background { get; init; }
   public required int Backdrop { get; init; }
   public required int Width { get; init; }
@@ -20,9 +21,11 @@ internal record NoteDto
   public required bool Trashed { get; init; }
 }
 
-internal record GetNoteDto
+internal record GetNoteSearchDto
 {
+  public required string SearchText { get; init; }
   public required Guid Id { get; init; }
+  public required string Body { get; init; }
 }
 
 internal record GetNotesDto
