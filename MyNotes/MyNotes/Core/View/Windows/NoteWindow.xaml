@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window x:Class="MyNotes.Core.View.NoteWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:view="using:MyNotes.Core.View"
+        xmlns:converters="using:MyNotes.Common.Converters">
+
+  <view:NotePage x:Name="View_NotePage" />
+</Window>
