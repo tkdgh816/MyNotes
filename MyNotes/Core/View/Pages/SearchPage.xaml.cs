@@ -5,15 +5,18 @@ using CommunityToolkit.WinUI;
 using Microsoft.UI.Xaml.Documents;
 
 using MyNotes.Core.Model;
-using MyNotes.Core.Service;
 using MyNotes.Core.Shared;
 using MyNotes.Core.ViewModel;
 
 using Windows.ApplicationModel.DataTransfer;
 
+using AppColorHelper = MyNotes.Common.Helpers.ColorHelper;
+using ToolkitColorHelper = CommunityToolkit.WinUI.Helpers.ColorHelper;
+
+
 namespace MyNotes.Core.View;
 
-internal sealed partial class SearchPage : Page, INotifyPropertyChanged
+internal sealed partial class SearchPage : Page
 {
   public SearchPage()
   {
@@ -67,8 +70,6 @@ internal sealed partial class SearchPage : Page, INotifyPropertyChanged
   }
 
   #region Handling Events
-  public event PropertyChangedEventHandler? PropertyChanged;
-  private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
   private void RegisterEvents()
   {
@@ -120,12 +121,17 @@ internal sealed partial class SearchPage : Page, INotifyPropertyChanged
         && grid.FindChild("Template_BodyTextBlock") is TextBlock textblock)
       {
         textblock.TextHighlighters.Clear();
-        //var background = noteViewModel.Note.Background;
-        //var color = ColorHelper.FromArgb(255, (byte)(255 - background.R), (byte)(255 - background.G), (byte)(255 - background.B));
-        SolidColorBrush brush = new(Colors.White);
+        var background = noteViewModel.Note.Background;
+        var comp = AppColorHelper.GetComplementary(background);
+
+        var backHsv = ToolkitColorHelper.ToHsv(background);
+        var h = (backHsv.H - 180.0) / 360.0;
+
+        var emphasis = ToolkitColorHelper.FromHsv((h - Math.Floor(h)) * 360.0, Math.Clamp(backHsv.S, 0.3, 0.7), Math.Max(0.7, backHsv.V), 1.0);
+
         foreach (var textRange in noteViewModel.Note.HighlighterRanges)
         {
-          TextHighlighter highlighter = new() { Background = brush };
+          TextHighlighter highlighter = new() { Background = new SolidColorBrush(emphasis) };
           highlighter.Ranges.Add(textRange);
           textblock.TextHighlighters.Add(highlighter);
         }

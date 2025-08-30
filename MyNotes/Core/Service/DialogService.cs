@@ -1,4 +1,5 @@
 ﻿using MyNotes.Core.Model;
+using MyNotes.Core.Shared;
 using MyNotes.Core.View;
 using MyNotes.Core.ViewModel;
 
@@ -10,7 +11,7 @@ internal class DialogService
   { }
 
   private XamlRoot? _mainXamlRoot;
-  private ContentDialog? _mainDialog;
+  //private ContentDialog? _mainDialog;
 
   public void SetMainXamlRoot(XamlRoot xamlRoot) => _mainXamlRoot = xamlRoot;
 

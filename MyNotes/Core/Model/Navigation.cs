@@ -1,4 +1,4 @@
-﻿using MyNotes.Common.Collections;
+﻿using MyNotes.Core.Shared;
 using MyNotes.Core.View;
 
 namespace MyNotes.Core.Model;

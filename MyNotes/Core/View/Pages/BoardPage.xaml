@@ -374,6 +374,7 @@
   <Grid x:Name="View_RootGrid">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
       <RowDefinition />
     </Grid.RowDefinitions>
 
@@ -632,24 +633,28 @@
           <AppBarButton Label="Move"
                         Icon="MoveToFolder"
                         Command="{x:Bind ViewModel.ShowMoveNoteToBoardDialogCommand}"
-                        CommandParameter="{x:Bind View_NotesGridView.SelectedItems}" />
+                        CommandParameter="{Binding ElementName=View_NotesGridView, Path=SelectedItems}" />
           <AppBarButton Label="Remove"
                         Icon="Delete"
                         Command="{x:Bind ViewModel.RemoveNotesCommand}"
-                        CommandParameter="{x:Bind View_NotesGridView.SelectedItems}" />
+                        CommandParameter="{Binding ElementName=View_NotesGridView, Path=SelectedItems}" />
           <AppBarSeparator />
           <AppBarButton Label="Revert"
                         Icon="Refresh"
                         Click="View_RevertAppBarButton_Click" />
         </StackPanel>
       </Grid>
-
     </Grid>
     <!--#endregion-->
 
+    <ProgressBar Grid.Row="1"
+                 IsIndeterminate="True"
+                 Visibility="{x:Bind ViewModel.IsNotesLoading, Mode=OneWay}"
+                 Margin="8,0" />
+
     <!--#region Notes List GridView -->
     <GridView x:Name="View_NotesGridView"
-              Grid.Row="1"
+              Grid.Row="2"
               Padding="0,4"
               ItemsSource="{Binding Source={StaticResource NotesCollectionViewSource}}"
               SelectionMode="None"

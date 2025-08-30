@@ -15,8 +15,6 @@ internal sealed partial class BoardPage : Page
   public BoardPage()
   {
     InitializeComponent();
-
-    this.Unloaded += BoardPage_Unloaded;
   }
 
   public NavigationBoard Navigation { get; private set; } = null!;
@@ -32,10 +30,12 @@ internal sealed partial class BoardPage : Page
     RegisterEvents();
   }
 
-  private void BoardPage_Unloaded(object sender, RoutedEventArgs e)
+  protected override void OnNavigatedFrom(NavigationEventArgs e)
   {
     UnregisterEvents();
+    this.Bindings.StopTracking();
     ViewModel.Dispose();
+    base.OnNavigatedFrom(e);
   }
 
   private void InitializeSettings()
@@ -60,22 +60,28 @@ internal sealed partial class BoardPage : Page
 
     ChangeViewStyle(styleName[0]);
     ChangeViewSize();
-
-    ViewModel.NoteViewModels.MoreItemsLoaded += (s, e) =>
+  }
+  private void NoteViewModels_MoreItemsLoaded(object? sender, Common.Collections.MoreItemsLoadedEventArgs e)
+  {
+    if (_isEditMode)
     {
-      if (_isEditMode)
-      {
-        if (ViewModel.IsChecked == true)
-          View_NotesGridView.SelectAll();
-      }
-    };
+      if (ViewModel.IsChecked == true)
+        View_NotesGridView.SelectAll();
+    }
   }
 
   #region Handling Events
-  public event PropertyChangedEventHandler? PropertyChanged;
+  private void RegisterEvents()
+  {
+    _viewStyleSliderDebounceTimer.Tick += OnViewStyleSliderTimerTick;
+    //ViewModel.NoteViewModels.MoreItemsLoaded += NoteViewModels_MoreItemsLoaded;
+  }
 
-  private void RegisterEvents() => _viewStyleSliderDebounceTimer.Tick += OnViewStyleSliderTimerTick;
-  private void UnregisterEvents() => _viewStyleSliderDebounceTimer.Tick -= OnViewStyleSliderTimerTick;
+  private void UnregisterEvents()
+  {
+    _viewStyleSliderDebounceTimer.Tick -= OnViewStyleSliderTimerTick;
+    //ViewModel.NoteViewModels.MoreItemsLoaded -= NoteViewModels_MoreItemsLoaded;
+  }
   #endregion
 
   #region Timers
@@ -220,7 +226,6 @@ internal sealed partial class BoardPage : Page
   {
     var noteViewModel = (NoteViewModel)args.Item;
     var container = (GridViewItem)args.ItemContainer;
-    var templateRoot = (UserControl)container.ContentTemplateRoot;
 
     if (args.InRecycleQueue)
     {

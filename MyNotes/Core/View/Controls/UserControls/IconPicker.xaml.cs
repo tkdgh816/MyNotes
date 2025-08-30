@@ -1,4 +1,5 @@
 using MyNotes.Core.Model;
+using MyNotes.Core.Shared;
 
 namespace MyNotes.Core.View;
 

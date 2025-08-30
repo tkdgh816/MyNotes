@@ -1,4 +1,6 @@
-﻿namespace MyNotes.Core.Model;
+﻿using MyNotes.Core.Model;
+
+namespace MyNotes.Core.Shared;
 
 internal static class IconManager
 {

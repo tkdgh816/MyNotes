@@ -1,3 +1,6 @@
+using ToolkitColorHelper = CommunityToolkit.WinUI.Helpers.ColorHelper;
+using AppColorHelper = MyNotes.Common.Helpers.ColorHelper;
+
 namespace MyNotes.Core.View;
 internal sealed partial class HomePage : Page
 {
@@ -6,40 +9,51 @@ internal sealed partial class HomePage : Page
     this.InitializeComponent();
   }
 
-  public double CalculateContrastRatio(Color first, Color second)
+  private void Ex1_ColorPicker_ColorChanged(ColorPicker sender, ColorChangedEventArgs args)
   {
-    var relLuminanceOne = GetRelativeLuminance(first);
-    var relLuminanceTwo = GetRelativeLuminance(second);
-    return (Math.Max(relLuminanceOne, relLuminanceTwo) + 0.05)
-        / (Math.Min(relLuminanceOne, relLuminanceTwo) + 0.05);
+    double ratio = AppColorHelper.GetContrastRatio(Ex1_BackgroundColorPicker.Color, Ex1_ForegroundColorPicker.Color);
+    Ex1_ContrastTestTextBlock.Text = $"{Math.Round(ratio, 2)}";
+    Ex1_RegularTestTextBlock.Text = (ratio >= 4.5) ? "Pass" : "Fail";
+    Ex1_RegularTestTextBlock.Foreground = (ratio >= 4.5) ? new SolidColorBrush(Colors.DarkGreen) : new SolidColorBrush(Colors.DarkRed);
+    Ex1_LargeTestTextBlock.Text = (ratio >= 3.0) ? "Pass" : "Fail";
+    Ex1_LargeTestTextBlock.Foreground = (ratio >= 3.0) ? new SolidColorBrush(Colors.DarkGreen) : new SolidColorBrush(Colors.DarkRed);
+    double luminance = AppColorHelper.GetRelativeLuminance(Ex1_BackdropColorPicker.Color);
+    Ex1_LuminanceTestTextBlock.Text = $"{Math.Round(luminance, 2)}";
   }
 
-  public double GetRelativeLuminance(Color c)
+  private void Ex2_ColorPicker_ColorChanged(ColorPicker sender, ColorChangedEventArgs args)
   {
-    var rSRGB = c.R / 255.0;
-    var gSRGB = c.G / 255.0;
-    var bSRGB = c.B / 255.0;
+    var background = Ex2_BackgroundColorPicker.Color;
+    var foreground = Ex2_ForegroundColorPicker.Color;
+    var backLum = AppColorHelper.GetRelativeLuminance(background);
+    var emphasis = AppColorHelper.GetComplementary(background);
 
-    var r = rSRGB <= 0.04045 ? rSRGB / 12.92 : Math.Pow((rSRGB + 0.055) / 1.055, 2.4);
-    var g = gSRGB <= 0.04045 ? gSRGB / 12.92 : Math.Pow((gSRGB + 0.055) / 1.055, 2.4);
-    var b = bSRGB <= 0.04045 ? bSRGB / 12.92 : Math.Pow((bSRGB + 0.055) / 1.055, 2.4);
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    var backHsv = ToolkitColorHelper.ToHsv(background);
+    var foreHsv = ToolkitColorHelper.ToHsv(foreground);
+    Color emphasis2;
+    var h = (backHsv.H - 180.0) / 360.0;
+
+    if (foreHsv.V >= 0.5)
+      emphasis2 = ToolkitColorHelper.FromHsv((h - Math.Floor(h)) * 360.0, Math.Max(backHsv.S, 0.5), Math.Clamp(backHsv.V, 0.5, 0.8), 1.0);
+    else
+      emphasis2 = ToolkitColorHelper.FromHsv((h - Math.Floor(h)) * 360.0, Math.Min(backHsv.S, 0.5), Math.Max(0.7, backHsv.V), 1.0);
+    var contrast1 = AppColorHelper.GetContrastRatio(background, emphasis);
+    var contrast2 = AppColorHelper.GetContrastRatio(Colors.Black, emphasis);
+
+
+    Ex2_EmphasisColorPicker.Color = emphasis2;
+
+    Ex2_TextBlock.Text = $"backLum: {Math.Round(backLum, 2)}\r\ncontrast1: {Math.Round(contrast1, 2)}\r\ncontrast2: {Math.Round(contrast2, 2)}";
   }
 
-  private void ColorPicker_ColorChanged(ColorPicker sender, ColorChangedEventArgs args)
+  private void Ex2_EmphasisColorPicker_ColorChanged(ColorPicker sender, ColorChangedEventArgs args)
   {
-    CheckContrast();
-  }
-
-  private void CheckContrast()
-  {
-    double ratio = CalculateContrastRatio(BackgroundColorPicker.Color, ForegroundColorPicker.Color);
-    ContrastTestTextBlock.Text = $"{Math.Round(ratio, 2)}";
-    RegularTestTextBlock.Text = (ratio >= 4.5) ? "Pass" : "Fail";
-    RegularTestTextBlock.Foreground = (ratio >= 4.5) ? new SolidColorBrush(Colors.DarkGreen) : new SolidColorBrush(Colors.DarkRed);
-    LargeTestTextBlock.Text = (ratio >= 3.0) ? "Pass" : "Fail";
-    LargeTestTextBlock.Foreground = (ratio >= 3.0) ? new SolidColorBrush(Colors.DarkGreen) : new SolidColorBrush(Colors.DarkRed);
-    double luminance = GetRelativeLuminance(BackdropColorPicker.Color);
-    LuminanceTestTextBlock.Text = $"{Math.Round(luminance, 2)}";
+    //var background = Ex2_BackgroundColorPicker.Color;
+    //var backLum = AppColorHelper.GetRelativeLuminance(background);
+    //var emphasis = args.NewColor;
+    //var contrast1 = AppColorHelper.GetContrastRatio(background, emphasis);
+    //var contrast2 = AppColorHelper.GetContrastRatio(Colors.Black, emphasis);
+    Ex2_EmphasisBorder.Background = new SolidColorBrush(args.NewColor);
+    //Ex2_TextBlock.Text = $"backLum: {Math.Round(backLum, 2)}\r\ncontrast1: {Math.Round(contrast1, 2)}\r\ncontrast2: {Math.Round(contrast2, 2)}";
   }
 }

@@ -374,6 +374,7 @@
   <Grid x:Name="View_RootGrid">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
       <RowDefinition />
     </Grid.RowDefinitions>
 
@@ -631,9 +632,14 @@
     </Grid>
     <!--#endregion-->
 
+    <ProgressBar Grid.Row="1"
+                 IsIndeterminate="True"
+                 Visibility="{x:Bind ViewModel.IsNotesLoading, Mode=OneWay}"
+                 Margin="8,0" />
+
     <!--#region Notes List GridView -->
     <GridView x:Name="View_NotesGridView"
-              Grid.Row="1"
+              Grid.Row="2"
               Padding="0,4"
               ItemsSource="{Binding Source={StaticResource NotesCollectionViewSource}}"
               SelectionMode="None"
