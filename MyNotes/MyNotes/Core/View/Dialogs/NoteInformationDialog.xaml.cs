@@ -7,7 +7,10 @@ internal sealed partial class NoteInformationDialog : ContentDialog
   {
     InitializeComponent();
     ViewModel = viewModel;
+    this.Unloaded += NoteInformationDialog_Unloaded;
   }
+
+  private void NoteInformationDialog_Unloaded(object sender, RoutedEventArgs e) => this.Bindings.StopTracking();
 
   public NoteViewModel ViewModel { get; }
 }

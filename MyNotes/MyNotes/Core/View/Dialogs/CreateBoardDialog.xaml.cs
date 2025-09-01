@@ -7,7 +7,10 @@ internal sealed partial class CreateBoardDialog : ContentDialog
   {
     InitializeComponent();
     ViewModel = viewModel;
+    this.Unloaded += CreateBoardDialog_Unloaded;
   }
+
+  private void CreateBoardDialog_Unloaded(object sender, RoutedEventArgs e) => this.Bindings.StopTracking();
 
   public DialogService.NavigationDialogViewModel ViewModel { get; }
 }

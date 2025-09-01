@@ -1,3 +1,5 @@
+using MyNotes.Core.Model;
+using MyNotes.Core.Shared;
 using MyNotes.Core.ViewModel;
 
 using Windows.System;
@@ -12,7 +14,11 @@ internal sealed partial class SettingsPage : Page
   {
     this.InitializeComponent();
     ViewModel = App.Instance.GetService<SettingsViewModel>();
+
+    this.Unloaded += SettingsPage_Unloaded;
   }
+
+  private void SettingsPage_Unloaded(object sender, RoutedEventArgs e) => this.Bindings.StopTracking();
 
   private async void RunAtStartupButton_Click(object sender, RoutedEventArgs e)
   {
@@ -30,11 +36,22 @@ internal sealed partial class SettingsPage : Page
     //  await TaskbarManager.GetDefault().RequestPinCurrentAppAsync();
   }
 
+  private void View_ThemeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+  {
+    ViewModel.AppTheme = (AppTheme)View_ThemeComboBox.SelectedIndex;
+  }
+
   private void View_LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
   {
+    ViewModel.AppLanguage = (AppLanguage)View_LanguageComboBox.SelectedIndex;
     if (ViewModel.AppLanguage == ViewModel.InitialAppLanguage)
       VisualStateManager.GoToState(this, "LanguageNotChanged", false);
     else
       VisualStateManager.GoToState(this, "LanguageChanged", false);
+  }
+
+  private void View_BackdropComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+  {
+    ViewModel.NoteBackdrop = (BackdropKind)View_BackdropComboBox.SelectedIndex;
   }
 }

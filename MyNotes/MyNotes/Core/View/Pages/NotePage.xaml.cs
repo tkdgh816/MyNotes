@@ -26,6 +26,8 @@ internal sealed partial class NotePage : Page
 
   private async void NotePage_Unloaded(object sender, RoutedEventArgs e)
   {
+    this.Bindings.StopTracking();
+
     UnRegisterEvents();
     UnregisterMessengers();
 

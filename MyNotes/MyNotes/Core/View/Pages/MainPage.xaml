@@ -5,6 +5,7 @@
       xmlns:ui="using:CommunityToolkit.WinUI"
       xmlns:model="using:MyNotes.Core.Model"
       xmlns:view="using:MyNotes.Core.View"
+      xmlns:cv="using:MyNotes.Common.Converters"
       xmlns:interactivity="using:Microsoft.Xaml.Interactivity">
 
   <Page.Resources>
@@ -27,9 +28,9 @@
         <DataTemplate x:DataType="model:NavigationItem">
           <NavigationViewItem DataContext="{x:Bind}"
                               Content="{x:Bind Name, Mode=OneWay}"
-                              IsEnabled="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
+                              IsEnabled="{x:Bind cv:Converter.NegateBool(IsEditable), Mode=OneWay}">
             <NavigationViewItem.Icon>
-              <IconSourceElement IconSource="{x:Bind Icon, Converter={StaticResource IconToIconSourceConverter}, Mode=OneWay}" />
+              <IconSourceElement IconSource="{x:Bind cv:Converter.ToIconSource(Icon), Mode=OneWay}" />
             </NavigationViewItem.Icon>
           </NavigationViewItem>
         </DataTemplate>
@@ -41,10 +42,10 @@
         <DataTemplate x:DataType="model:NavigationItem">
           <NavigationViewItem DataContext="{x:Bind}"
                               Content="{x:Bind Name, Mode=OneWay}"
-                              IsEnabled="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}"
+                              IsEnabled="{x:Bind cv:Converter.NegateBool(IsEditable), Mode=OneWay}"
                               SelectsOnInvoked="False">
             <NavigationViewItem.Icon>
-              <IconSourceElement IconSource="{x:Bind Icon, Converter={StaticResource IconToIconSourceConverter}, Mode=OneWay}" />
+              <IconSourceElement IconSource="{x:Bind cv:Converter.ToIconSource(Icon), Mode=OneWay}" />
             </NavigationViewItem.Icon>
           </NavigationViewItem>
         </DataTemplate>
@@ -73,7 +74,7 @@
                                       DragOver="Template_Group_AppNavigationViewItem_DragOver"
                                       DragLeave="Template_Board_AppNavigationViewItem_DragLeave"
                                       Drop="Template_Board_AppNavigationViewItem_Drop"
-                                      SelectsOnInvoked="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
+                                      SelectsOnInvoked="{x:Bind cv:Converter.NegateBool(IsEditable), Mode=OneWay}">
             <view:AppNavigationViewItem.Resources>
               <x:Double x:Key="NavigationViewItemOnLeftMinHeight">32</x:Double>
             </view:AppNavigationViewItem.Resources>
@@ -93,11 +94,11 @@
                         Content="&#xE712;"
                         Width="24"
                         Height="24"
-                        Visibility="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        Visibility="{x:Bind cv:Converter.ToVisibility(IsEditable), Mode=OneWay}" />
               </Grid>
             </view:AppNavigationViewItem.Content>
             <view:AppNavigationViewItem.Icon>
-              <IconSourceElement IconSource="{x:Bind Icon, Converter={StaticResource IconToIconSourceConverter}, Mode=OneWay}" />
+              <IconSourceElement IconSource="{x:Bind cv:Converter.ToIconSource(Icon), Mode=OneWay}" />
             </view:AppNavigationViewItem.Icon>
             <view:AppNavigationViewItem.ContextFlyout>
               <MenuFlyout x:Name="Template_Group_ContextMenuFlyout"
@@ -143,7 +144,7 @@
                                       DragOver="Template_Board_AppNavigationViewItem_DragOver"
                                       DragLeave="Template_Board_AppNavigationViewItem_DragLeave"
                                       Drop="Template_Board_AppNavigationViewItem_Drop"
-                                      SelectsOnInvoked="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
+                                      SelectsOnInvoked="{x:Bind cv:Converter.NegateBool(IsEditable), Mode=OneWay}">
             <view:AppNavigationViewItem.Resources>
               <x:Double x:Key="NavigationViewItemOnLeftMinHeight">32</x:Double>
             </view:AppNavigationViewItem.Resources>
@@ -161,11 +162,11 @@
                         Content="&#xE712;"
                         Width="24"
                         Height="24"
-                        Visibility="{x:Bind IsEditable, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        Visibility="{x:Bind cv:Converter.ToVisibility(IsEditable), Mode=OneWay}" />
               </Grid>
             </view:AppNavigationViewItem.Content>
             <view:AppNavigationViewItem.Icon>
-              <IconSourceElement IconSource="{x:Bind Icon, Converter={StaticResource IconToIconSourceConverter}, Mode=OneWay}" />
+              <IconSourceElement IconSource="{x:Bind cv:Converter.ToIconSource(Icon), Mode=OneWay}" />
             </view:AppNavigationViewItem.Icon>
             <view:AppNavigationViewItem.ContextFlyout>
               <MenuFlyout Placement="Bottom">
@@ -202,7 +203,7 @@
     <TitleBar x:Name="View_TitleBar"
               Grid.Row="0"
               IsBackButtonEnabled="{Binding ElementName=View_NavigationContent_RootFrame, Path=CanGoBack}"
-              IsBackButtonVisible="{x:Bind ViewModel.IsEditMode, Converter={StaticResource BoolNegationConverter}, Mode=OneWay}"
+              IsBackButtonVisible="{x:Bind cv:Converter.NegateBool(ViewModel.IsEditMode), Mode=OneWay}"
               IsPaneToggleButtonVisible="True"
               PaneToggleRequested="View_TitleBar_PaneToggleRequested"
               Margin="2,0,0,0"
@@ -246,7 +247,7 @@
         <AutoSuggestBox x:Name="View_NavigationView_AutoSuggestBox"
                         PlaceholderText="Search notes"
                         QueryIcon="Find"
-                        IsEnabled="{x:Bind ViewModel.IsEditMode, Converter={StaticResource BoolNegationConverter}, Mode=OneWay}">
+                        IsEnabled="{x:Bind cv:Converter.NegateBool(ViewModel.IsEditMode), Mode=OneWay}">
           <interactivity:Interaction.Behaviors>
             <interactivity:EventTriggerBehavior EventName="QuerySubmitted">
               <interactivity:InvokeCommandAction Command="{x:Bind ViewModel.SearchNavigationCommand}"
@@ -273,14 +274,14 @@
                                     Grid.Column="0"
                                     Content="New group"
                                     Icon="{ui:FontIcon Glyph=&#xE82E;}"
-                                    IsEnabled="{x:Bind ViewModel.IsEditMode, Converter={StaticResource BoolNegationConverter}, Mode=OneWay}"
+                                    IsEnabled="{x:Bind cv:Converter.NegateBool(ViewModel.IsEditMode), Mode=OneWay}"
                                     Style="{StaticResource AppNavigationButtonStyle}"
                                     Command="{x:Bind ViewModel.ShowNewGroupDialogCommand}"
                                     CommandParameter="{x:Bind ViewModel.UserRootNavigation}" />
             <view:AppCompoundButton x:Name="View_NavigationViewFooter_NewBoardButton"
                                     Grid.Column="1"
                                     Content="New board"
-                                    IsEnabled="{x:Bind ViewModel.IsEditMode, Converter={StaticResource BoolNegationConverter}, Mode=OneWay}"
+                                    IsEnabled="{x:Bind cv:Converter.NegateBool(ViewModel.IsEditMode), Mode=OneWay}"
                                     Icon="{ui:FontIcon Glyph=&#xED0E;}"
                                     Style="{StaticResource AppNavigationButtonStyle}"
                                     Command="{x:Bind ViewModel.ShowNewBoardDialogCommand}"

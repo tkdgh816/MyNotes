@@ -1,6 +1,9 @@
 ﻿using MyNotes.Core.Model;
 
 using ToolkitColorHelper = CommunityToolkit.WinUI.Helpers.ColorHelper;
+using AppColorHelper = MyNotes.Common.Helpers.ColorHelper;
+using MyNotes.Core.Shared;
+
 
 
 namespace MyNotes.Common.Converters;
@@ -58,4 +61,37 @@ internal static class Converter
 
   public static bool NullToBool(object? obj) => obj is null;
   public static bool NotNullToBool(object? obj) => obj is not null;
+
+  public static SolidColorBrush BlendColorsToBrush(Color color, Color background) => new SolidColorBrush(AppColorHelper.GetAlphaBlendingColor(color, background));
+
+  private readonly static SolidColorBrush _brushLight = new(ColorHelper.FromArgb(96, 255, 255, 255));
+  private readonly static SolidColorBrush _brushMediumLight = new(ColorHelper.FromArgb(96, 200, 200, 200));
+  private readonly static SolidColorBrush _brushMediumDark = new(ColorHelper.FromArgb(16, 16, 16, 16));
+  private readonly static SolidColorBrush _brushDark = new(ColorHelper.FromArgb(16, 0, 0, 0));
+  public static SolidColorBrush LayerColorToBrush(Color color) => (color.A < 64)
+    ? _brushDark
+    : AppColorHelper.GetRelativeLuminance(color) switch
+    {
+      >= 0 and <= 0.25 => _brushLight,
+      > 0.25 and <= 0.5 => _brushMediumLight,
+      > 0.5 and <= 0.75 => _brushMediumDark,
+      > 0.75 and <= 1.0 => _brushDark,
+      _ => _brushDark
+    };
+
+  public static string BoolToString(bool boolValue, string trueValue, string falseValue) => boolValue ? trueValue : falseValue;
+
+  public static bool NegateBool(bool boolValue) => !boolValue;
+  public static Visibility ToVisibility(bool boolValue) => boolValue ? Visibility.Visible : Visibility.Collapsed;
+  public static Visibility ToVisibilityInverted(bool boolValue) => boolValue ? Visibility.Collapsed : Visibility.Visible;
+  public static SolidColorBrush ToBrush(Color color) => new SolidColorBrush(color);
+
+  public static Visibility NavigationUserBoardToVisibility(Navigation navigation) => navigation is NavigationUserBoard ? Visibility.Visible : Visibility.Collapsed;
+
+  public static Visibility PositiveToVisibility(int number) => number > 0 ? Visibility.Visible : Visibility.Collapsed;
+  public static Visibility PositiveToVisibilityInverted(int number) => number <= 0 ? Visibility.Visible : Visibility.Collapsed;
+
+  public static int BackdropKindToInt(BackdropKind backdropKind) => (int)backdropKind;
+  public static int AppThemeToInt(AppTheme theme) => (int)theme;
+  public static int AppLanguageToInt(AppLanguage language) => (int)language;
 }

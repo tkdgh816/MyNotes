@@ -7,7 +7,10 @@ internal sealed partial class HomePage : Page
   public HomePage()
   {
     this.InitializeComponent();
+    this.Unloaded += HomePage_Unloaded;
   }
+
+  private void HomePage_Unloaded(object sender, RoutedEventArgs e) => this.Bindings.StopTracking();
 
   private void Ex1_ColorPicker_ColorChanged(ColorPicker sender, ColorChangedEventArgs args)
   {

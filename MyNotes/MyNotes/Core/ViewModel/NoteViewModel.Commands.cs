@@ -37,7 +37,11 @@ internal partial class NoteViewModel : ViewModelBase
     MinimizeWindowCommand = new(() => _windowService.MinimizeNoteWindow(Note));
     CloseWindowCommand = new(() => _windowService.CloseNoteWindow(Note));
     ToggleWindowPinCommand = new(() => _windowService.ToggleNoteWindowPin(Note, IsWindowAlwaysOnTop = !IsWindowAlwaysOnTop));
-    SetWindowBackdropCommand = new((backdropKindIndex) => _windowService.SetNoteWindowBackdrop(Note, (BackdropKind)backdropKindIndex));
+    SetWindowBackdropCommand = new((backdropKindIndex) => 
+    {
+      Note.Backdrop = (BackdropKind)backdropKindIndex;
+      _windowService.SetNoteWindowBackdrop(Note, (BackdropKind)backdropKindIndex);
+    });
 
     BookmarkNoteCommand = new(() =>
     {

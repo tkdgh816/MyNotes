@@ -13,7 +13,10 @@ internal sealed partial class TagsEditor : UserControl
     this.InitializeComponent();
     ViewModel = App.Instance.GetService<TagsViewModel>();
     ReferenceTracker.ViewReferences.Add(new(this.GetType().Name, this));
+    this.Unloaded += TagsEditor_Unloaded;
   }
+
+  private void TagsEditor_Unloaded(object sender, RoutedEventArgs e) => this.Bindings.StopTracking();
 
   public TagsViewModel ViewModel { get; }
 

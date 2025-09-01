@@ -7,7 +7,10 @@ internal sealed partial class TagColorSelector : Button
   public TagColorSelector()
   {
     InitializeComponent();
+    this.Unloaded += TagColorSelector_Unloaded;
   }
+
+  private void TagColorSelector_Unloaded(object sender, RoutedEventArgs e) => this.Bindings.StopTracking();
 
   public static readonly DependencyProperty TagColorProperty = DependencyProperty.Register("TagColor", typeof(TagColor), typeof(TagColorSelector), new PropertyMetadata(TagColor.White, OnTagColorChanged));
   public TagColor TagColor

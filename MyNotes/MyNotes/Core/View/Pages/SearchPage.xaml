@@ -8,8 +8,10 @@
       xmlns:model="using:MyNotes.Core.Model"
       xmlns:view="using:MyNotes.Core.View"
       xmlns:viewmodel="using:MyNotes.Core.ViewModel"
+      xmlns:cv="using:MyNotes.Common.Converters"
       xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
-      xmlns:behaviors="using:CommunityToolkit.WinUI.Behaviors">
+      xmlns:behaviors="using:CommunityToolkit.WinUI.Behaviors"
+      xmlns:msui="using:Microsoft.UI">
 
   <Page.Resources>
     <!--#region CollectionViewSource -->
@@ -26,7 +28,7 @@
                    PointerEntered="Template_RootUserControl_PointerEntered"
                    PointerExited="Template_RootUserControl_PointerExited">
         <Grid x:Name="Template_RootGrid"
-              Background="{x:Bind Note.Background, Converter={StaticResource AlphaBlendingWhiteConverter}, Mode=OneWay}"
+              Background="{x:Bind cv:Converter.BlendColorsToBrush(Note.Background, msui:Colors.White), Mode=OneWay}"
               CornerRadius="8"
               BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
               BorderThickness="1"
@@ -43,7 +45,7 @@
 
           <!--Note Header-->
           <Grid Grid.Row="0"
-                Background="{x:Bind Note.Background, Converter={StaticResource ColorToLayerBrushConverter}, Mode=OneWay}"
+                Background="{x:Bind cv:Converter.LayerColorToBrush(Note.Background), Mode=OneWay}"
                 BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
                 BorderThickness="0,0,0,1"
                 CornerRadius="6,6,0,0">
@@ -59,7 +61,7 @@
                     Grid.Column="0"
                     HorizontalAlignment="Left"
                     Style="{StaticResource AppFontIconNormalButtonStyle}"
-                    Content="{x:Bind Note.IsBookmarked, Converter={StaticResource BoolToBookmarkIconGlyphConverter}, Mode=OneWay}"
+                    Content="{x:Bind cv:Converter.BoolToString(Note.IsBookmarked, '&#xE735;', '&#xE734;'), Mode=OneWay}"
                     CornerRadius="8,4,4,4"
                     Visibility="Collapsed"
                     IsTabStop="False"
@@ -104,12 +106,12 @@
                   <AppBarButton x:Name="Template_RemoveNoteButton"
                                 Label="Remove"
                                 Icon="Delete"
-                                Visibility="{x:Bind Note.IsTrashed, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+                                Visibility="{x:Bind cv:Converter.ToVisibilityInverted(Note.IsTrashed)}"
                                 Command="{x:Bind RemoveNoteCommand}" />
                   <AppBarButton x:Name="Template_RestoreNoteButton"
                                 Label="Restore"
                                 Icon="Refresh"
-                                Visibility="{x:Bind Note.IsTrashed, Converter={StaticResource BoolToVisibilityConverter}}"
+                                Visibility="{x:Bind cv:Converter.ToVisibility(Note.IsTrashed)}"
                                 Command="{x:Bind RestoreNoteCommand}" />
                   <CommandBarFlyout.SecondaryCommands>
                     <AppBarButton x:Name="Template_MoveToBoardButton"
@@ -165,8 +167,8 @@
                 </ItemsRepeater.Layout>
                 <ItemsRepeater.ItemTemplate>
                   <DataTemplate x:DataType="model:Tag">
-                    <view:AppTagButton Background="{x:Bind Color, Converter={StaticResource TagColorToBackgroundBrushConverter}}"
-                                       Foreground="{x:Bind Color, Converter={StaticResource TagColorToForegroundBrushConverter}}"
+                    <view:AppTagButton Background="{x:Bind cv:Converter.ToTagBackground(Color)}"
+                                       Foreground="{x:Bind cv:Converter.ToTagForeground(Color)}"
                                        DeleteButtonVisible="Collapsed"
                                        IsTabStop="False">
                       <TextBlock Text="{x:Bind Text}"
@@ -216,7 +218,7 @@
                    PointerEntered="Template_RootUserControl_PointerEntered"
                    PointerExited="Template_RootUserControl_PointerExited">
         <Grid x:Name="Template_RootGrid"
-              Background="{x:Bind Note.Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}"
+              Background="{x:Bind cv:Converter.ToBrush(Note.Background), Mode=OneWay}"
               CornerRadius="8"
               BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
               BorderThickness="1"
@@ -271,7 +273,7 @@
                 Grid.Column="1"
                 VerticalAlignment="Bottom"
                 Visibility="Collapsed"
-                Background="{x:Bind Note.Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}">
+                Background="{x:Bind cv:Converter.ToBrush(Note.Background), Mode=OneWay}">
             <Grid.ColumnDefinitions>
               <ColumnDefinition />
               <ColumnDefinition Width="Auto" />
@@ -308,7 +310,7 @@
               <!--Bookmark Button-->
               <Button x:Name="Template_BookmarkButton"
                       Style="{StaticResource AppFontIconNormalButtonStyle}"
-                      Content="{x:Bind Note.IsBookmarked, Converter={StaticResource BoolToBookmarkIconGlyphConverter}, Mode=OneWay}"
+                      Content="{x:Bind cv:Converter.BoolToString(Note.IsBookmarked, '&#xE735;', '&#xE734;'), Mode=OneWay}"
                       CornerRadius="8,4,4,4"
                       Command="{x:Bind BookmarkNoteCommand}" />
 
@@ -430,10 +432,10 @@
               <!-- Rename Title -->
               <MenuFlyoutItem Text="Rename title"
                               Icon="Rename"
-                              Visibility="{x:Bind Navigation, Converter={StaticResource NavigationUserBoardToVisibilityConverter}}"
+                              Visibility="{x:Bind cv:Converter.NavigationUserBoardToVisibility(Navigation)}"
                               Command="{x:Bind ViewModel.ShowRenameBoardDialogCommand}" />
 
-              <MenuFlyoutSeparator Visibility="{x:Bind Navigation, Converter={StaticResource NavigationUserBoardToVisibilityConverter}}" />
+              <MenuFlyoutSeparator Visibility="{x:Bind cv:Converter.NavigationUserBoardToVisibility(Navigation)}" />
 
               <!-- Sort & Ordering -->
               <MenuFlyoutSubItem x:Name="View_SortMenuFlyoutSubItem"
@@ -543,7 +545,7 @@
                     </Grid>
 
                     <!-- Style: View Ratio -->
-                    <Grid Visibility="{Binding ElementName=View_StyleChangeRadioButtons, Path=SelectedIndex, Converter={StaticResource IntZeroToVisibilityConverter}}">
+                    <Grid Visibility="{x:Bind cv:Converter.PositiveToVisibilityInverted(View_StyleChangeRadioButtons.SelectedIndex), Mode=OneWay}">
                       <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -588,7 +590,7 @@
 
               <MenuFlyoutItem Text="Delete board"
                               Icon="Delete"
-                              Visibility="{x:Bind Navigation, Converter={StaticResource NavigationUserBoardToVisibilityConverter}}"
+                              Visibility="{x:Bind cv:Converter.NavigationUserBoardToVisibility(Navigation)}"
                               Command="{x:Bind ViewModel.ShowDeleteBoardDialogCommand}" />
             </MenuFlyout>
           </Button.Flyout>

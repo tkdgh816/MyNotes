@@ -48,6 +48,7 @@ internal sealed partial class MainPage : Page
   private void MainPage_Unloaded(object sender, RoutedEventArgs e)
   {
     _navigationService.DetachView();
+    this.Bindings.StopTracking();
 
     ViewModel.Dispose();
     UnegisterEvents();

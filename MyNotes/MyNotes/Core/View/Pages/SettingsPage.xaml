@@ -2,6 +2,7 @@
 <Page x:Class="MyNotes.Core.View.SettingsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:cv="using:MyNotes.Common.Converters"
       xmlns:ui="using:CommunityToolkit.WinUI"
       xmlns:controls="using:CommunityToolkit.WinUI.Controls">
 
@@ -55,7 +56,8 @@
           <controls:SettingsCard Header="App theme"
                                  HeaderIcon="{ui:FontIcon Glyph=&#xE790;}"
                                  Description="Select which app theme to display">
-            <ComboBox SelectedIndex="{x:Bind ViewModel.AppTheme, Converter={StaticResource AppThemeToIntConverter}, Mode=TwoWay}">
+            <ComboBox x:Name="View_ThemeComboBox"
+                      SelectionChanged="View_ThemeComboBox_SelectionChanged">
               <ComboBoxItem Content="Use System Settings"
                             Tag="Default" />
               <ComboBoxItem Content="Light"
@@ -73,7 +75,7 @@
               <controls:SettingsCard.Description>
                 <TextBlock Text="Selects a display language for this app" />
               </controls:SettingsCard.Description>
-              <ComboBox SelectedIndex="{x:Bind ViewModel.AppLanguage, Converter={StaticResource AppLanguageToIntConverter}, Mode=TwoWay}"
+              <ComboBox x:Name="View_LanguageComboBox"
                         SelectionChanged="View_LanguageComboBox_SelectionChanged">
                 <ComboBoxItem Content="Use System Default"
                               Tag="system" />
@@ -141,7 +143,7 @@
                                  HeaderIcon="{ui:FontIcon Glyph=&#xE790;}"
                                  Description="Change the background color of a new note">
             <SplitButton>
-              <Border Background="{x:Bind ViewModel.NoteBackground, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}"
+              <Border Background="{x:Bind cv:Converter.ToBrush(ViewModel.NoteBackground), Mode=OneWay}"
                       Width="24"
                       Height="24"
                       CornerRadius="{ThemeResource ControlCornerRadius}" />
@@ -162,7 +164,8 @@
           <controls:SettingsCard Header="Backdrop"
                                  HeaderIcon="{ui:FontIcon Glyph=&#xF4A5;}"
                                  Description="Change the backdrop effect of a new note">
-            <ComboBox SelectedIndex="{x:Bind ViewModel.NoteBackdrop, Converter={StaticResource BackdropKindToIntConverter}, Mode=TwoWay}">
+            <ComboBox x:Name="View_BackdropComboBox"
+                      SelectionChanged="View_BackdropComboBox_SelectionChanged">
               <ComboBoxItem Content="None" />
               <ComboBoxItem Content="Acrylic" />
               <ComboBoxItem Content="Mica" />

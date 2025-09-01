@@ -44,8 +44,8 @@
                      Stroke="{x:Bind Converter={StaticResource TagColorToForegroundBrushConverter}}"
                      Style="{StaticResource EllipseStyle}" />-->
             <Ellipse ToolTipService.ToolTip="{x:Bind}"
-                     Fill="{x:Bind cv:Converter.ToTagBackground(model:TagColor), Mode=OneWay}"
-                     Stroke="{x:Bind cv:Converter.ToTagForeground(model:TagColor), Mode=OneWay}"
+                     Fill="{x:Bind cv:Converter.ToTagBackground((model:TagColor))}"
+                     Stroke="{x:Bind cv:Converter.ToTagForeground((model:TagColor))}"
                      Style="{StaticResource EllipseStyle}" />
           </DataTemplate>
         </GridView.ItemTemplate>

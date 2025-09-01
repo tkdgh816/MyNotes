@@ -41,6 +41,8 @@ internal sealed partial class SearchPage : Page
 
   private void SearchPage_Unloaded(object sender, RoutedEventArgs e)
   {
+    this.Bindings.StopTracking();
+
     UnregisterEvents();
     ViewModel.Dispose();
   }

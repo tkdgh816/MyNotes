@@ -5,10 +5,11 @@
       xmlns:ui="using:CommunityToolkit.WinUI"
       xmlns:view="using:MyNotes.Core.View"
       xmlns:viewmodel="using:MyNotes.Core.ViewModel"
+      xmlns:cv="using:MyNotes.Common.Converters"
       xmlns:interactivity="using:Microsoft.Xaml.Interactivity">
 
   <Grid x:Name="View_RootGrid"
-        Background="{x:Bind ViewModel.Note.Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}"
+        Background="{x:Bind cv:Converter.ToBrush(ViewModel.Note.Background), Mode=OneWay}"
         KeyboardAcceleratorPlacementMode="Hidden">
     <Grid.KeyboardAccelerators>
       <KeyboardAccelerator x:Name="View_SaveKeyboardAccelerator"
@@ -26,7 +27,7 @@
     <!--#region Title Bar -->
     <Grid x:Name="View_TitleBarGrid"
           Grid.Row="0"
-          Background="{x:Bind ViewModel.Note.Background, Converter={StaticResource ColorToLayerBrushConverter}, Mode=OneWay}"
+          Background="{x:Bind cv:Converter.LayerColorToBrush(ViewModel.Note.Background), Mode=OneWay}"
           BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
           BorderThickness="0,0,0,1">
       <Grid.ColumnDefinitions>
@@ -39,7 +40,7 @@
                   Grid.Column="0"
                   Orientation="Horizontal">
         <Button x:Name="View_PinButton"
-                Content="{x:Bind ViewModel.IsWindowAlwaysOnTop, Converter={StaticResource BoolToWindowPinIconGlyphConverter}, Mode=OneWay}"
+                Content="{x:Bind cv:Converter.BoolToString(ViewModel.IsWindowAlwaysOnTop, '&#xEE47;', '&#xEE49;'), Mode=OneWay}"
                 Style="{StaticResource AppFontIconNormalButtonStyle}"
                 Command="{x:Bind ViewModel.ToggleWindowPinCommand}"
                 RenderTransformOrigin="0.5,0">
@@ -179,7 +180,7 @@
                   VerticalScrollMode="Disabled"
                   HorizontalScrollBarVisibility="Hidden"
                   VerticalScrollBarVisibility="Disabled"
-                  Background="{x:Bind ViewModel.Note.Background, Converter={StaticResource ColorToLayerBrushConverter}, Mode=OneWay}"
+                  Background="{x:Bind cv:Converter.LayerColorToBrush( ViewModel.Note.Background), Mode=OneWay}"
                   BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
                   BorderThickness="0,1,0,0">
       <StackPanel Orientation="Horizontal"
@@ -351,7 +352,7 @@
                               Header="Backdrop type"
                               HeaderTemplate="{StaticResource AppBoldTextHeaderTemplate}"
                               MaxColumns="2"
-                              SelectedIndex="{x:Bind ViewModel.Note.Backdrop, Converter={StaticResource BackdropKindToIntConverter}, Mode=TwoWay}">
+                              SelectedIndex="{x:Bind cv:Converter.BackdropKindToInt(ViewModel.Note.Backdrop)}">
                   <interactivity:Interaction.Behaviors>
                     <interactivity:EventTriggerBehavior EventName="SelectionChanged">
                       <interactivity:InvokeCommandAction Command="{x:Bind ViewModel.SetWindowBackdropCommand}"
