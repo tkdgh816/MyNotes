@@ -34,7 +34,7 @@
   </Button.Resources>
 
   <IconSourceElement IconSource="{x:Bind Icon, Converter={StaticResource IconToIconSourceConverter}, Mode=OneWay}" />
-
+  
   <Button.Flyout>
     <Flyout Placement="BottomEdgeAlignedLeft"
             ShouldConstrainToRootBounds="False">

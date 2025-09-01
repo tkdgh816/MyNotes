@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Windows.Globalization;
 
 using MyNotes.Core.Dao;
 using MyNotes.Core.Service;
@@ -18,8 +17,6 @@ public partial class App : Application
   {
     GetService<WindowService>().GetMainWindow().Activate();
     var settingsService = GetService<SettingsService>();
-    Debug.WriteLine(string.Join(", ", ApplicationLanguages.Languages));
-    Debug.WriteLine(string.Join(", ", ApplicationLanguages.ManifestLanguages));
   }
 
   public static App Instance => (App)Current;

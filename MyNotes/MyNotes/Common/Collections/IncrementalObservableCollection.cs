@@ -10,7 +10,8 @@ internal class IncrementalObservableCollection<T> : ObservableCollection<T>, ISu
 
   private bool _hasMoreItems = true;
   private bool _isLoading = false;
-  private readonly Lock _lockObj = new();
+  private readonly object _lockObj = new();
+  //private readonly Lock _lockObj = new();
 
   public event EventHandler<MoreItemsLoadedEventArgs>? MoreItemsLoaded;
 

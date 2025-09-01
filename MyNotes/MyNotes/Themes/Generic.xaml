@@ -21,7 +21,9 @@
   <x:Boolean x:Key="BooleanFalse">False</x:Boolean>
   <Visibility x:Key="VisibilityVisible">Visible</Visibility>
   <Visibility x:Key="VisibilityCollapsed">Collapsed</Visibility>
-  <converters:BoolNegationConverter x:Key="BoolNegationConverter" />
+  <converters:ToPointOverBrushConverter x:Key="ToPointOverBrushConverter" />
+  
+  <!--<converters:BoolNegationConverter x:Key="BoolNegationConverter" />
   <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"
                                         IsInverted="False" />
   <converters:BoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"
@@ -33,34 +35,20 @@
   <converters:ColorToBrushConverter x:Key="ColorToBrushConverter" />
   <converters:ColorToLayerBrushConverter x:Key="ColorToLayerBrushConverter" />
   <converters:StringWrapperConverter x:Key="StringWrapperConverter" />
-  <converters:StringToUriConverter x:Key="StringToUriConverter" />
-  <converters:TypeToObjectConverter x:Key="NavigationBookmarksToBoolConverter"
-                                    TargetType="model:NavigationBookmarks"
-                                    MatchedValue="{StaticResource BooleanTrue}"
-                                    FallbackValue="{StaticResource BooleanFalse}"
-                                    AllowBaseType="True" />
-  <converters:TypeToObjectConverter x:Key="NavigationUserBoardToBoolConverter"
-                                    TargetType="model:NavigationUserBoard"
-                                    MatchedValue="{StaticResource BooleanTrue}"
-                                    FallbackValue="{StaticResource BooleanFalse}"
-                                    AllowBaseType="True" />
+
   <converters:TypeToObjectConverter x:Key="NavigationUserBoardToVisibilityConverter"
                                     TargetType="model:NavigationUserBoard"
                                     MatchedValue="{StaticResource VisibilityVisible}"
                                     FallbackValue="{StaticResource VisibilityCollapsed}"
                                     AllowBaseType="False" />
-  <converters:TypeToObjectConverter x:Key="NavigationUserGroupToBoolConverter"
-                                    TargetType="model:NavigationUserGroup"
-                                    MatchedValue="{StaticResource BooleanTrue}"
-                                    FallbackValue="{StaticResource BooleanFalse}"
-                                    AllowBaseType="True" />
+
   <converters:ObjectToVisibilityConverter x:Key="IntZeroToVisibilityConverter"
                                           ObjectType="x:Int32"
                                           TargetValue="0" />
   <converters:BoolToObjectConverter x:Key="BoolToBookmarkIconGlyphConverter"
                                     TrueValue="&#xE735;"
                                     FalseValue="&#xE734;" />
-  <!-- [Dot: &#xE9B0; &#xE915;] [Set: &#xF5ED; &#xF5EE;] [Window: &#xE8A7; &#xE944;] [Pin: &#xE718; &#xE841;] [Expand: &#xEE49; &#xEE47;] -->
+  --><!-- [Dot: &#xE9B0; &#xE915;] [Set: &#xF5ED; &#xF5EE;] [Window: &#xE8A7; &#xE944;] [Pin: &#xE718; &#xE841;] [Expand: &#xEE49; &#xEE47;] --><!--
   <converters:BoolToObjectConverter x:Key="BoolToWindowPinIconGlyphConverter"
                                     TrueValue="&#xEE47;"
                                     FalseValue="&#xEE49;" />
@@ -79,18 +67,37 @@
                                  EnumType="shared:AppTheme" />
   <converters:EnumToIntConverter x:Key="AppLanguageToIntConverter"
                                  EnumType="shared:AppLanguage" />
-  <converters:EnumToIntConverter x:Key="NavigationViewPaneDisplayModeToIntConverter"
-                                 EnumType="controls:NavigationViewPaneDisplayMode" />
 
   <converters:TagColorToBackgroundBrushConverter x:Key="TagColorToBackgroundBrushConverter" />
   <converters:TagColorToForegroundBrushConverter x:Key="TagColorToForegroundBrushConverter" />
   <converters:ToPointOverBrushConverter x:Key="ToPointOverBrushConverter" />
   <converters:CollectionToStringConverter x:Key="CollectionToStringConverter" />
-  <converters:EmptyCollectionToObjectConverter x:Key="EmptyCollectionToVisibilityCollapsedConverter"
-                                               TrueValue="{StaticResource VisibilityCollapsed}"
-                                               FalseValue="{StaticResource VisibilityVisible}" />
   <converters:AlphaBlendingConverter x:Key="AlphaBlendingWhiteConverter"
-                                     BackgroundColor="White" />
+                                     BackgroundColor="White" />-->
+  
+  <!--<converters:TypeToObjectConverter x:Key="NavigationUserGroupToBoolConverter"
+                                    TargetType="model:NavigationUserGroup"
+                                    MatchedValue="{StaticResource BooleanTrue}"
+                                    FallbackValue="{StaticResource BooleanFalse}"
+                                    AllowBaseType="True" />-->
+  <!--<converters:StringToUriConverter x:Key="StringToUriConverter" />-->
+  <!--<converters:TypeToObjectConverter x:Key="NavigationBookmarksToBoolConverter"
+                                    TargetType="model:NavigationBookmarks"
+                                    MatchedValue="{StaticResource BooleanTrue}"
+                                    FallbackValue="{StaticResource BooleanFalse}"
+                                    AllowBaseType="True" />-->
+  <!--<converters:TypeToObjectConverter x:Key="NavigationUserBoardToBoolConverter"
+                                    TargetType="model:NavigationUserBoard"
+                                    MatchedValue="{StaticResource BooleanTrue}"
+                                    FallbackValue="{StaticResource BooleanFalse}"
+                                    AllowBaseType="True" />-->
+  <!--<converters:EnumToIntConverter x:Key="NavigationViewPaneDisplayModeToIntConverter"
+                                 EnumType="controls:NavigationViewPaneDisplayMode" />-->
+  <!--<converters:EmptyCollectionToObjectConverter x:Key="EmptyCollectionToVisibilityCollapsedConverter"
+                                               TrueValue="{StaticResource VisibilityCollapsed}"
+                                               FalseValue="{StaticResource VisibilityVisible}" />-->
+  
+
   <!-- #endregion-->
 
   <!-- #region Resources -->
