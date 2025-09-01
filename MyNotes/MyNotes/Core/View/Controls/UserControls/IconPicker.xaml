@@ -5,6 +5,7 @@
         xmlns:ui="using:CommunityToolkit.WinUI"
         xmlns:view="using:MyNotes.Core.View"
         xmlns:model="using:MyNotes.Core.Model"
+        xmlns:cv="using:MyNotes.Common.Converters"
         Style="{StaticResource AppIconMediumButtonStyle}">
 
   <Button.Resources>
@@ -33,7 +34,8 @@
     </view:IconPickerViewItemTemplateSelector>
   </Button.Resources>
 
-  <IconSourceElement IconSource="{x:Bind Icon, Converter={StaticResource IconToIconSourceConverter}, Mode=OneWay}" />
+  <!--<IconSourceElement IconSource="{x:Bind Icon, Converter={StaticResource IconToIconSourceConverter}, Mode=OneWay}" />-->
+  <IconSourceElement IconSource="{x:Bind cv:Converter.ToIconSource(Icon), Mode=OneWay}" />
   
   <Button.Flyout>
     <Flyout Placement="BottomEdgeAlignedLeft"
