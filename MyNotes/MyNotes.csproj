@@ -48,7 +48,6 @@
     <Content Include="Assets\Square150x150Logo.scale-200.png" />
     <Content Include="Assets\Square44x44Logo.scale-200.png" />
     <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-    <Content Include="Assets\StoreLogo.png" />
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
 
@@ -101,6 +100,14 @@
     <Page Update="Core\View\Dialogs\RemoveNoteDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <None Update="Assets\icons\app\AppIcon_128.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="Assets\icons\app\AppIcon_256.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Update="Debugging\Test\Test.xaml">
       <Generator>MSBuild:Compile</Generator>
     </None>
@@ -225,5 +232,16 @@
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
     <PlatformTarget>x64</PlatformTarget>
+    <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
+    <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
+    <PackageCertificateThumbprint>1AB04C02ECDD6D748CCCAF745BB261DD27F1CF28</PackageCertificateThumbprint>
+    <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
+    <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
+    <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
+    <GenerateTestArtifacts>True</GenerateTestArtifacts>
+    <AppxBundle>Never</AppxBundle>
+    <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
+    <ApplicationIcon>Assets\icons\app\AppIcon.ico</ApplicationIcon>
+    <PackageIcon>AppIcon_128.png</PackageIcon>
   </PropertyGroup>
 </Project>
