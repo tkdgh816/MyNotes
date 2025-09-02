@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog x:Class="MyNotes.Core.View.EditNoteTagsDialog"
+               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:view="using:MyNotes.Core.View"
+               xmlns:model="using:MyNotes.Core.Model"
+               xmlns:dto="using:MyNotes.Core.Dto"
+               xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+               Title="{x:Bind ViewModel.Note.Title, Converter={StaticResource StringWrapperConverter}, ConverterParameter='Tags for: |%|'}"
+               CloseButtonText="Close"
+               Style="{StaticResource DefaultContentDialogStyle}">
+  <Grid Width="320"
+        MaxHeight="300"
+        RowSpacing="12">
+    <Grid.RowDefinitions>
+      <RowDefinition MinHeight="40" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <ScrollView Grid.Row="0"
+                ContentOrientation="Vertical"
+                HorizontalScrollMode="Disabled"
+                VerticalScrollMode="Enabled"
+                HorizontalScrollBarVisibility="Hidden"
+                VerticalScrollBarVisibility="Visible"
+                BorderThickness="1"
+                Padding="0,4,8,4">
+      <ItemsRepeater x:Name="View_EditNoteTagsItemsRepeater"
+                     ItemsSource="{x:Bind ViewModel.Note.Tags}">
+        <ItemsRepeater.Layout>
+          <controls:WrapLayout HorizontalSpacing="6"
+                               VerticalSpacing="6" />
+        </ItemsRepeater.Layout>
+
+        <ItemsRepeater.ItemTemplate>
+          <DataTemplate x:DataType="model:Tag">
+            <view:AppTagButton Background="{x:Bind Color, Converter={StaticResource TagColorToBackgroundBrushConverter}, Mode=OneWay}"
+                               Foreground="{x:Bind Color, Converter={StaticResource TagColorToForegroundBrushConverter}, Mode=OneWay}"
+                               DeleteButtonVisible="Visible"
+                               DeleteButtonClick="AppTagButton_DeleteButtonClick"
+                               DataContext="{x:Bind}">
+              <TextBlock Text="{x:Bind Text}"
+                         TextTrimming="CharacterEllipsis" />
+            </view:AppTagButton>
+          </DataTemplate>
+        </ItemsRepeater.ItemTemplate>
+      </ItemsRepeater>
+    </ScrollView>
+
+    <Grid Grid.Row="1"
+          ColumnSpacing="8" >
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+
+      <view:TagColorSelector x:Name="View_TagColorSelector"
+                             Grid.Column="0"
+                             TagColorChanged="View_TagColorSelector_TagColorChanged"/>
+
+      <AutoSuggestBox x:Name="View_AddTagAutoSuggestBox"
+                      Grid.Column="1"
+                      PlaceholderText="Enter a new tag"
+                      MaxSuggestionListHeight="200"
+                      TextChanged="View_AddTagAutoSuggestBox_TextChanged" />
+
+      <Button x:Name="View_AddTagButton"
+              Grid.Column="2"
+              Content="Add"
+              Style="{StaticResource AccentButtonStyle}"
+              Command="{x:Bind ViewModel.AddNoteTagCommand}">
+        <Button.CommandParameter>
+          <dto:TagCommandParameterDto Text="{x:Bind View_AddTagAutoSuggestBox.Text, Mode=OneWay}"
+                                      Color="{x:Bind View_TagColorSelector.TagColor, Mode=OneWay}" />
+        </Button.CommandParameter>
+      </Button>
+    </Grid>
+  </Grid>
+</ContentDialog>

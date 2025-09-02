@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog x:Class="MyNotes.Core.View.DeleteBoardDialog"
+               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               Title="{x:Bind Board.Name, Converter={StaticResource StringWrapperConverter}, ConverterParameter='Delete |%|?'}"
+               PrimaryButtonText="Yes"
+               CloseButtonText="Cancel"
+               DefaultButton="Close"
+               Style="{StaticResource DefaultContentDialogStyle}">
+
+  <Grid>
+    <TextBlock Text="All subboards and notes will be removed" />
+  </Grid>
+</ContentDialog>
