@@ -7,7 +7,11 @@ internal sealed partial class DeleteBoardDialog : ContentDialog
   {
     InitializeComponent();
     Board = board;
+
+    this.Unloaded += DeleteBoardDialog_Unloaded;
   }
+
+  private void DeleteBoardDialog_Unloaded(object sender, RoutedEventArgs e) => this.Bindings.StopTracking();
 
   public NavigationBoard Board { get; }
 }

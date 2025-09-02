@@ -8,7 +8,10 @@ internal sealed partial class IconPicker : Button
   public IconPicker()
   {
     this.InitializeComponent();
+    this.Unloaded += IconPicker_Unloaded;
   }
+
+  private void IconPicker_Unloaded(object sender, RoutedEventArgs e) => this.Bindings.StopTracking();
 
   public static readonly DependencyProperty IconProperty = DependencyProperty.Register("Icon", typeof(Icon), typeof(IconPicker), new PropertyMetadata(null, OnIconChanged));
   public Icon Icon

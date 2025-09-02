@@ -13,6 +13,8 @@ internal sealed partial class UserGroupPage : Page
   private void NoteBoardGroupPage_Unloaded(object sender, RoutedEventArgs e)
   {
     ViewModel.Dispose();
+
+    this.Bindings.StopTracking();
   }
 
   public BoardViewModel ViewModel { get; private set; } = null!;

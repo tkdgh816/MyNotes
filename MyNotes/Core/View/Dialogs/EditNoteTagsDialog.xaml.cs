@@ -11,7 +11,11 @@ internal sealed partial class EditNoteTagsDialog : ContentDialog
     InitializeComponent();
     ViewModel = noteViewModel;
     _tagService = App.Instance.GetService<TagService>();
+
+    this.Unloaded += EditNoteTagsDialog_Unloaded;
   }
+
+  private void EditNoteTagsDialog_Unloaded(object sender, RoutedEventArgs e) => this.Bindings.StopTracking();
 
   public NoteViewModel ViewModel { get; }
   private readonly TagService _tagService;

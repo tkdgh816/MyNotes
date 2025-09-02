@@ -52,6 +52,8 @@ internal sealed partial class MainPage : Page
     ViewModel.Dispose();
     UnegisterEvents();
     UnregisterMessengers();
+
+    this.Bindings.StopTracking();
   }
 
   private void InitializeSettings()

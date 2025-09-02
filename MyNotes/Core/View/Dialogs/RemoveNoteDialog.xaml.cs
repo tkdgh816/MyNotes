@@ -6,5 +6,9 @@ internal sealed partial class RemoveNoteDialog : ContentDialog
   {
     InitializeComponent();
     this.Content = $"Remove {noteCount} note(s)";
+
+    //this.Unloaded += RemoveNoteDialog_Unloaded;
   }
+
+  //private void RemoveNoteDialog_Unloaded(object sender, RoutedEventArgs e) => this.Bindings.StopTracking();
 }

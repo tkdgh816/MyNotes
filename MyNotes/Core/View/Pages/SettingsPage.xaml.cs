@@ -12,7 +12,11 @@ internal sealed partial class SettingsPage : Page
   {
     this.InitializeComponent();
     ViewModel = App.Instance.GetService<SettingsViewModel>();
+
+    this.Unloaded += SettingsPage_Unloaded;
   }
+
+  private void SettingsPage_Unloaded(object sender, RoutedEventArgs e) => this.Bindings.StopTracking();
 
   private async void RunAtStartupButton_Click(object sender, RoutedEventArgs e)
   {

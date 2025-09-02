@@ -43,6 +43,8 @@ internal sealed partial class SearchPage : Page
   {
     UnregisterEvents();
     ViewModel.Dispose();
+
+    this.Bindings.StopTracking();
   }
 
   private void InitializeSettings()

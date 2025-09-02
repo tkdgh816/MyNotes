@@ -65,7 +65,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Common\Extensions\" />
-    <Folder Include="Common\Helpers\" />
     <Folder Include="Strings\ko-KR\" />
     <Folder Include="Strings\en-US\" />
   </ItemGroup>

@@ -45,6 +45,8 @@ internal sealed partial class NotePage : Page
 
     if (!ViewModel.IsNoteInBoard())
       ViewModel.Dispose();
+
+    this.Bindings.StopTracking();
   }
 
   private async Task LoadBodyAsync()

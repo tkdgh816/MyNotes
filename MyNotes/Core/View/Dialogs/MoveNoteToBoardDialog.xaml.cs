@@ -8,7 +8,11 @@ internal sealed partial class MoveNoteToBoardDialog : ContentDialog
   {
     InitializeComponent();
     ViewModel = viewModel;
+
+    this.Unloaded += MoveNoteToBoardDialog_Unloaded;
   }
+
+  private void MoveNoteToBoardDialog_Unloaded(object sender, RoutedEventArgs e) => this.Bindings.StopTracking();
 
   public DialogService.NavigationTreeDialogViewModel ViewModel { get; }
 }

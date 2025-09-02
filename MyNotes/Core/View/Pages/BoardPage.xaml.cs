@@ -15,7 +15,11 @@ internal sealed partial class BoardPage : Page
   public BoardPage()
   {
     InitializeComponent();
+
+    this.Unloaded += BoardPage_Unloaded;
   }
+
+  private void BoardPage_Unloaded(object sender, RoutedEventArgs e) => this.Bindings.StopTracking();
 
   public NavigationBoard Navigation { get; private set; } = null!;
   public BoardViewModel ViewModel { get; private set; } = null!;

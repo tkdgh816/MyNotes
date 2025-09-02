@@ -7,7 +7,11 @@ internal sealed partial class RenameBoardDialog : ContentDialog
   {
     InitializeComponent();
     ViewModel = viewModel;
+
+    this.Unloaded += RenameBoardDialog_Unloaded;
   }
+
+  private void RenameBoardDialog_Unloaded(object sender, RoutedEventArgs e) => this.Bindings.StopTracking();
 
   public DialogService.NavigationDialogViewModel ViewModel { get; }
 }
