@@ -1,4 +1,6 @@
-﻿using System.Threading.Channels;
+﻿using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Channels;
 
 using Microsoft.Data.Sqlite;
 
@@ -45,7 +47,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
 
   #region Read
   #region Read: Batch
-  public Task<IEnumerable<NoteDto>> GetNotesBatchAsync(GetNotesDto dto) =>
+  public Task<IEnumerable<NoteDto>> GetNotesBatchAsync(GetNotesDto dto, CancellationToken cancellationToken = default) =>
     Task.Run(async () =>
     {
       List<NoteDto> noteDtos = new();
@@ -54,7 +56,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
       if (fields.Count > 0)
       {
         await using SqliteConnection connection = _databaseService.Connection;
-        await connection.OpenAsync();
+        await connection.OpenAsync(cancellationToken);
 
         string whereClause = string.Join(" AND ", fields.Select(field => $"{field.Key} = @{field.Key}"));
         string limitCluase = dto.Limit > 0 ? "LIMIT @limit" : "";
@@ -70,14 +72,14 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
         if (dto.Offset > 0)
           command.Parameters.AddWithValue("@offset", dto.Offset);
 
-        await using SqliteDataReader reader = await command.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
+        await using SqliteDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
           noteDtos.Add(CreateNoteDto(reader));
       }
       return (IEnumerable<NoteDto>)noteDtos;
-    });
+    }, cancellationToken);
 
-  public Task<List<NoteDto>> SearchNotesBatchAsync(IList<GetNoteSearchDto> dtos) =>
+  public Task<List<NoteDto>> SearchNotesBatchAsync(IList<GetNoteSearchDto> dtos, CancellationToken cancellationToken = default) =>
     Task.Run(async () =>
     {
       List<NoteDto> noteDtos = new();
@@ -85,7 +87,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
       if (count > 0)
       {
         await using SqliteConnection connection = _databaseService.Connection;
-        await connection.OpenAsync();
+        await connection.OpenAsync(cancellationToken);
 
         List<SqliteCommand> commands = new();
 
@@ -106,17 +108,17 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
 
         foreach (var command in commands)
         {
-          await using SqliteDataReader reader = await command.ExecuteReaderAsync();
-          while (await reader.ReadAsync())
+          await using SqliteDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
+          while (await reader.ReadAsync(cancellationToken))
             noteDtos.Add(CreateNoteDto(reader));
         }
       }
       return noteDtos;
-    });
+    }, cancellationToken);
   #endregion
 
   #region Read: Stream
-  private async IAsyncEnumerable<NoteDto> GetNotesStream(GetNotesDto dto)
+  private async IAsyncEnumerable<NoteDto> GetNotesStream(GetNotesDto dto, [EnumeratorCancellation] CancellationToken cancellationToken = default)
   {
     Dictionary<string, object> fields = GetNoteFieldValue(dto);
 
@@ -124,7 +126,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
       yield break;
 
     await using SqliteConnection connection = _databaseService.Connection;
-    await connection.OpenAsync();
+    await connection.OpenAsync(cancellationToken);
 
     string whereClause = string.Join(" AND ", fields.Select(field => $"{field.Key} = @{field.Key}"));
     string limitCluase = dto.Limit > 0 ? "LIMIT @limit" : "";
@@ -140,21 +142,21 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     if (dto.Offset > 0)
       command.Parameters.AddWithValue("@offset", dto.Offset);
 
-    await using SqliteDataReader reader = await command.ExecuteReaderAsync();
-    while (await reader.ReadAsync())
+    await using SqliteDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
+    while (await reader.ReadAsync(cancellationToken))
     {
-      //await Task.Delay(20);
+      await Task.Delay(10, cancellationToken);
       yield return CreateNoteDto(reader);
     }
   }
 
-  private async IAsyncEnumerable<NoteDto> SearchNotesStream(IList<GetNoteSearchDto> dtos)
+  private async IAsyncEnumerable<NoteDto> SearchNotesStream(IList<GetNoteSearchDto> dtos, [EnumeratorCancellation] CancellationToken cancellationToken = default)
   {
     int count = dtos.Count;
     if (count > 0)
     {
       await using SqliteConnection connection = _databaseService.Connection;
-      await connection.OpenAsync();
+      await connection.OpenAsync(cancellationToken);
 
       List<SqliteCommand> commands = new();
 
@@ -175,14 +177,14 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
 
       foreach (var command in commands)
       {
-        await using SqliteDataReader reader = await command.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
+        await using SqliteDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
           yield return CreateNoteDto(reader);
       }
     }
   }
 
-  public async IAsyncEnumerable<NoteDto> SearchNotesStream(IAsyncEnumerable<GetNoteSearchDto> dtos)
+  public async IAsyncEnumerable<NoteDto> SearchNotesStream(IAsyncEnumerable<GetNoteSearchDto> dtos, [EnumeratorCancellation] CancellationToken cancellationToken = default)
   {
     List<SqliteCommand> commands = new();
 
@@ -195,22 +197,22 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
       dtoBuffer.Add(dto);
       if (dtoBuffer.Count == batchSize)
       {
-        await foreach (var noteDto in SearchNotesInner(dtoBuffer, batchSize))
+        await foreach (var noteDto in SearchNotesInner(dtoBuffer, batchSize, cancellationToken))
           yield return noteDto;
         dtoBuffer.Clear();
       }
     }
     if (dtoBuffer.Count > 0)
     {
-      await foreach (var noteDto in SearchNotesInner(dtoBuffer, dtoBuffer.Count))
+      await foreach (var noteDto in SearchNotesInner(dtoBuffer, dtoBuffer.Count, cancellationToken))
         yield return noteDto;
     }
   }
 
-  private async IAsyncEnumerable<NoteDto> SearchNotesInner(List<GetNoteSearchDto> dtoBuffer, int batchSize)
+  private async IAsyncEnumerable<NoteDto> SearchNotesInner(List<GetNoteSearchDto> dtoBuffer, int batchSize, [EnumeratorCancellation] CancellationToken cancellationToken = default)
   {
     await using SqliteConnection connection = _databaseService.Connection;
-    await connection.OpenAsync();
+    await connection.OpenAsync(cancellationToken);
 
     string inClause = string.Join(", ", Enumerable.Range(0, batchSize).Select((num) => $"@id{num}"));
     string query = $"SELECT * FROM Notes WHERE id IN ({inClause}) AND trashed = @trashed";
@@ -222,7 +224,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     await using SqliteDataReader reader = await command.ExecuteReaderAsync();
 
     int maxLength = 5000;
-    while (await reader.ReadAsync())
+    while (await reader.ReadAsync(cancellationToken))
     {
       var dto = dtoBuffer.Find((item) => item.Id == new Guid(GetReaderValue<string>(reader, "id")!));
       string searchPreview = "";
@@ -241,9 +243,9 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     }
   }
 
-  public Task<IAsyncEnumerable<NoteDto>> GetNotesStreamAsync(GetNotesDto dto) => Task.Run(() => GetNotesStream(dto));
+  public Task<IAsyncEnumerable<NoteDto>> GetNotesStreamAsync(GetNotesDto dto, CancellationToken cancellationToken = default) => Task.Run(() => GetNotesStream(dto, cancellationToken), cancellationToken);
 
-  public Task<IAsyncEnumerable<NoteDto>> SearchNotesStreamAsync(IList<GetNoteSearchDto> dtos) => Task.Run(() => SearchNotesStream(dtos));
+  public Task<IAsyncEnumerable<NoteDto>> SearchNotesStreamAsync(IList<GetNoteSearchDto> dtos, CancellationToken cancellationToken = default) => Task.Run(() => SearchNotesStream(dtos, cancellationToken), cancellationToken);
   #endregion
 
   #region Read: Channel Stream

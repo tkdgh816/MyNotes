@@ -213,7 +213,7 @@
         </interactivity:EventTriggerBehavior>
       </interactivity:Interaction.Behaviors>
       <TitleBar.IconSource>
-        <ImageIconSource ImageSource="ms-appx:///Assets/icons/app/AppIcon_16.png" />
+        <ImageIconSource ImageSource="ms-appx:///Assets/icons/app/AppIcon_128.ico" />
       </TitleBar.IconSource>
 
       <!--#region Reference Test-->

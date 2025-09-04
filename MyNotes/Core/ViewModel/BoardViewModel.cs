@@ -63,9 +63,6 @@ internal partial class BoardViewModel : ViewModelBase
   public SortedCollection<Note> Notes { get; private set; } = null!;
   public IncrementalObservableCollection<NoteViewModel> NoteViewModels { get; private set; } = null!;
 
-  //public ObservableCollection<Note> Notes { get; private set; } = new();
-  //public ObservableCollection<NoteViewModel> NoteViewModels { get; private set; } = new();
-
   private bool _isNotesLoading = true;
   public bool IsNotesLoading
   {
@@ -101,39 +98,44 @@ internal partial class BoardViewModel : ViewModelBase
     var notes = Notes;
     await Task.Run(async () =>
     {
-      switch (_navigation)
+      try
       {
-        case NavigationSearch search:
-          await foreach (var note in _noteService.SearchNotesStreamAsync(search.SearchText))
-          {
-            int firstIndex = note.SearchPreview.IndexOf(search.SearchText, StringComparison.CurrentCultureIgnoreCase);
-            int maxLength = AppStyles.GetNoteViewMaxLength(ViewStyle);
-            int length = note.SearchPreview.Length;
-            if (firstIndex >= 0)
+        switch (_navigation)
+        {
+          case NavigationSearch search:
+            await foreach (var note in _noteService.SearchNotesStreamAsync(search.SearchText, cancellationToken: _cancellationTokenSource.Token))
             {
-              if (firstIndex <= 0 || length <= maxLength)
-                note.SearchPreview = note.SearchPreview[0..length];
-              else if (firstIndex + maxLength >= length)
-                note.SearchPreview = note.SearchPreview[(length - maxLength)..length];
-              else
-                note.SearchPreview = note.SearchPreview[firstIndex..(firstIndex + maxLength)];
+              int firstIndex = note.SearchPreview.IndexOf(search.SearchText, StringComparison.CurrentCultureIgnoreCase);
+              int maxLength = AppStyles.GetNoteViewMaxLength(ViewStyle);
+              int length = note.SearchPreview.Length;
+              if (firstIndex >= 0)
+              {
+                if (firstIndex <= 0 || length <= maxLength)
+                  note.SearchPreview = note.SearchPreview[0..length];
+                else if (firstIndex + maxLength >= length)
+                  note.SearchPreview = note.SearchPreview[(length - maxLength)..length];
+                else
+                  note.SearchPreview = note.SearchPreview[firstIndex..(firstIndex + maxLength)];
 
-              foreach (int index in FindAllIndexes(note.SearchPreview, search.SearchText))
-                note.HighlighterRanges.Add(new TextRange(index, search.SearchText.Length));
+                foreach (int index in FindAllIndexes(note.SearchPreview, search.SearchText))
+                  note.HighlighterRanges.Add(new TextRange(index, search.SearchText.Length));
+              }
+
+              notes.Add(note);
             }
-
-            notes.Add(note);
-          }
-          break;
-        default:
-          await foreach (var note in _noteService.GetNotesStreamAsync(_navigation, sortField: SortField, sortDirection: SortDirection))
-            notes.Add(note);
-          break;
+            break;
+          default:
+            await foreach (var note in _noteService.GetNotesStreamAsync(_navigation, sortField: SortField, sortDirection: SortDirection, cancellationToken: _cancellationTokenSource.Token))
+              notes.Add(note);
+            break;
+        }
       }
-    });
+      catch (OperationCanceledException e)
+      {
+        Debug.WriteLine(e.Message);
+      }
+    }, _cancellationTokenSource.Token);
     IsNotesLoading = false;
-    //foreach (var note in Notes)
-    //  NoteViewModels.Add(_noteViewModelFactory.Resolve(note));
   }
 
   private void GetNoteViewModels()

@@ -1,16 +1,14 @@
 ﻿## 현재 구현 중
 + **구현 중**
-  - Lazy Loading(ISupportIncrementalLoading)
+  - CancellationToken 기능 구현
 
 ## 수정 사항
 + **긴급**
 
 + **중요**
-  - MainWindow가 닫혀도 하위 뷰(MainPage)가 해제되지 않는 문제
 
 
 + **보통**
-  - MainPage 열릴 때 내비게이션 또는 홈으로 가기
 
 
 ## 구현 / 수정 예정
