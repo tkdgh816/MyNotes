@@ -56,32 +56,38 @@ internal class NoteSearchDao(SearchService searchService)
     }
   }
 
-  private ScoreDoc? _currentDoc;
-  public Task<IEnumerable<GetNoteSearchDto>> GetNoteSearchIdsBatch(string searchText, int limit, int offset, CancellationToken cancellationToken = default) =>
+  private readonly int _pageSize = 100;
+
+  public Task<IEnumerable<GetNoteSearchDto>> GetNoteSearchIdsBatch(string searchText, CancellationToken cancellationToken = default) =>
     Task.Run(() =>
     {
-      if (offset == 0)
-        _currentDoc = null;
-
-      using DirectoryReader indexReader = _searchService.Writer.GetReader(true);
-      var indexSearcher = new IndexSearcher(indexReader);
       List<GetNoteSearchDto> dtos = new();
-
-      var parser = new QueryParser(_searchService.LuceneVersion, "body", _searchService.Analyzer);
       try
       {
+        using DirectoryReader indexReader = _searchService.Writer.GetReader(true);
+        var indexSearcher = new IndexSearcher(indexReader);
+        var parser = new QueryParser(_searchService.LuceneVersion, "body", _searchService.Analyzer);
         var searchQuery = parser.Parse(searchText);
-        var topDocs = indexSearcher.SearchAfter(_currentDoc, searchQuery, limit);
+        ScoreDoc? currentDoc = null;
 
-        foreach (var scoreDoc in topDocs.ScoreDocs)
+        while (true)
         {
           cancellationToken.ThrowIfCancellationRequested();
-          var doc = indexSearcher.Doc(scoreDoc.Doc);
-          dtos.Add(new GetNoteSearchDto() { SearchText = searchText, Id = new Guid(doc.Get("id")), Body = doc.Get("body") });
-        }
 
-        if (topDocs.ScoreDocs.Length > 0)
-          _currentDoc = topDocs.ScoreDocs[^1];
+          var topDocs = indexSearcher.SearchAfter(currentDoc, searchQuery, _pageSize);
+          var scoreDocs = topDocs.ScoreDocs;
+
+          if (scoreDocs.Length == 0)
+            break;
+
+          foreach (var scoreDoc in scoreDocs)
+          {
+            var doc = indexSearcher.Doc(scoreDoc.Doc);
+            dtos.Add(new GetNoteSearchDto() { SearchText = searchText, Id = new Guid(doc.Get("id")), Body = doc.Get("body") });
+          }
+
+          currentDoc = scoreDocs.Last();
+        }
       }
       catch (ParseException)
       {
@@ -91,33 +97,37 @@ internal class NoteSearchDao(SearchService searchService)
       return (IEnumerable<GetNoteSearchDto>)dtos;
     }, cancellationToken);
 
-  public IAsyncEnumerable<GetNoteSearchDto> GetNoteSearchIdsStream(string searchText, int limit, int offset, CancellationToken cancellationToken = default)
+  public IAsyncEnumerable<GetNoteSearchDto> GetNoteSearchIdsStream(string searchText, CancellationToken cancellationToken = default)
   {
-    if (offset == 0)
-      _currentDoc = null;
-
     var channel = Channel.CreateUnbounded<GetNoteSearchDto>();
     Task.Run(async () =>
     {
-      using DirectoryReader indexReader = _searchService.Writer.GetReader(true);
-      var indexSearcher = new IndexSearcher(indexReader);
-      List<GetNoteSearchDto> dtos = new();
-
-      var parser = new QueryParser(_searchService.LuceneVersion, "body", _searchService.Analyzer);
       try
       {
+        using DirectoryReader indexReader = _searchService.Writer.GetReader(true);
+        var indexSearcher = new IndexSearcher(indexReader);
+        var parser = new QueryParser(_searchService.LuceneVersion, "body", _searchService.Analyzer);
         var searchQuery = parser.Parse(searchText);
-        var topDocs = indexSearcher.SearchAfter(_currentDoc, searchQuery, limit);
+        ScoreDoc? currentDoc = null;
 
-        foreach (var scoreDoc in topDocs.ScoreDocs)
+        while (true)
         {
           cancellationToken.ThrowIfCancellationRequested();
-          var doc = indexSearcher.Doc(scoreDoc.Doc);
-          await channel.Writer.WriteAsync(new GetNoteSearchDto() { SearchText = searchText, Id = new Guid(doc.Get("id")), Body = doc.Get("body") });
-        }
+          
+          var topDocs = indexSearcher.SearchAfter(currentDoc, searchQuery, _pageSize);
+          var scoreDocs = topDocs.ScoreDocs;
 
-        if (topDocs.ScoreDocs.Length > 0)
-          _currentDoc = topDocs.ScoreDocs[^1];
+          if (scoreDocs.Length == 0)
+            break;
+
+          foreach (var scoreDoc in scoreDocs)
+          {
+            var doc = indexSearcher.Doc(scoreDoc.Doc);
+            await channel.Writer.WriteAsync(new GetNoteSearchDto() { SearchText = searchText, Id = new Guid(doc.Get("id")), Body = doc.Get("body") });
+          }
+
+          currentDoc = scoreDocs.Last();
+        }
       }
       catch (ParseException)
       {
@@ -129,6 +139,6 @@ internal class NoteSearchDao(SearchService searchService)
       }
     }, cancellationToken);
 
-    return channel.Reader.ReadAllAsync();
+    return channel.Reader.ReadAllAsync(cancellationToken);
   }
 }

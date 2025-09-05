@@ -165,9 +165,9 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
   }
 
 
-  public async IAsyncEnumerable<Note> SearchNotesStreamAsync(string searchText, int count = 1000, int startIndex = 0, NoteSortField? sortField = null, SortDirection? sortDirection = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+  public async IAsyncEnumerable<Note> SearchNotesStreamAsync(string searchText, NoteSortField? sortField = null, SortDirection? sortDirection = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
   {
-    await foreach (var noteDto in _dbDao.SearchNotesStream(_searchDao.GetNoteSearchIdsStream(searchText, count, startIndex), cancellationToken))
+    await foreach (var noteDto in _dbDao.SearchNotesStream(_searchDao.GetNoteSearchIdsStream(searchText, cancellationToken), cancellationToken))
       yield return ToNote(noteDto, true);
   }
 
@@ -178,9 +178,9 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
     return (await _dbDao.GetNotesBatchAsync(dto, cancellationToken)).Select(item => ToNote(item));
   }
 
-  public async Task<IEnumerable<Note>> SearchNotesBatchAsync(string searchText, int count = 1000, int startIndex = 0, NoteSortField? sortField = null, SortDirection? sortDirection = null, CancellationToken cancellationToken = default)
+  public async Task<IEnumerable<Note>> SearchNotesBatchAsync(string searchText, NoteSortField? sortField = null, SortDirection? sortDirection = null, CancellationToken cancellationToken = default)
   {
-    List<GetNoteSearchDto> dtos = new(await _searchDao.GetNoteSearchIdsBatch(searchText, count, startIndex, cancellationToken));
+    List<GetNoteSearchDto> dtos = new(await _searchDao.GetNoteSearchIdsBatch(searchText, cancellationToken));
 
     return (await _dbDao.SearchNotesBatchAsync(dtos, cancellationToken)).Select(item => ToNote(item, true));
   }

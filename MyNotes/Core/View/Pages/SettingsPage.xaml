@@ -93,8 +93,10 @@
                      BorderThickness="1,0,1,1"
                      Canvas.ZIndex="-1">
               <InfoBar.ActionButton>
-                <Button Content="Relaunch"
-                        HorizontalAlignment="Right" />
+                <Button x:Name="RelaunchButton"
+                        Content="Relaunch"
+                        HorizontalAlignment="Right" 
+                        Click="RelaunchButton_Click"/>
               </InfoBar.ActionButton>
               <InfoBar.RenderTransform>
                 <TranslateTransform x:Name="View_LanguageInfoBar_TranslateTransform" />

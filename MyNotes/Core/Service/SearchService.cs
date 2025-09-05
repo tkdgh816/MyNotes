@@ -1,4 +1,6 @@
 ﻿using Lucene.Net.Analysis;
+using Lucene.Net.Analysis.NGram;
+using Lucene.Net.Analysis.Miscellaneous;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Index;
 using Lucene.Net.Store;
@@ -22,6 +24,12 @@ internal class SearchService : IDisposable
     Analyzer = new StandardAnalyzer(LuceneVersion);
     var indexConfig = new IndexWriterConfig(LuceneVersion, Analyzer) { OpenMode = OpenMode.CREATE_OR_APPEND };
     Writer = new IndexWriter(_indexDir, indexConfig);
+
+//    var perFieldAnalyzer = new PerFieldAnalyzerWrapper(Analyzer, new Dictionary<string, Analyzer>
+//{
+//    { "title", new EdgeNGramTokenizer(LuceneVersion.LUCENE_48, 1, 10) },    // 제목: 접두사 검색
+//    { "content_ngram", new NGramTokenizer(LuceneVersion.LUCENE_48, 3, 10) } // 본문 부분검색
+//});
   }
 
   public void Dispose()

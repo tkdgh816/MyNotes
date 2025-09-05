@@ -1,3 +1,5 @@
+using Microsoft.Windows.AppLifecycle;
+
 using MyNotes.Core.ViewModel;
 
 using Windows.System;
@@ -40,5 +42,10 @@ internal sealed partial class SettingsPage : Page
       VisualStateManager.GoToState(this, "LanguageNotChanged", false);
     else
       VisualStateManager.GoToState(this, "LanguageChanged", false);
+  }
+
+  private void RelaunchButton_Click(object sender, RoutedEventArgs e)
+  {
+    AppInstance.Restart("");
   }
 }

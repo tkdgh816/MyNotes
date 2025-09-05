@@ -1,4 +1,8 @@
-﻿using MyNotes.Common.Collections;
+﻿using CommunityToolkit.WinUI;
+
+using Microsoft.UI.Dispatching;
+
+using MyNotes.Common.Collections;
 using MyNotes.Common.Commands;
 using MyNotes.Core.Model;
 using MyNotes.Core.Shared;
@@ -22,21 +26,21 @@ internal partial class BoardViewModel : ViewModelBase
     {
       //for (int i = 0; i < 25; i++)
       //{
-      Note newNote = _noteService.CreateNote((NavigationUserBoard)_navigation);
-      NoteViewModel noteViewModel = _noteViewModelFactory.Resolve(newNote);
+        Note newNote = _noteService.CreateNote((NavigationUserBoard)_navigation);
+        NoteViewModel noteViewModel = _noteViewModelFactory.Resolve(newNote);
 
-      Notes.Add(newNote);
-      int index = Notes.IndexOf(newNote);
-      if (index <= NoteViewModels.Count)
-        NoteViewModels.Insert(index, noteViewModel);
+        Notes.Add(newNote);
+        int index = Notes.IndexOf(newNote);
+        if (index <= NoteViewModels.Count)
+          NoteViewModels.Insert(index, noteViewModel);
 
-      noteViewModel.CreateWindow();
+        noteViewModel.CreateWindow();
 
-      //DispatcherQueue.GetForCurrentThread().EnqueueAsync(async () =>
-      //{
-      //  await Task.Delay(5000);
-      //  noteViewModel.CloseWindowCommand?.Execute();
-      //});
+      //  DispatcherQueue.GetForCurrentThread().EnqueueAsync(async () =>
+      //  {
+      //    await Task.Delay(5000);
+      //    noteViewModel.CloseWindowCommand?.Execute();
+      //  });
       //}
     });
 

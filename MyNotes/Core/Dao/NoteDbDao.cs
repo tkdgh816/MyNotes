@@ -145,7 +145,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     await using SqliteDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
     while (await reader.ReadAsync(cancellationToken))
     {
-      await Task.Delay(10, cancellationToken);
+      //await Task.Delay(100, cancellationToken);
       yield return CreateNoteDto(reader);
     }
   }

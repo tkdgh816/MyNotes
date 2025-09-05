@@ -39,6 +39,8 @@ internal partial class BoardViewModel : ViewModelBase
   {
     if (disposing)
     {
+      _cancellationTokenSource.Cancel();
+
       foreach (var noteViewModel in NoteViewModels)
       {
         if (!_windowService.IsNoteWindowActive(noteViewModel.Note))
@@ -50,7 +52,6 @@ internal partial class BoardViewModel : ViewModelBase
           note.HighlighterRanges.Clear();
       }
 
-      _cancellationTokenSource.Cancel();
       NoteViewModels.Clear();
       Notes.Clear();
       UnregisterMessengers();
