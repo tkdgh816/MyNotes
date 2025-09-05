@@ -24,9 +24,9 @@ internal partial class BoardViewModel : ViewModelBase
   {
     AddNewNoteCommand = new(() =>
     {
-      //for (int i = 0; i < 25; i++)
-      //{
-        Note newNote = _noteService.CreateNote((NavigationUserBoard)_navigation);
+    //for (int i = 0; i < 25; i++)
+    //{
+      Note newNote = _noteService.CreateNote((NavigationUserBoard)_navigation);
         NoteViewModel noteViewModel = _noteViewModelFactory.Resolve(newNote);
 
         Notes.Add(newNote);
