@@ -13,6 +13,7 @@ namespace MyNotes.Core.Dao;
 internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
 {
   private readonly DatabaseService _databaseService = databaseService;
+  private readonly int _batchSize = 20;
 
   #region Create
   public bool CreateNote(NoteDto dto)
@@ -21,9 +22,9 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     connection.Open();
     string query = """
       INSERT OR IGNORE INTO Notes
-      (id, parent, created, modified, title, preview, background, backdrop, width, height, position_x, position_y, bookmarked, trashed)
+      (id, parent, created, modified, title, body, preview, background, backdrop, width, height, position_x, position_y, bookmarked, trashed)
       VALUES
-      (@id, @parent, @created, @modified, @title, @preview, @background, @backdrop, @width, @height, @position_x, @position_y, @bookmarked, @trashed)
+      (@id, @parent, @created, @modified, @title, @body, @preview, @background, @backdrop, @width, @height, @position_x, @position_y, @bookmarked, @trashed)
       """;
     using SqliteCommand command = new(query, connection);
     command.Parameters.AddWithValue("@id", dto.Id);
@@ -31,6 +32,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     command.Parameters.AddWithValue("@created", dto.Created);
     command.Parameters.AddWithValue("@modified", dto.Modified);
     command.Parameters.AddWithValue("@title", dto.Title);
+    command.Parameters.AddWithValue("@body", dto.Body);
     command.Parameters.AddWithValue("@preview", dto.Preview);
     command.Parameters.AddWithValue("@background", dto.Background);
     command.Parameters.AddWithValue("@backdrop", dto.Backdrop);
@@ -61,9 +63,15 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
         string whereClause = string.Join(" AND ", fields.Select(field => $"{field.Key} = @{field.Key}"));
         string limitCluase = dto.Limit > 0 ? "LIMIT @limit" : "";
         string offsetCluase = dto.Offset > 0 ? "OFFSET @offset" : "";
-        string orderByClasue = GetOrderByClause(dto.SortField, dto.SortDirection);
+        string orderByClause = GetOrderByClause(dto.SortField, dto.SortDirection);
 
-        string query = $"SELECT * FROM Notes WHERE {whereClause} {limitCluase} {offsetCluase} {orderByClasue}";
+        // 필요한 필드만(body 제외) 불러오기
+        string query = $"""
+        SELECT
+        id, parent, created, modified, title, preview, background, backdrop, width, height, position_x, position_y, bookmarked, trashed
+        FROM Notes
+        WHERE {whereClause} {limitCluase} {offsetCluase} {orderByClause}
+        """;
         await using SqliteCommand command = new(query, connection);
         foreach (var field in fields)
           command.Parameters.AddWithValue($"@{field.Key}", field.Value);
@@ -74,7 +82,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
 
         await using SqliteDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
-          noteDtos.Add(CreateNoteDto(reader));
+          noteDtos.Add(CreateNoteDtoWithoutBody(reader));
       }
       return (IEnumerable<NoteDto>)noteDtos;
     }, cancellationToken);
@@ -91,12 +99,18 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
 
         List<SqliteCommand> commands = new();
 
-        int batchSize = 10;
-        for (int index = 0; index < count; index += batchSize)
+        for (int index = 0; index < count; index += _batchSize)
         {
-          int paramsCount = Math.Min(batchSize, count - index);
+          int paramsCount = Math.Min(_batchSize, count - index);
           string inClause = string.Join(", ", Enumerable.Range(index, paramsCount).Select((num) => $"@id{num}"));
-          string query = $"SELECT * FROM Notes WHERE id IN ({inClause}) AND trashed = @trashed";
+
+          // 필요한 필드만(priview 제외) 불러오기
+          string query = $"""
+          SELECT
+          id, parent, created, modified, title, body, background, backdrop, width, height, position_x, position_y, bookmarked, trashed
+          FROM Notes
+          WHERE id IN ({inClause}) AND trashed = @trashed
+          """;
 
           await using SqliteCommand command = new(query, connection);
           command.Parameters.AddWithValue("@trashed", 0);
@@ -110,7 +124,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
         {
           await using SqliteDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
           while (await reader.ReadAsync(cancellationToken))
-            noteDtos.Add(CreateNoteDto(reader));
+            noteDtos.Add(CreateNoteDtoWithoutPreview(reader));
         }
       }
       return noteDtos;
@@ -133,7 +147,13 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     string offsetCluase = dto.Offset > 0 ? "OFFSET @offset" : "";
     string orderByClause = GetOrderByClause(dto.SortField, dto.SortDirection);
 
-    string query = $"SELECT * FROM Notes WHERE {whereClause} {limitCluase} {offsetCluase} {orderByClause}";
+    // 필요한 필드만(body 제외) 불러오기
+    string query = $"""
+    SELECT
+    id, parent, created, modified, title, preview, background, backdrop, width, height, position_x, position_y, bookmarked, trashed
+    FROM Notes
+    WHERE {whereClause} {limitCluase} {offsetCluase} {orderByClause}
+    """;
     await using SqliteCommand command = new(query, connection);
     foreach (var field in fields)
       command.Parameters.AddWithValue($"@{field.Key}", field.Value);
@@ -146,7 +166,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     while (await reader.ReadAsync(cancellationToken))
     {
       //await Task.Delay(100, cancellationToken);
-      yield return CreateNoteDto(reader);
+      yield return CreateNoteDtoWithoutBody(reader);
     }
   }
 
@@ -160,12 +180,18 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
 
       List<SqliteCommand> commands = new();
 
-      int batchSize = 10;
-      for (int index = 0; index < count; index += batchSize)
+      for (int index = 0; index < count; index += _batchSize)
       {
-        int paramsCount = Math.Min(batchSize, count - index);
+        int paramsCount = Math.Min(_batchSize, count - index);
         string inClause = string.Join(", ", Enumerable.Range(index, paramsCount).Select((num) => $"@id{num}"));
-        string query = $"SELECT * FROM Notes WHERE id IN ({inClause}) AND trashed = @trashed";
+
+        // 필요한 필드만(priview 제외) 불러오기
+        string query = $"""
+          SELECT
+          id, parent, created, modified, title, body, background, backdrop, width, height, position_x, position_y, bookmarked, trashed
+          FROM Notes
+          WHERE id IN ({inClause}) AND trashed = @trashed
+          """;
 
         await using SqliteCommand command = new(query, connection);
         command.Parameters.AddWithValue("@trashed", 0);
@@ -179,7 +205,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
       {
         await using SqliteDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
-          yield return CreateNoteDto(reader);
+          yield return CreateNoteDtoWithoutPreview(reader);
       }
     }
   }
@@ -188,16 +214,14 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
   {
     List<SqliteCommand> commands = new();
 
-    int batchSize = 50;
-
-    List<GetNoteSearchDto> dtoBuffer = new(batchSize);
+    List<GetNoteSearchDto> dtoBuffer = new(_batchSize);
 
     await foreach (var dto in dtos)
     {
       dtoBuffer.Add(dto);
-      if (dtoBuffer.Count == batchSize)
+      if (dtoBuffer.Count == _batchSize)
       {
-        await foreach (var noteDto in SearchNotesInner(dtoBuffer, batchSize, cancellationToken))
+        await foreach (var noteDto in SearchNotesInner(dtoBuffer, _batchSize, cancellationToken))
           yield return noteDto;
         dtoBuffer.Clear();
       }
@@ -215,7 +239,14 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     await connection.OpenAsync(cancellationToken);
 
     string inClause = string.Join(", ", Enumerable.Range(0, batchSize).Select((num) => $"@id{num}"));
-    string query = $"SELECT * FROM Notes WHERE id IN ({inClause}) AND trashed = @trashed";
+
+    // 필요한 필드만(priview 제외) 불러오기
+    string query = $"""
+      SELECT
+      id, parent, created, modified, title, body, background, backdrop, width, height, position_x, position_y, bookmarked, trashed
+      FROM Notes
+      WHERE id IN ({inClause}) AND trashed = @trashed
+      """;
 
     await using SqliteCommand command = new(query, connection);
     command.Parameters.AddWithValue("@trashed", 0);
@@ -230,16 +261,20 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
       string searchPreview = "";
       if (dto is not null)
       {
-        int index = dto.Body.IndexOf(dto.SearchText, StringComparison.CurrentCultureIgnoreCase);
-        int length = dto.Body.Length;
-        if (index <= 0 || length <= maxLength)
-          searchPreview = dto.Body[0..length];
-        else if (index + maxLength >= length)
-          searchPreview = dto.Body[(length - maxLength)..length];
+        string body = GetReaderValue<string>(reader, "body")!;
+        var matches = dto.Matches;
+        int length = body.Length;
+        var firstMatch = matches.OrderBy(pair => pair.Key).First();
+        int startOffset = firstMatch.Value.Start.Value;
+
+        if (startOffset <= 0 || length <= maxLength)
+          searchPreview = body[0..length];
+        else if (startOffset + maxLength >= length)
+          searchPreview = "..." + body[(length - maxLength)..length];
         else
-          searchPreview = dto.Body[index..(index + maxLength)];
+          searchPreview = "..." + body[startOffset..(startOffset + maxLength)];
       }
-      yield return CreateNoteDto(reader, searchPreview);
+      yield return CreateNoteDtoWithoutPreview(reader, searchPreview);
     }
   }
 
@@ -270,7 +305,14 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
         string offsetCluase = dto.Offset > 0 ? "OFFSET @offset" : "";
         string orderByClause = GetOrderByClause(dto.SortField, dto.SortDirection);
 
-        string query = $"SELECT * FROM Notes WHERE {whereClause} {limitCluase} {offsetCluase} {orderByClause}";
+        // 필요한 필드만(body 제외) 불러오기
+        string query = $"""
+        SELECT
+        id, parent, created, modified, title, preview, background, backdrop, width, height, position_x, position_y, bookmarked, trashed
+        FROM Notes
+        WHERE {whereClause} {limitCluase} {offsetCluase} {orderByClause}
+        """;
+
         await using SqliteCommand command = new(query, connection);
         foreach (var field in fields)
           command.Parameters.AddWithValue($"@{field.Key}", field.Value);
@@ -281,7 +323,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
 
         await using SqliteDataReader reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
-          await channel.Writer.WriteAsync(CreateNoteDto(reader));
+          await channel.Writer.WriteAsync(CreateNoteDtoWithoutBody(reader));
       }
       finally
       {
@@ -308,12 +350,20 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
 
           List<SqliteCommand> commands = new();
 
-          int batchSize = 10;
-          for (int index = 0; index < count; index += batchSize)
+          int _batchSize = 10;
+          for (int index = 0; index < count; index += _batchSize)
           {
-            int paramsCount = Math.Min(batchSize, count - index);
+            int paramsCount = Math.Min(_batchSize, count - index);
             string inClause = string.Join(", ", Enumerable.Range(index, paramsCount).Select((num) => $"@id{num}"));
-            string query = $"SELECT * FROM Notes WHERE id IN ({inClause}) AND trashed = @trashed";
+
+            // 필요한 필드만(priview 제외) 불러오기
+            string query = $"""
+            SELECT
+            id, parent, created, modified, title, body, background, backdrop, width, height, position_x, position_y, bookmarked, trashed
+            FROM Notes
+            WHERE id IN ({inClause}) AND trashed = @trashed
+            """;
+
 
             await using SqliteCommand command = new(query, connection);
             command.Parameters.AddWithValue("@trashed", 0);
@@ -327,7 +377,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
           {
             await using SqliteDataReader reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync())
-              await channel.Writer.WriteAsync(CreateNoteDto(reader));
+              await channel.Writer.WriteAsync(CreateNoteDtoWithoutPreview(reader));
           }
         }
       }
@@ -379,7 +429,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
   #endregion
 
   #region Helpers & Converters
-  private NoteDto CreateNoteDto(SqliteDataReader reader, string searchPreview = "")
+  private NoteDto CreateNoteDtoWithoutBody(SqliteDataReader reader, string searchPreview = "")
   {
     var id = new Guid(GetReaderValue<string>(reader, "id")!);
     var parent = new Guid(GetReaderValue<string>(reader, "parent")!);
@@ -396,7 +446,28 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     var bookmarked = GetReaderValue<bool>(reader, "bookmarked");
     var trashed = GetReaderValue<bool>(reader, "trashed");
 
-    NoteDto noteDbDto = new() { Id = id, Parent = parent, Created = created, Modified = modified, Title = title, Preview = preview, SearchPreview = searchPreview, Background = background, Backdrop = backdrop, Width = width, Height = height, PositionX = positionX, PositionY = positionY, Bookmarked = bookmarked, Trashed = trashed };
+    NoteDto noteDbDto = new() { Id = id, Parent = parent, Created = created, Modified = modified, Title = title, Body = "", Preview = preview, SearchPreview = searchPreview, Background = background, Backdrop = backdrop, Width = width, Height = height, PositionX = positionX, PositionY = positionY, Bookmarked = bookmarked, Trashed = trashed };
+    return noteDbDto;
+  }
+
+  private NoteDto CreateNoteDtoWithoutPreview(SqliteDataReader reader, string searchPreview = "")
+  {
+    var id = new Guid(GetReaderValue<string>(reader, "id")!);
+    var parent = new Guid(GetReaderValue<string>(reader, "parent")!);
+    var created = GetReaderValue<DateTimeOffset>(reader, "created");
+    var modified = GetReaderValue<DateTimeOffset>(reader, "modified");
+    var title = GetReaderValue<string>(reader, "title")!;
+    var body = GetReaderValue<string>(reader, "body")!;
+    var background = GetReaderValue<string>(reader, "background")!;
+    var backdrop = GetReaderValue<int>(reader, "backdrop");
+    var width = GetReaderValue<int>(reader, "width");
+    var height = GetReaderValue<int>(reader, "height");
+    var positionX = GetReaderValue<int>(reader, "position_x");
+    var positionY = GetReaderValue<int>(reader, "position_y");
+    var bookmarked = GetReaderValue<bool>(reader, "bookmarked");
+    var trashed = GetReaderValue<bool>(reader, "trashed");
+
+    NoteDto noteDbDto = new() { Id = id, Parent = parent, Created = created, Modified = modified, Title = title, Body = body, Preview = "", SearchPreview = searchPreview, Background = background, Backdrop = backdrop, Width = width, Height = height, PositionX = positionX, PositionY = positionY, Bookmarked = bookmarked, Trashed = trashed };
     return noteDbDto;
   }
 
@@ -413,6 +484,8 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
       fields.Add("modified", dto.Modified);
     if (updateFields.HasFlag(NoteUpdateFields.Title) && dto.Title is not null)
       fields.Add("title", dto.Title);
+    if (updateFields.HasFlag(NoteUpdateFields.Body) && dto.Body is not null)
+      fields.Add("body", dto.Body);
     if (updateFields.HasFlag(NoteUpdateFields.Preview) && dto.Preview is not null)
       fields.Add("preview", dto.Preview);
     if (updateFields.HasFlag(NoteUpdateFields.Background) && dto.Background is not null)

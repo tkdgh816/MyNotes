@@ -94,6 +94,7 @@ internal partial class NoteViewModel : ViewModelBase
       { nameof(Note.BoardId), NoteUpdateFields.Parent },
       { nameof(Note.Modified), NoteUpdateFields.Modified },
       { nameof(Note.Title), NoteUpdateFields.Title },
+      { nameof(Note.Body), NoteUpdateFields.Body },
       { nameof(Note.Preview), NoteUpdateFields.Preview },
       { nameof(Note.Background), NoteUpdateFields.Background },
       { nameof(Note.Backdrop), NoteUpdateFields.Backdrop },
@@ -149,6 +150,7 @@ internal partial class NoteViewModel : ViewModelBase
 
   public void UpdateBody(string body)
   {
+    Note.Body = body;
     Note.Preview = body[..Math.Min(body.Length, 5000)];
     _noteService.UpdateSearchDocument(Note, body);
   }

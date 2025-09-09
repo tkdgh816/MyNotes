@@ -72,6 +72,7 @@ internal class DatabaseService
       created         TEXT NOT NULL,
       modified        TEXT NOT NULL,
       title           TEXT NOT NULL DEFAULT '',
+      body            TEXT NOT NULL DEFAULT '',
       preview         TEXT NOT NULL DEFAULT '',
       background      TEXT NOT NULL,
       backdrop        INTEGER NOT NULL,

@@ -9,6 +9,7 @@ internal record NoteDto
   public required DateTimeOffset Created { get; init; }
   public required DateTimeOffset Modified { get; init; }
   public required string Title { get; init; }
+  public required string Body { get; init; }
   public required string Preview { get; init; }
   public required string SearchPreview { get; init; }
   public required string Background { get; init; }
@@ -25,7 +26,7 @@ internal record GetNoteSearchDto
 {
   public required string SearchText { get; init; }
   public required Guid Id { get; init; }
-  public required string Body { get; init; }
+  public required Dictionary<int, Range> Matches { get; init; }
 }
 
 internal record GetNotesDto
@@ -57,6 +58,7 @@ internal record UpdateNoteDto
   public Guid? Parent { get; init; }
   public DateTimeOffset? Modified { get; init; }
   public string? Title { get; init; }
+  public string? Body { get; init; }
   public string? Preview { get; init; }
   public string? Background { get; init; }
   public int? Backdrop { get; init; }
@@ -75,15 +77,16 @@ internal enum NoteUpdateFields
   Parent = 1 << 0,
   Modified = 1 << 1,
   Title = 1 << 2,
-  Preview = 1 << 3,
-  Background = 1 << 4,
-  Backdrop = 1 << 5,
-  Width = 1 << 6,
-  Height = 1 << 7,
-  PositionX = 1 << 8,
-  PositionY = 1 << 9,
-  Bookmarked = 1 << 10,
-  Trashed = 1 << 11,
+  Body = 1 << 3,
+  Preview = 1 << 4,
+  Background = 1 << 5,
+  Backdrop = 1 << 6,
+  Width = 1 << 7,
+  Height = 1 << 8,
+  PositionX = 1 << 9,
+  PositionY = 1 << 10,
+  Bookmarked = 1 << 11,
+  Trashed = 1 << 12,
   All = int.MaxValue
 }
 

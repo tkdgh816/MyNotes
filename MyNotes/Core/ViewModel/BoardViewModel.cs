@@ -111,12 +111,12 @@ internal partial class BoardViewModel : ViewModelBase
               int length = note.SearchPreview.Length;
               if (firstIndex >= 0)
               {
-                if (firstIndex <= 0 || length <= maxLength)
+                if (length <= maxLength)
                   note.SearchPreview = note.SearchPreview[0..length];
                 else if (firstIndex + maxLength >= length)
-                  note.SearchPreview = note.SearchPreview[(length - maxLength)..length];
+                  note.SearchPreview = "..." + note.SearchPreview[(length - maxLength)..length];
                 else
-                  note.SearchPreview = note.SearchPreview[firstIndex..(firstIndex + maxLength)];
+                  note.SearchPreview = "..." + note.SearchPreview[firstIndex..(firstIndex + maxLength)];
 
                 foreach (int index in FindAllIndexes(note.SearchPreview, search.SearchText))
                   note.HighlighterRanges.Add(new TextRange(index, search.SearchText.Length));

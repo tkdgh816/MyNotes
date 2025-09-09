@@ -66,6 +66,7 @@ internal sealed partial class NotePage : Page
     }
     catch (Exception)
     {
+      View_TextEditorRichEditBox.Document.SetText(TextSetOptions.None, ViewModel.Note.Body);
       View_TextEditorRichEditBox.Document.SetText(TextSetOptions.None, TextGenerator.GenerateTexts(1000));
     }
   }
@@ -94,7 +95,7 @@ internal sealed partial class NotePage : Page
 
   private void View_TextEditorRichEditBox_Loaded(object sender, RoutedEventArgs e)
   {
-    View_TextEditorRichEditBox.Document.SetText(TextSetOptions.None, ViewModel.Note.Preview);
+    View_TextEditorRichEditBox.Document.SetText(TextSetOptions.None, ViewModel.Note.Body);
   }
 
   private void View_TitleTextBox_LostFocus(object sender, RoutedEventArgs e)

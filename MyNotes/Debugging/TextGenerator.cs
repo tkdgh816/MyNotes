@@ -11,7 +11,7 @@ internal class TextGenerator
 
   static TextGenerator()
   {
-    using var sr = new StreamReader(Path.Combine(Package.Current.InstalledLocation.Path, @"Assets\text\words_en_466482"));
+    using var sr = new StreamReader(Path.Combine(Package.Current.InstalledLocation.Path, @"Assets\text\words_en_10000.txt"));
     string? text;
     while ((text = sr.ReadLine()) is not null)
       Words.Add(text);

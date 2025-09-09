@@ -167,8 +167,8 @@
                    SelectionFlyout="{x:Null}"
                    SelectionHighlightColorWhenNotFocused="{StaticResource AccentFillColorSelectedTextBackgroundBrush}"
                    SelectionChanged="View_TextEditorRichEditBox_SelectionChanged"
-                   Loaded="View_TextEditorRichEditBox_Loaded"
-                   TextChanged="View_TextEditorRichEditBox_TextChanged" />
+                   TextChanged="View_TextEditorRichEditBox_TextChanged" 
+                   MaxLength="100000"/>
     </Grid>
     <!--#endregion-->
 
