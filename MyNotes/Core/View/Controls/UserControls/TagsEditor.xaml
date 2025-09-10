@@ -6,6 +6,7 @@
              xmlns:view="using:MyNotes.Core.View"
              xmlns:model="using:MyNotes.Core.Model"
              xmlns:dto="using:MyNotes.Core.Dto"
+             xmlns:h="using:MyNotes.Common.Helpers"
              xmlns:controls="using:CommunityToolkit.WinUI.Controls"
              xmlns:ui="using:CommunityToolkit.WinUI"
              xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
@@ -191,8 +192,8 @@
                            Width="12"
                            Height="12"
                            Stretch="Fill"
-                           Fill="{x:Bind Color, Converter={StaticResource TagColorToBackgroundBrushConverter}}"
-                           Stroke="{x:Bind Color, Converter={StaticResource TagColorToForegroundBrushConverter}}"
+                           Fill="{x:Bind h:Converter.GetTagBackgroundBrush(Color)}"
+                           Stroke="{x:Bind h:Converter.GetTagForegroundBrush(Color)}"
                            StrokeThickness="2.5" 
                            VerticalAlignment="Center"
                            Margin="0,3,0,0"/>
@@ -253,8 +254,8 @@
               <view:AppTagButton x:Name="View_SelectedTagButton"
                                  DataContext="{x:Bind}"
                                  Content="{x:Bind Text}"
-                                 Background="{x:Bind Color, Converter={StaticResource TagColorToBackgroundBrushConverter}}"
-                                 Foreground="{x:Bind Color, Converter={StaticResource TagColorToForegroundBrushConverter}}"
+                                 Background="{x:Bind h:Converter.GetTagBackgroundBrush(Color)}"
+                                 Foreground="{x:Bind h:Converter.GetTagForegroundBrush(Color)}"
                                  Click="View_SelectedTagButton_Click"
                                  DeleteButtonClick="View_SelectedTagButton_DeleteButtonClick" />
             </DataTemplate>
@@ -275,7 +276,7 @@
                   Style="{StaticResource AppIconNormalButtonStyle}"
                   Padding="6"
                   Command="{x:Bind ViewModel.ToggleInclusionCommand}" >
-            <IconSourceElement IconSource="{x:Bind ViewModel.IsIntersectSelection, Converter={StaticResource BoolToSetOperationIconSourceConverter}, Mode=OneWay}" />
+            <IconSourceElement IconSource="{x:Bind h:Converter.GetOperationIconSource(ViewModel.IsIntersectSelection), Mode=OneWay}" />
           </Button>
         </StackPanel>
         <Button x:Name="View_CommandBarExploreButton"

@@ -3,10 +3,11 @@
                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                xmlns:view="using:MyNotes.Core.View"
+               xmlns:h="using:MyNotes.Common.Helpers"
                Style="{StaticResource DefaultContentDialogStyle}"
                Title="New board"
                PrimaryButtonText="Add"
-               IsPrimaryButtonEnabled="{x:Bind ViewModel.Name, Converter={StaticResource EmptyStringToBoolConverter}, Mode=OneWay}"
+               IsPrimaryButtonEnabled="{x:Bind h:Converter.IsValidString(ViewModel.Name), Mode=OneWay}"
                CloseButtonText="Cancel"
                DefaultButton="Primary">
 

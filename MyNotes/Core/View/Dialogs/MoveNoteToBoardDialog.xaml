@@ -4,10 +4,11 @@
                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                xmlns:view="using:MyNotes.Core.View"
                xmlns:model="using:MyNotes.Core.Model"
+               xmlns:h="using:MyNotes.Common.Helpers"
                Style="{StaticResource DefaultContentDialogStyle}"
                Title="Move to board"
                PrimaryButtonText="Move"
-               IsPrimaryButtonEnabled="{Binding ElementName=View_MoveNoteToBoardTreeView, Path=SelectedItem, Converter={StaticResource NotNullToBoolConverter}}"
+               IsPrimaryButtonEnabled="{x:Bind h:Converter.IsNotNull(View_MoveNoteToBoardTreeView.SelectedItem), Mode=OneWay}"
                CloseButtonText="Close"
                DefaultButton="Primary">
   <TreeView x:Name="View_MoveNoteToBoardTreeView"
@@ -31,7 +32,7 @@
                   <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <IconSourceElement Grid.Column="0"
-                                   IconSource="{x:Bind Icon, Converter={StaticResource IconToIconSourceConverter}}"
+                                   IconSource="{x:Bind h:Converter.GetIconSource(Icon)}"
                                    VerticalAlignment="Center" />
                 <Border Grid.Column="0"
                         Background="{StaticResource LayerFillColorDefault}" />
@@ -54,7 +55,7 @@
                   <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <IconSourceElement Grid.Column="0"
-                                   IconSource="{x:Bind Icon, Converter={StaticResource IconToIconSourceConverter}}"
+                                   IconSource="{x:Bind h:Converter.GetIconSource(Icon)}"
                                    VerticalAlignment="Center" />
                 <TextBlock Grid.Column="1"
                            VerticalAlignment="Center"

@@ -2,8 +2,9 @@
 <ContentDialog x:Class="MyNotes.Core.View.NoteInformationDialog"
                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:h="using:MyNotes.Common.Helpers"
                CloseButtonText="Close"
-               Title="{x:Bind ViewModel.Note.Title, Converter={StaticResource StringWrapperConverter}, ConverterParameter='About: |%|'}"
+               Title="{x:Bind h:Converter.WrapStringWith(ViewModel.Note.Title, 'About: ', '.')}"
                Style="{StaticResource DefaultContentDialogStyle}">
 
   <ScrollViewer MaxWidth="300"
@@ -63,7 +64,7 @@
                  Text="Tags" />
       <TextBlock Grid.Row="4"
                  Grid.Column="1"
-                 Text="{x:Bind ViewModel.Note.Tags, Converter={StaticResource CollectionToStringConverter}}"
+                 Text="{x:Bind h:Converter.JoinStrings(ViewModel.Note.Tags, ',')}"
                  IsTextSelectionEnabled="True" />
     </Grid>
   </ScrollViewer>

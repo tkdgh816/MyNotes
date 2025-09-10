@@ -4,9 +4,10 @@
                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                xmlns:view="using:MyNotes.Core.View"
                xmlns:model="using:MyNotes.Core.Model"
+               xmlns:h="using:MyNotes.Common.Helpers"
                xmlns:dto="using:MyNotes.Core.Dto"
                xmlns:controls="using:CommunityToolkit.WinUI.Controls"
-               Title="{x:Bind ViewModel.Note.Title, Converter={StaticResource StringWrapperConverter}, ConverterParameter='Tags for: |%|'}"
+               Title="{x:Bind h:Converter.WrapStringWith(ViewModel.Note.Title, 'Tags for: ', '.')}"
                CloseButtonText="Close"
                Style="{StaticResource DefaultContentDialogStyle}">
   <Grid Width="320"
@@ -33,8 +34,8 @@
 
         <ItemsRepeater.ItemTemplate>
           <DataTemplate x:DataType="model:Tag">
-            <view:AppTagButton Background="{x:Bind Color, Converter={StaticResource TagColorToBackgroundBrushConverter}, Mode=OneWay}"
-                               Foreground="{x:Bind Color, Converter={StaticResource TagColorToForegroundBrushConverter}, Mode=OneWay}"
+            <view:AppTagButton Background="{x:Bind h:Converter.GetTagBackgroundBrush(Color), Mode=OneWay}"
+                               Foreground="{x:Bind h:Converter.GetTagForegroundBrush(Color), Mode=OneWay}"
                                DeleteButtonVisible="Visible"
                                DeleteButtonClick="AppTagButton_DeleteButtonClick"
                                DataContext="{x:Bind}">

@@ -7,7 +7,7 @@ namespace MyNotes.Common.Helpers;
 
 internal static class Converter
 {
-  public static IconSource? ToIconSource(Icon icon)
+  public static IconSource? GetIconSource(Icon icon)
   {
     if (icon is Glyph glyph)
       return new FontIconSource() { Glyph = glyph.Code };
@@ -43,30 +43,30 @@ internal static class Converter
     {TagColor.Violet,  new SolidColorBrush(ToolkitColorHelper.ToColor("#FF8F00D6"))},
   };
 
-  public static SolidColorBrush ToTagBackground(TagColor color) => TagBackgroundPairs.TryGetValue(color, out var brush) ? brush : TagBackgroundPairs[TagColor.White];
-  public static SolidColorBrush ToTagForeground(TagColor color) => TagForegroundPairs.TryGetValue(color, out var brush) ? brush : TagForegroundPairs[TagColor.White];
+  public static SolidColorBrush GetTagBackgroundBrush(TagColor color) => TagBackgroundPairs.TryGetValue(color, out var brush) ? brush : TagBackgroundPairs[TagColor.White];
+  public static SolidColorBrush GetTagForegroundBrush(TagColor color) => TagForegroundPairs.TryGetValue(color, out var brush) ? brush : TagForegroundPairs[TagColor.White];
 
   public static BitmapIconSource IntersectIconSource = new() { UriSource = new Uri("ms-appx:///Assets/icons/fluent/FluentShapeIntersect24Regular.png") };
   public static BitmapIconSource UnionIconSource = new() { UriSource = new Uri("ms-appx:///Assets/icons/fluent/FluentShapeUnion24Regular.png") };
 
-  public static BitmapIconSource ToSetOperationIconSource(bool boolValue) => boolValue ? IntersectIconSource : UnionIconSource;
+  public static BitmapIconSource GetOperationIconSource(bool boolValue) => boolValue ? IntersectIconSource : UnionIconSource;
 
-  public static bool EmptyStringToBool(string? text) => string.IsNullOrEmpty(text);
-  public static bool EmptyStringToBoolInverted(string? text) => !string.IsNullOrEmpty(text);
+  public static bool IsEmptyString(string? text) => string.IsNullOrEmpty(text);
+  public static bool IsValidString(string? text) => !string.IsNullOrEmpty(text);
 
-  public static string Concat(string text, string prefix, string suffix) => string.Concat(prefix, text, prefix);
-  public static string Join(IEnumerable values, string separator) => string.Join(separator, values.Cast<object>().Select(obj => obj.ToString()));
+  public static string WrapStringWith(string text, string prefix, string suffix) => string.Concat(prefix, text, prefix);
+  public static string JoinStrings(IEnumerable values, string separator) => string.Join(separator, values.Cast<object>().Select(obj => obj.ToString()));
 
-  public static bool NullToBool(object? obj) => obj is null;
-  public static bool NotNullToBool(object? obj) => obj is not null;
+  public static bool IsNull(object? obj) => obj is null;
+  public static bool IsNotNull(object? obj) => obj is not null;
 
-  public static SolidColorBrush BlendColorsToBrush(Color color, Color background) => new SolidColorBrush(ColorHelper.GetAlphaBlendingColor(color, background));
+  public static SolidColorBrush GetOverlayColorBrush(Color color, Color background) => new SolidColorBrush(ColorHelper.GetAlphaBlendingColor(color, background));
 
   private readonly static SolidColorBrush _brushLight = new(Microsoft.UI.ColorHelper.FromArgb(96, 255, 255, 255));
   private readonly static SolidColorBrush _brushMediumLight = new(Microsoft.UI.ColorHelper.FromArgb(96, 200, 200, 200));
   private readonly static SolidColorBrush _brushMediumDark = new(Microsoft.UI.ColorHelper.FromArgb(16, 16, 16, 16));
   private readonly static SolidColorBrush _brushDark = new(Microsoft.UI.ColorHelper.FromArgb(16, 0, 0, 0));
-  public static SolidColorBrush LayerColorToBrush(Color color) => (color.A < 64)
+  public static SolidColorBrush GetLayerColorBrush(Color color) => (color.A < 64)
     ? _brushDark
     : ColorHelper.GetRelativeLuminance(color) switch
     {
@@ -77,17 +77,17 @@ internal static class Converter
       _ => _brushDark
     };
 
-  public static string BoolToString(bool boolValue, string trueValue, string falseValue) => boolValue ? trueValue : falseValue;
+  public static string GetConditionalString(bool boolValue, string trueValue, string falseValue) => boolValue ? trueValue : falseValue;
 
   public static bool NegateBool(bool boolValue) => !boolValue;
-  public static Visibility ToVisibility(bool boolValue) => boolValue ? Visibility.Visible : Visibility.Collapsed;
-  public static Visibility ToVisibilityInverted(bool boolValue) => boolValue ? Visibility.Collapsed : Visibility.Visible;
-  public static SolidColorBrush ToBrush(Color color) => new SolidColorBrush(color);
+  public static Visibility GetVisibleIfFalse(bool boolValue) => boolValue ? Visibility.Collapsed : Visibility.Visible;
 
-  public static Visibility NavigationUserBoardToVisibility(Navigation navigation) => navigation is NavigationUserBoard ? Visibility.Visible : Visibility.Collapsed;
+  public static SolidColorBrush GetColorBrush(Color color) => new SolidColorBrush(color);
 
-  public static Visibility PositiveToVisibility(int number) => number > 0 ? Visibility.Visible : Visibility.Collapsed;
-  public static Visibility PositiveToVisibilityInverted(int number) => number <= 0 ? Visibility.Visible : Visibility.Collapsed;
+  public static Visibility GetVisibleIfUserBoard(Navigation navigation) => navigation is NavigationUserBoard ? Visibility.Visible : Visibility.Collapsed;
+
+  public static Visibility GetVisibleIfPositive(int number) => number > 0 ? Visibility.Visible : Visibility.Collapsed;
+  public static Visibility GetVisibleIfNotPositive(int number) => number <= 0 ? Visibility.Visible : Visibility.Collapsed;
 
   public static int BackdropKindToInt(BackdropKind backdropKind) => (int)backdropKind;
   public static int AppThemeToInt(AppTheme theme) => (int)theme;

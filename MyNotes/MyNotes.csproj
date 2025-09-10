@@ -24,7 +24,6 @@
     <None Remove="Core\View\Pages\HomePage.xaml" />
     <None Remove="Core\View\Pages\MainPage.xaml" />
     <None Remove="Core\View\Pages\NotePage.xaml" />
-    <None Remove="Core\View\Pages\SearchPage.xaml" />
     <None Remove="Core\View\Pages\SettingsPage.xaml" />
     <None Remove="Core\View\Pages\TagsPage.xaml" />
     <None Remove="Core\View\Pages\TestPage.xaml" />
@@ -218,14 +217,15 @@
     <PlatformTarget>x64</PlatformTarget>
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
-    <PackageCertificateThumbprint>1AB04C02ECDD6D748CCCAF745BB261DD27F1CF28</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>B522F9F3E6D44E50DAE39815A53C381FB59349FF</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
-    <AppxBundle>Never</AppxBundle>
+    <AppxBundle>Auto</AppxBundle>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
     <ApplicationIcon>Assets\icons\app\AppIcon_128.ico</ApplicationIcon>
     <PackageIcon>AppIcon_128.png</PackageIcon>
+    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
   </PropertyGroup>
 </Project>

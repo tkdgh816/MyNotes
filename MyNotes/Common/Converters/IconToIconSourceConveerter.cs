@@ -2,7 +2,7 @@
 
 namespace MyNotes.Common.Converters;
 
-internal class IconToIconSourceConveerter : IValueConverter
+internal class IconGetIconSourceConveerter : IValueConverter
 {
   public static IconSource? Convert(object value)
   {

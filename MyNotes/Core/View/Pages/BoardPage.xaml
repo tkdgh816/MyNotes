@@ -8,6 +8,8 @@
       xmlns:model="using:MyNotes.Core.Model"
       xmlns:view="using:MyNotes.Core.View"
       xmlns:viewmodel="using:MyNotes.Core.ViewModel"
+      xmlns:h="using:MyNotes.Common.Helpers"
+      xmlns:msui="using:Microsoft.UI"
       xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
       xmlns:behaviors="using:CommunityToolkit.WinUI.Behaviors">
 
@@ -26,7 +28,7 @@
                    PointerEntered="Template_RootUserControl_PointerEntered"
                    PointerExited="Template_RootUserControl_PointerExited">
         <Grid x:Name="Template_RootGrid"
-              Background="{x:Bind Note.Background, Converter={StaticResource AlphaBlendingWhiteConverter}, Mode=OneWay}"
+              Background="{x:Bind h:Converter.GetOverlayColorBrush(Note.Background, msui:Colors.White), Mode=OneWay}"
               CornerRadius="8"
               BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
               BorderThickness="1"
@@ -43,7 +45,7 @@
 
           <!--Note Header-->
           <Grid Grid.Row="0"
-                Background="{x:Bind Note.Background, Converter={StaticResource ColorToLayerBrushConverter}, Mode=OneWay}"
+                Background="{x:Bind h:Converter.GetLayerColorBrush(Note.Background), Mode=OneWay}"
                 BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
                 BorderThickness="0,0,0,1"
                 CornerRadius="6,6,0,0">
@@ -59,7 +61,7 @@
                     Grid.Column="0"
                     HorizontalAlignment="Left"
                     Style="{StaticResource AppFontIconNormalButtonStyle}"
-                    Content="{x:Bind Note.IsBookmarked, Converter={StaticResource BoolToBookmarkIconGlyphConverter}, Mode=OneWay}"
+                    Content="{x:Bind h:Converter.GetConditionalString(Note.IsBookmarked, '&#xE735;', '&#xE734;'), Mode=OneWay}"
                     CornerRadius="8,4,4,4"
                     Visibility="Collapsed"
                     IsTabStop="False"
@@ -78,7 +80,7 @@
               <interactivity:Interaction.Behaviors>
                 <interactivity:EventTriggerBehavior EventName="DoubleTapped">
                   <interactivity:InvokeCommandAction Command="{x:Bind OpenWindowCommand}"
-                                                     CommandParameter="{x:Bind Note.IsTrashed, Converter={StaticResource BoolNegationConverter}}" />
+                                                     CommandParameter="{x:Bind h:Converter.NegateBool(Note.IsTrashed)}" />
                 </interactivity:EventTriggerBehavior>
               </interactivity:Interaction.Behaviors>
             </TextBlock>
@@ -104,12 +106,12 @@
                   <AppBarButton x:Name="Template_RemoveNoteButton"
                                 Label="Remove"
                                 Icon="Delete"
-                                Visibility="{x:Bind Note.IsTrashed, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+                                Visibility="{x:Bind h:Converter.GetVisibleIfFalse(Note.IsTrashed)}"
                                 Command="{x:Bind RemoveNoteCommand}" />
                   <AppBarButton x:Name="Template_RestoreNoteButton"
                                 Label="Restore"
                                 Icon="Refresh"
-                                Visibility="{x:Bind Note.IsTrashed, Converter={StaticResource BoolToVisibilityConverter}}"
+                                Visibility="{x:Bind Note.IsTrashed}"
                                 Command="{x:Bind RestoreNoteCommand}" />
                   <CommandBarFlyout.SecondaryCommands>
                     <AppBarButton x:Name="Template_MoveToBoardButton"
@@ -143,7 +145,7 @@
             <interactivity:Interaction.Behaviors>
               <interactivity:EventTriggerBehavior EventName="DoubleTapped">
                 <interactivity:InvokeCommandAction Command="{x:Bind OpenWindowCommand}"
-                                                   CommandParameter="{x:Bind Note.IsTrashed, Converter={StaticResource BoolNegationConverter}}" />
+                                                   CommandParameter="{x:Bind h:Converter.NegateBool(Note.IsTrashed)}" />
               </interactivity:EventTriggerBehavior>
             </interactivity:Interaction.Behaviors>
           </TextBlock>
@@ -165,8 +167,8 @@
                 </ItemsRepeater.Layout>
                 <ItemsRepeater.ItemTemplate>
                   <DataTemplate x:DataType="model:Tag">
-                    <view:AppTagButton Background="{x:Bind Color, Converter={StaticResource TagColorToBackgroundBrushConverter}}"
-                                       Foreground="{x:Bind Color, Converter={StaticResource TagColorToForegroundBrushConverter}}"
+                    <view:AppTagButton Background="{x:Bind h:Converter.GetTagBackgroundBrush(Color)}"
+                                       Foreground="{x:Bind h:Converter.GetTagForegroundBrush(Color)}"
                                        DeleteButtonVisible="Collapsed"
                                        IsTabStop="False">
                       <TextBlock Text="{x:Bind Text}"
@@ -216,7 +218,7 @@
                    PointerEntered="Template_RootUserControl_PointerEntered"
                    PointerExited="Template_RootUserControl_PointerExited">
         <Grid x:Name="Template_RootGrid"
-              Background="{x:Bind Note.Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}"
+              Background="{x:Bind h:Converter.GetColorBrush(Note.Background), Mode=OneWay}"
               CornerRadius="8"
               BorderBrush="{StaticResource ControlStrokeColorDefaultBrush}"
               BorderThickness="1"
@@ -246,7 +248,7 @@
               <interactivity:Interaction.Behaviors>
                 <interactivity:EventTriggerBehavior EventName="DoubleTapped">
                   <interactivity:InvokeCommandAction Command="{x:Bind OpenWindowCommand}"
-                                                     CommandParameter="{x:Bind Note.IsTrashed, Converter={StaticResource BoolNegationConverter}}" />
+                                                     CommandParameter="{x:Bind h:Converter.NegateBool(Note.IsTrashed)}" />
                 </interactivity:EventTriggerBehavior>
               </interactivity:Interaction.Behaviors>
             </TextBlock>
@@ -261,7 +263,7 @@
               <interactivity:Interaction.Behaviors>
                 <interactivity:EventTriggerBehavior EventName="DoubleTapped">
                   <interactivity:InvokeCommandAction Command="{x:Bind OpenWindowCommand}"
-                                                     CommandParameter="{x:Bind Note.IsTrashed, Converter={StaticResource BoolNegationConverter}}" />
+                                                     CommandParameter="{x:Bind h:Converter.NegateBool(Note.IsTrashed)}" />
                 </interactivity:EventTriggerBehavior>
               </interactivity:Interaction.Behaviors>
           </TextBlock>
@@ -271,7 +273,7 @@
                 Grid.Column="1"
                 VerticalAlignment="Bottom"
                 Visibility="Collapsed"
-                Background="{x:Bind Note.Background, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}">
+                Background="{x:Bind h:Converter.GetColorBrush(Note.Background), Mode=OneWay}">
             <Grid.ColumnDefinitions>
               <ColumnDefinition />
               <ColumnDefinition Width="Auto" />
@@ -308,7 +310,7 @@
               <!--Bookmark Button-->
               <Button x:Name="Template_BookmarkButton"
                       Style="{StaticResource AppFontIconNormalButtonStyle}"
-                      Content="{x:Bind Note.IsBookmarked, Converter={StaticResource BoolToBookmarkIconGlyphConverter}, Mode=OneWay}"
+                      Content="{x:Bind h:Converter.GetConditionalString(Note.IsBookmarked, '&#xE735;', '&#xE734;'), Mode=OneWay}"
                       CornerRadius="8,4,4,4"
                       Command="{x:Bind BookmarkNoteCommand}" />
 
@@ -406,7 +408,7 @@
       <!--#region Icon -->
       <view:IconPicker Icon="{x:Bind Navigation.Icon, Mode=OneWay}"
                        IconChanged="View_IconPicker_IconChanged"
-                       Visibility="{x:Bind Navigation, Converter={StaticResource NavigationUserBoardToVisibilityConverter}}"
+                       Visibility="{x:Bind h:Converter.GetVisibleIfUserBoard(Navigation)}"
                        Margin="0,0,4,0" />
       <!--#endregion-->
 
@@ -432,7 +434,7 @@
                                 Icon="Add"
                                 Content="New note"
                                 Style="{StaticResource AppCommandBarButtonStyle}"
-                                Visibility="{x:Bind Navigation, Converter={StaticResource NavigationUserBoardToVisibilityConverter}}"
+                                Visibility="{x:Bind h:Converter.GetVisibleIfUserBoard(Navigation)}"
                                 Command="{x:Bind ViewModel.AddNewNoteCommand}" />
         <!--#endregion-->
 
@@ -453,10 +455,10 @@
               <!-- Rename Title -->
               <MenuFlyoutItem Text="Rename title"
                               Icon="Rename"
-                              Visibility="{x:Bind Navigation, Converter={StaticResource NavigationUserBoardToVisibilityConverter}}"
+                              Visibility="{x:Bind h:Converter.GetVisibleIfUserBoard(Navigation)}"
                               Command="{x:Bind ViewModel.ShowRenameBoardDialogCommand}" />
 
-              <MenuFlyoutSeparator Visibility="{x:Bind Navigation, Converter={StaticResource NavigationUserBoardToVisibilityConverter}}" />
+              <MenuFlyoutSeparator Visibility="{x:Bind h:Converter.GetVisibleIfUserBoard(Navigation)}" />
 
               <!-- Sort & Ordering -->
               <MenuFlyoutSubItem x:Name="View_SortMenuFlyoutSubItem"
@@ -566,7 +568,7 @@
                     </Grid>
 
                     <!-- Style: View Ratio -->
-                    <Grid Visibility="{Binding ElementName=View_StyleChangeRadioButtons, Path=SelectedIndex, Converter={StaticResource IntZeroToVisibilityConverter}}">
+                    <Grid Visibility="{x:Bind h:Converter.GetVisibleIfNotPositive(View_StyleChangeRadioButtons.SelectedIndex), Mode=OneWay}">
                       <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -611,7 +613,7 @@
 
               <MenuFlyoutItem Text="Delete board"
                               Icon="Delete"
-                              Visibility="{x:Bind Navigation, Converter={StaticResource NavigationUserBoardToVisibilityConverter}}"
+                              Visibility="{x:Bind h:Converter.GetVisibleIfUserBoard(Navigation)}"
                               Command="{x:Bind ViewModel.ShowDeleteBoardDialogCommand}" />
             </MenuFlyout>
           </Button.Flyout>
