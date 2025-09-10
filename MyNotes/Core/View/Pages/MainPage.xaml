@@ -202,7 +202,7 @@
 
     <TitleBar x:Name="View_TitleBar"
               Grid.Row="0"
-              IsBackButtonEnabled="{Binding ElementName=View_NavigationContent_RootFrame, Path=CanGoBack}"
+              IsBackButtonEnabled="{x:Bind View_NavigationContent_RootFrame.CanGoBack, Mode=OneWay}"
               IsBackButtonVisible="{x:Bind h:Converter.NegateBool(ViewModel.IsEditMode), Mode=OneWay}"
               IsPaneToggleButtonVisible="True"
               PaneToggleRequested="View_TitleBar_PaneToggleRequested"
@@ -251,7 +251,7 @@
           <interactivity:Interaction.Behaviors>
             <interactivity:EventTriggerBehavior EventName="QuerySubmitted">
               <interactivity:InvokeCommandAction Command="{x:Bind ViewModel.SearchNavigationCommand}"
-                                                 CommandParameter="{Binding ElementName=View_NavigationView_AutoSuggestBox, Path=Text}" />
+                                                 CommandParameter="{x:Bind View_NavigationView_AutoSuggestBox.Text}" />
             </interactivity:EventTriggerBehavior>
           </interactivity:Interaction.Behaviors>
         </AutoSuggestBox>
@@ -299,7 +299,7 @@
     </NavigationView>
 
     <TeachingTip x:Name="View_EditTeachingTip"
-                 Target="{Binding ElementName=View_NavigationViewFooter_EditNavigationViewItem}"
+                 Target="{x:Bind View_NavigationViewFooter_EditNavigationViewItem}"
                  Title="Turn off edit mode to select item."
                  IsLightDismissEnabled="True" />
   </Grid>

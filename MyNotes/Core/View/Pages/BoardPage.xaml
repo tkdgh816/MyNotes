@@ -641,11 +641,11 @@
           <AppBarButton Label="Move"
                         Icon="MoveToFolder"
                         Command="{x:Bind ViewModel.ShowMoveNoteToBoardDialogCommand}"
-                        CommandParameter="{Binding ElementName=View_NotesGridView, Path=SelectedItems}" />
+                        CommandParameter="{x:Bind View_NotesGridView.SelectedItems}" />
           <AppBarButton Label="Remove"
                         Icon="Delete"
                         Command="{x:Bind ViewModel.RemoveNotesCommand}"
-                        CommandParameter="{Binding ElementName=View_NotesGridView, Path=SelectedItems}" />
+                        CommandParameter="{x:Bind View_NotesGridView.SelectedItems}" />
           <AppBarSeparator />
           <AppBarButton Label="Revert"
                         Icon="Refresh"
