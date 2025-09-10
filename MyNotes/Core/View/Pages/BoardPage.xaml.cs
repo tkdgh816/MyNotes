@@ -2,11 +2,16 @@ using System.Text;
 
 using CommunityToolkit.WinUI;
 
+using Microsoft.UI.Xaml.Documents;
+
 using MyNotes.Core.Model;
 using MyNotes.Core.Shared;
 using MyNotes.Core.ViewModel;
 
 using Windows.ApplicationModel.DataTransfer;
+
+using AppColorHelper = MyNotes.Common.Helpers.ColorHelper;
+using ToolkitColorHelper = CommunityToolkit.WinUI.Helpers.ColorHelper;
 
 namespace MyNotes.Core.View;
 
@@ -18,8 +23,6 @@ internal sealed partial class BoardPage : Page
 
     this.Unloaded += BoardPage_Unloaded;
   }
-
-  private void BoardPage_Unloaded(object sender, RoutedEventArgs e) => this.Bindings.StopTracking();
 
   public NavigationBoard Navigation { get; private set; } = null!;
   public BoardViewModel ViewModel { get; private set; } = null!;
@@ -34,12 +37,11 @@ internal sealed partial class BoardPage : Page
     RegisterEvents();
   }
 
-  protected override void OnNavigatedFrom(NavigationEventArgs e)
+  private void BoardPage_Unloaded(object sender, RoutedEventArgs e)
   {
-    UnregisterEvents();
     this.Bindings.StopTracking();
+    UnregisterEvents();
     ViewModel.Dispose();
-    base.OnNavigatedFrom(e);
   }
 
   private void InitializeSettings()
@@ -177,7 +179,7 @@ internal sealed partial class BoardPage : Page
     View_NotesGridView.ItemContainerStyle = (Style)((App)Application.Current).Resources[$"AppGridViewItemContainerStyle_{styleNameSuffix}"];
 
     if (Enum.TryParse<BoardViewStyle>(styleNameSuffix, out var viewStyle))
-      ViewModel.SetBoardSettings(AppSettingsKeys.BoardViewStyle, (int)viewStyle);
+      ViewModel.SetBoardSettings(AppSettingsKeys.BoardViewStyle, viewStyle);
   }
   #endregion
 
@@ -240,6 +242,30 @@ internal sealed partial class BoardPage : Page
     {
       container.GotFocus += OnHoverStateHovering;
       container.LostFocus += OnHoverStateNormal;
+
+      if (Navigation is NavigationSearch)
+      {
+        var templateRoot = (UserControl)container.ContentTemplateRoot;
+        if (templateRoot.FindChild("Template_RootGrid") is Grid grid
+          && grid.FindChild("Template_BodyTextBlock") is TextBlock textblock)
+        {
+          textblock.TextHighlighters.Clear();
+          var background = noteViewModel.Note.Background;
+          var comp = AppColorHelper.GetComplementary(background);
+
+          var backHsv = ToolkitColorHelper.ToHsv(background);
+          var h = (backHsv.H - 180.0) / 360.0;
+
+          var emphasis = ToolkitColorHelper.FromHsv((h - Math.Floor(h)) * 360.0, Math.Clamp(backHsv.S, 0.3, 0.7), Math.Max(0.7, backHsv.V), 1.0);
+
+          foreach (var textRange in noteViewModel.Note.HighlighterRanges)
+          {
+            TextHighlighter highlighter = new() { Background = new SolidColorBrush(emphasis) };
+            highlighter.Ranges.Add(textRange);
+            textblock.TextHighlighters.Add(highlighter);
+          }
+        }
+      }
     }
   }
 
@@ -255,4 +281,6 @@ internal sealed partial class BoardPage : Page
     else
       View_NotesGridView.DeselectAll();
   }
+
+  private string FormatCount(int count) => count > 0 ? $"({count})" : "";
 }

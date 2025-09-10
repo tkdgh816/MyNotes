@@ -173,20 +173,6 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
       yield return ToNote(noteDto, true);
   }
 
-  public async Task<IEnumerable<Note>> GetNotesBatchAsync(NavigationBoard navigation, int count = -1, int startIndex = -1, NoteSortField? sortField = null, SortDirection? sortDirection = null, CancellationToken cancellationToken = default)
-  {
-    GetNotesDto dto = GetNotesDto(navigation, count, startIndex, sortField, sortDirection);
-
-    return (await _dbDao.GetNotesBatchAsync(dto, cancellationToken)).Select(item => ToNote(item));
-  }
-
-  public async Task<IEnumerable<Note>> SearchNotesBatchAsync(string searchText, NoteSortField? sortField = null, SortDirection? sortDirection = null, CancellationToken cancellationToken = default)
-  {
-    List<GetNoteSearchDto> dtos = new(await _searchDao.GetNoteSearchIdsBatch(searchText, cancellationToken));
-
-    return (await _dbDao.SearchNotesBatchAsync(dtos, cancellationToken)).Select(item => ToNote(item, true));
-  }
-
   public async Task UpdateNote(Note note, NoteUpdateFields updateFields)
   {
     if (updateFields == NoteUpdateFields.None)

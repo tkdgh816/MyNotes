@@ -30,7 +30,7 @@ internal class SettingsService
   {
     GlobalSettings.TryAdd(AppSettingsKeys.AppTheme, (int)AppTheme.Default);
     GlobalSettings.TryAdd(AppSettingsKeys.AppLanguage, (int)AppLanguage.Default);
-    GlobalSettings.TryAdd(AppSettingsKeys.StartupLaunch, false);
+    GlobalSettings.TryAdd(AppSettingsKeys.AppStartupLaunch, false);
 
     NoteSettings.TryAdd(AppSettingsKeys.NoteBackground, "#FFFAFAD2");
     NoteSettings.TryAdd(AppSettingsKeys.NoteBackdrop, (int)BackdropKind.None);
@@ -39,13 +39,14 @@ internal class SettingsService
     BoardSettings.TryAdd(AppSettingsKeys.BoardNoteSortField, (int)NoteSortField.Created);
     BoardSettings.TryAdd(AppSettingsKeys.BoardNoteSortDirection, (int)SortDirection.Ascending);
     BoardSettings.TryAdd(AppSettingsKeys.BoardViewStyle, (int)BoardViewStyle.Grid_320_100);
+    BoardSettings.TryAdd(AppSettingsKeys.BoardDisplayNoteCount, true);
   }
 
   public GetGlobalSettingsDto GetGlobalSettings()
   {
     var theme = (int)GlobalSettings[AppSettingsKeys.AppTheme];
     var language = (int)GlobalSettings[AppSettingsKeys.AppLanguage];
-    var startup = (bool)GlobalSettings[AppSettingsKeys.StartupLaunch];
+    var startup = (bool)GlobalSettings[AppSettingsKeys.AppStartupLaunch];
 
     return new()
     {
@@ -74,12 +75,14 @@ internal class SettingsService
     var sortField = (int)BoardSettings[AppSettingsKeys.BoardNoteSortField];
     var sortDirection = (int)BoardSettings[AppSettingsKeys.BoardNoteSortDirection];
     var viewStyle = (int)BoardSettings[AppSettingsKeys.BoardViewStyle];
+    var displayNoteCount = (bool)BoardSettings[AppSettingsKeys.BoardDisplayNoteCount];
 
     return new()
     {
       SortField = (NoteSortField)sortField,
       SortDirection = (SortDirection)sortDirection,
-      ViewStyle = (BoardViewStyle)viewStyle
+      ViewStyle = (BoardViewStyle)viewStyle,
+      DisplayNoteCount = displayNoteCount
     };
   }
 

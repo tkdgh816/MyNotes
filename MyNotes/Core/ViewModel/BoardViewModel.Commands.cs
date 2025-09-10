@@ -24,9 +24,9 @@ internal partial class BoardViewModel : ViewModelBase
   {
     AddNewNoteCommand = new(() =>
     {
-    //for (int i = 0; i < 25; i++)
-    //{
-      Note newNote = _noteService.CreateNote((NavigationUserBoard)_navigation);
+      for (int i = 0; i < 25; i++)
+      {
+        Note newNote = _noteService.CreateNote((NavigationUserBoard)_navigation);
         NoteViewModel noteViewModel = _noteViewModelFactory.Resolve(newNote);
 
         Notes.Add(newNote);
@@ -36,12 +36,12 @@ internal partial class BoardViewModel : ViewModelBase
 
         noteViewModel.CreateWindow();
 
-      //  DispatcherQueue.GetForCurrentThread().EnqueueAsync(async () =>
-      //  {
-      //    await Task.Delay(5000);
-      //    noteViewModel.CloseWindowCommand?.Execute();
-      //  });
-      //}
+      DispatcherQueue.GetForCurrentThread().EnqueueAsync(async () =>
+      {
+        await Task.Delay(5000);
+        noteViewModel.CloseWindowCommand?.Execute();
+      });
+    }
     });
 
     RemoveNotesCommand = new(async (items) =>

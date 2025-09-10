@@ -3,7 +3,7 @@ internal static class AppSettingsKeys
 {
   public const string AppTheme = "AppTheme";
   public const string AppLanguage = "AppLanguage";
-  public const string StartupLaunch = "StartupLaunch";
+  public const string AppStartupLaunch = "AppStartupLaunch";
 
   public const string NoteBackground = "NoteBackground";
   public const string NoteBackdrop = "NoteBackdrop";
@@ -12,6 +12,7 @@ internal static class AppSettingsKeys
   public const string BoardNoteSortField = "BoardNotesSortField";
   public const string BoardNoteSortDirection = "BoardNotesSortDirection";
   public const string BoardViewStyle = "BoardViewStyle";
+  public const string BoardDisplayNoteCount = "BoardDisplayNoteCount";
 }
 
 internal enum AppTheme { Default, Light, Dark }

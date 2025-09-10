@@ -13,12 +13,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Debugging\Test\Test.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Remove="Debugging\Test\Test.xaml" />
-  </ItemGroup>
-  <ItemGroup>
     <None Remove="Assets\Square44x44Logo.targetsize-16.png" />
     <None Remove="Assets\Square44x44Logo.targetsize-24_altform-lightunplated.png" />
     <None Remove="Core\View\Controls\UserControls\IconPicker.xaml" />
@@ -37,9 +31,6 @@
     <None Remove="Core\View\Pages\TrashPage.xaml" />
     <None Remove="Core\View\Windows\TestWindow.xaml" />
     <None Remove="Themes\Generic.xaml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Page Remove="Debugging\Test\Test.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -67,9 +58,6 @@
     <Folder Include="Common\Extensions\" />
     <Folder Include="Strings\ko-KR\" />
     <Folder Include="Strings\en-US\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Debugging\Test\Test.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
@@ -106,9 +94,6 @@
     <None Update="Assets\icons\app\AppIcon_256.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
-    </None>
-    <None Update="Debugging\Test\Test.xaml">
-      <Generator>MSBuild:Compile</Generator>
     </None>
     <Page Update="Core\View\Dialogs\EditNoteTagsDialog.xaml">
       <Generator>MSBuild:Compile</Generator>

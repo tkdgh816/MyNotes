@@ -29,15 +29,6 @@
                  Margin="4,0" />
 
       <!--#endregion -->
-
-      <StackPanel Grid.Column="1"
-                  Orientation="Horizontal">
-        <!--#region More Button -->
-        <Button x:Name="View_MoreButton"
-                Style="{StaticResource AppFontIconMediumButtonStyle}"
-                Content="&#xE712;" />
-        <!--#endregion-->
-      </StackPanel>
     </Grid>
     <!--#endregion-->
 
@@ -95,8 +86,8 @@
               <InfoBar.ActionButton>
                 <Button x:Name="RelaunchButton"
                         Content="Relaunch"
-                        HorizontalAlignment="Right" 
-                        Click="RelaunchButton_Click"/>
+                        HorizontalAlignment="Right"
+                        Click="RelaunchButton_Click" />
               </InfoBar.ActionButton>
               <InfoBar.RenderTransform>
                 <TranslateTransform x:Name="View_LanguageInfoBar_TranslateTransform" />
@@ -195,6 +186,21 @@
         </StackPanel>
         <!--#endregion-->
 
+        <!--#region Board -->
+        <StackPanel Spacing="4">
+          <TextBlock Text="Board"
+                     Padding="4"
+                     Style="{ThemeResource BaseTextBlockStyle}" />
+
+          <!-- Bool SettingsCard -->
+          <controls:SettingsCard Header="Note count"
+                                 HeaderIcon="{ui:FontIcon Glyph=&#xE7B3;}"
+                                 Description="Display the number of notes on the board.">
+            <ToggleSwitch IsOn="{x:Bind ViewModel.DisplayNoteCount, Mode=TwoWay}"/>
+          </controls:SettingsCard>
+        </StackPanel>
+        <!--#endregion -->
+
         <!--#region Others -->
         <StackPanel Spacing="4">
           <TextBlock Text="Others"
@@ -208,6 +214,7 @@
             <ToggleSwitch IsOn="True" />
           </controls:SettingsCard>
         </StackPanel>
+        <!--#endregion -->
 
         <!--#region About -->
         <StackPanel Spacing="4">

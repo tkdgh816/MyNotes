@@ -138,7 +138,7 @@
           <TextBlock x:Name="Template_BodyTextBlock"
                      Grid.Row="1"
                      Margin="6"
-                     Text="{x:Bind Note.SearchPreview}"
+                     Text="{x:Bind Note.Preview, Mode=OneWay}"
                      TextWrapping="Wrap">
             <interactivity:Interaction.Behaviors>
               <interactivity:EventTriggerBehavior EventName="DoubleTapped">
@@ -256,7 +256,7 @@
           <TextBlock x:Name="Template_BodyTextBlock"
                      Grid.Column="1"
                      Margin="6"
-                     Text="{x:Bind Note.SearchPreview}"
+                     Text="{x:Bind Note.Preview, Mode=OneWay}"
                      TextWrapping="Wrap">
               <interactivity:Interaction.Behaviors>
                 <interactivity:EventTriggerBehavior EventName="DoubleTapped">

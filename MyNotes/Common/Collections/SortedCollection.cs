@@ -2,12 +2,19 @@
 internal class SortedCollection<T> : IList<T>
 {
   private readonly List<T> _inner = new();
-  private readonly IComparer<T> _comparer;
+  private IComparer<T> _comparer;
 
   public SortedCollection() : this(Comparer<T>.Default) { }
 
   public SortedCollection(IComparer<T> comparer) 
     => _comparer = comparer ?? Comparer<T>.Default;
+
+  public SortedCollection(IComparer<T> comparer, IEnumerable<T> items)
+  {
+    _comparer = comparer ?? Comparer<T>.Default;
+    foreach (var item in items)
+      Add(item);
+  }
 
   public void Add(T item)
   {
@@ -36,4 +43,12 @@ internal class SortedCollection<T> : IList<T>
 
   public IEnumerator<T> GetEnumerator() => _inner.GetEnumerator();
   IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+  public void Reset(IComparer<T> comparer)
+  {
+    if (_comparer == comparer || _comparer.Equals(comparer))
+      return;
+    _comparer = comparer ?? Comparer<T>.Default;
+    _inner.Sort(_comparer);
+  }
 }

@@ -8,6 +8,7 @@ using MyNotes.Common.Collections;
 using MyNotes.Core.Dto;
 using MyNotes.Core.Model;
 using MyNotes.Core.Service;
+using MyNotes.Core.Shared;
 
 namespace MyNotes.Core.Dao;
 internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
@@ -48,89 +49,6 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
   #endregion
 
   #region Read
-  #region Read: Batch
-  public Task<IEnumerable<NoteDto>> GetNotesBatchAsync(GetNotesDto dto, CancellationToken cancellationToken = default) =>
-    Task.Run(async () =>
-    {
-      List<NoteDto> noteDtos = new();
-      Dictionary<string, object> fields = GetNoteFieldValue(dto);
-
-      if (fields.Count > 0)
-      {
-        await using SqliteConnection connection = _databaseService.Connection;
-        await connection.OpenAsync(cancellationToken);
-
-        string whereClause = string.Join(" AND ", fields.Select(field => $"{field.Key} = @{field.Key}"));
-        string limitCluase = dto.Limit > 0 ? "LIMIT @limit" : "";
-        string offsetCluase = dto.Offset > 0 ? "OFFSET @offset" : "";
-        string orderByClause = GetOrderByClause(dto.SortField, dto.SortDirection);
-
-        // 필요한 필드만(body 제외) 불러오기
-        string query = $"""
-        SELECT
-        id, parent, created, modified, title, preview, background, backdrop, width, height, position_x, position_y, bookmarked, trashed
-        FROM Notes
-        WHERE {whereClause} {limitCluase} {offsetCluase} {orderByClause}
-        """;
-        await using SqliteCommand command = new(query, connection);
-        foreach (var field in fields)
-          command.Parameters.AddWithValue($"@{field.Key}", field.Value);
-        if (dto.Limit > 0)
-          command.Parameters.AddWithValue("@limit", dto.Limit);
-        if (dto.Offset > 0)
-          command.Parameters.AddWithValue("@offset", dto.Offset);
-
-        await using SqliteDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
-        while (await reader.ReadAsync(cancellationToken))
-          noteDtos.Add(CreateNoteDtoWithoutBody(reader));
-      }
-      return (IEnumerable<NoteDto>)noteDtos;
-    }, cancellationToken);
-
-  public Task<List<NoteDto>> SearchNotesBatchAsync(IList<GetNoteSearchDto> dtos, CancellationToken cancellationToken = default) =>
-    Task.Run(async () =>
-    {
-      List<NoteDto> noteDtos = new();
-      int count = dtos.Count;
-      if (count > 0)
-      {
-        await using SqliteConnection connection = _databaseService.Connection;
-        await connection.OpenAsync(cancellationToken);
-
-        List<SqliteCommand> commands = new();
-
-        for (int index = 0; index < count; index += _batchSize)
-        {
-          int paramsCount = Math.Min(_batchSize, count - index);
-          string inClause = string.Join(", ", Enumerable.Range(index, paramsCount).Select((num) => $"@id{num}"));
-
-          // 필요한 필드만(priview 제외) 불러오기
-          string query = $"""
-          SELECT
-          id, parent, created, modified, title, body, background, backdrop, width, height, position_x, position_y, bookmarked, trashed
-          FROM Notes
-          WHERE id IN ({inClause}) AND trashed = @trashed
-          """;
-
-          await using SqliteCommand command = new(query, connection);
-          command.Parameters.AddWithValue("@trashed", 0);
-          for (int paramsIndex = index; paramsIndex < index + paramsCount; paramsIndex++)
-            command.Parameters.AddWithValue($"@id{paramsIndex}", dtos[paramsIndex].Id);
-
-          commands.Add(command);
-        }
-
-        foreach (var command in commands)
-        {
-          await using SqliteDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
-          while (await reader.ReadAsync(cancellationToken))
-            noteDtos.Add(CreateNoteDtoWithoutPreview(reader));
-        }
-      }
-      return noteDtos;
-    }, cancellationToken);
-  #endregion
-
   #region Read: Stream
   private async IAsyncEnumerable<NoteDto> GetNotesStream(GetNotesDto dto, [EnumeratorCancellation] CancellationToken cancellationToken = default)
   {
@@ -185,10 +103,9 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
         int paramsCount = Math.Min(_batchSize, count - index);
         string inClause = string.Join(", ", Enumerable.Range(index, paramsCount).Select((num) => $"@id{num}"));
 
-        // 필요한 필드만(priview 제외) 불러오기
         string query = $"""
           SELECT
-          id, parent, created, modified, title, body, background, backdrop, width, height, position_x, position_y, bookmarked, trashed
+          *
           FROM Notes
           WHERE id IN ({inClause}) AND trashed = @trashed
           """;
@@ -205,7 +122,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
       {
         await using SqliteDataReader reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
-          yield return CreateNoteDtoWithoutPreview(reader);
+          yield return CreateNoteDto(reader);
       }
     }
   }
@@ -240,10 +157,9 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
 
     string inClause = string.Join(", ", Enumerable.Range(0, batchSize).Select((num) => $"@id{num}"));
 
-    // 필요한 필드만(priview 제외) 불러오기
     string query = $"""
       SELECT
-      id, parent, created, modified, title, body, background, backdrop, width, height, position_x, position_y, bookmarked, trashed
+      *
       FROM Notes
       WHERE id IN ({inClause}) AND trashed = @trashed
       """;
@@ -274,121 +190,13 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
         else
           searchPreview = "..." + body[startOffset..(startOffset + maxLength)];
       }
-      yield return CreateNoteDtoWithoutPreview(reader, searchPreview);
+      yield return CreateNoteDto(reader, searchPreview);
     }
   }
 
   public Task<IAsyncEnumerable<NoteDto>> GetNotesStreamAsync(GetNotesDto dto, CancellationToken cancellationToken = default) => Task.Run(() => GetNotesStream(dto, cancellationToken), cancellationToken);
 
   public Task<IAsyncEnumerable<NoteDto>> SearchNotesStreamAsync(IList<GetNoteSearchDto> dtos, CancellationToken cancellationToken = default) => Task.Run(() => SearchNotesStream(dtos, cancellationToken), cancellationToken);
-  #endregion
-
-  #region Read: Channel Stream
-  public IAsyncEnumerable<NoteDto> GetNotesChannelStreamAsync(GetNotesDto dto)
-  {
-    var channel = Channel.CreateUnbounded<NoteDto>();
-
-    Task.Run(async () =>
-    {
-      try
-      {
-        Dictionary<string, object> fields = GetNoteFieldValue(dto);
-
-        if (fields.Count == 0)
-          return;
-
-        await using SqliteConnection connection = _databaseService.Connection;
-        await connection.OpenAsync();
-
-        string whereClause = string.Join(" AND ", fields.Select(field => $"{field.Key} = @{field.Key}"));
-        string limitCluase = dto.Limit > 0 ? "LIMIT @limit" : "";
-        string offsetCluase = dto.Offset > 0 ? "OFFSET @offset" : "";
-        string orderByClause = GetOrderByClause(dto.SortField, dto.SortDirection);
-
-        // 필요한 필드만(body 제외) 불러오기
-        string query = $"""
-        SELECT
-        id, parent, created, modified, title, preview, background, backdrop, width, height, position_x, position_y, bookmarked, trashed
-        FROM Notes
-        WHERE {whereClause} {limitCluase} {offsetCluase} {orderByClause}
-        """;
-
-        await using SqliteCommand command = new(query, connection);
-        foreach (var field in fields)
-          command.Parameters.AddWithValue($"@{field.Key}", field.Value);
-        if (dto.Limit > 0)
-          command.Parameters.AddWithValue("@limit", dto.Limit);
-        if (dto.Offset > 0)
-          command.Parameters.AddWithValue("@offset", dto.Offset);
-
-        await using SqliteDataReader reader = await command.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
-          await channel.Writer.WriteAsync(CreateNoteDtoWithoutBody(reader));
-      }
-      finally
-      {
-        channel.Writer.Complete();
-      }
-    });
-
-    return channel.Reader.ReadAllAsync();
-  }
-
-  public IAsyncEnumerable<NoteDto> SearchNotesChannelStreamAsync(IList<GetNoteSearchDto> dtos)
-  {
-    var channel = Channel.CreateUnbounded<NoteDto>();
-
-    Task.Run(async () =>
-    {
-      try
-      {
-        int count = dtos.Count;
-        if (count > 0)
-        {
-          await using SqliteConnection connection = _databaseService.Connection;
-          await connection.OpenAsync();
-
-          List<SqliteCommand> commands = new();
-
-          int _batchSize = 10;
-          for (int index = 0; index < count; index += _batchSize)
-          {
-            int paramsCount = Math.Min(_batchSize, count - index);
-            string inClause = string.Join(", ", Enumerable.Range(index, paramsCount).Select((num) => $"@id{num}"));
-
-            // 필요한 필드만(priview 제외) 불러오기
-            string query = $"""
-            SELECT
-            id, parent, created, modified, title, body, background, backdrop, width, height, position_x, position_y, bookmarked, trashed
-            FROM Notes
-            WHERE id IN ({inClause}) AND trashed = @trashed
-            """;
-
-
-            await using SqliteCommand command = new(query, connection);
-            command.Parameters.AddWithValue("@trashed", 0);
-            for (int paramsIndex = index; paramsIndex < index + paramsCount; paramsIndex++)
-              command.Parameters.AddWithValue($"@id{paramsIndex}", dtos[paramsIndex].Id);
-
-            commands.Add(command);
-          }
-
-          foreach (var command in commands)
-          {
-            await using SqliteDataReader reader = await command.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-              await channel.Writer.WriteAsync(CreateNoteDtoWithoutPreview(reader));
-          }
-        }
-      }
-      finally
-      {
-        channel.Writer.Complete();
-      }
-    });
-
-    return channel.Reader.ReadAllAsync();
-  }
   #endregion
   #endregion
 
@@ -429,7 +237,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
   #endregion
 
   #region Helpers & Converters
-  private NoteDto CreateNoteDtoWithoutBody(SqliteDataReader reader, string searchPreview = "")
+  private NoteDto CreateNoteDtoWithoutBody(SqliteDataReader reader)
   {
     var id = new Guid(GetReaderValue<string>(reader, "id")!);
     var parent = new Guid(GetReaderValue<string>(reader, "parent")!);
@@ -446,11 +254,11 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     var bookmarked = GetReaderValue<bool>(reader, "bookmarked");
     var trashed = GetReaderValue<bool>(reader, "trashed");
 
-    NoteDto noteDbDto = new() { Id = id, Parent = parent, Created = created, Modified = modified, Title = title, Body = "", Preview = preview, SearchPreview = searchPreview, Background = background, Backdrop = backdrop, Width = width, Height = height, PositionX = positionX, PositionY = positionY, Bookmarked = bookmarked, Trashed = trashed };
+    NoteDto noteDbDto = new() { Id = id, Parent = parent, Created = created, Modified = modified, Title = title, Body = "", Preview = preview, SearchPreview = "", Background = background, Backdrop = backdrop, Width = width, Height = height, PositionX = positionX, PositionY = positionY, Bookmarked = bookmarked, Trashed = trashed };
     return noteDbDto;
   }
 
-  private NoteDto CreateNoteDtoWithoutPreview(SqliteDataReader reader, string searchPreview = "")
+  private NoteDto CreateNoteDto(SqliteDataReader reader, string searchPreview = "")
   {
     var id = new Guid(GetReaderValue<string>(reader, "id")!);
     var parent = new Guid(GetReaderValue<string>(reader, "parent")!);
@@ -458,6 +266,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     var modified = GetReaderValue<DateTimeOffset>(reader, "modified");
     var title = GetReaderValue<string>(reader, "title")!;
     var body = GetReaderValue<string>(reader, "body")!;
+    var preview = GetReaderValue<string>(reader, "preview")!;
     var background = GetReaderValue<string>(reader, "background")!;
     var backdrop = GetReaderValue<int>(reader, "backdrop");
     var width = GetReaderValue<int>(reader, "width");
@@ -467,17 +276,56 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     var bookmarked = GetReaderValue<bool>(reader, "bookmarked");
     var trashed = GetReaderValue<bool>(reader, "trashed");
 
-    NoteDto noteDbDto = new() { Id = id, Parent = parent, Created = created, Modified = modified, Title = title, Body = body, Preview = "", SearchPreview = searchPreview, Background = background, Backdrop = backdrop, Width = width, Height = height, PositionX = positionX, PositionY = positionY, Bookmarked = bookmarked, Trashed = trashed };
+    NoteDto noteDbDto = new() { Id = id, Parent = parent, Created = created, Modified = modified, Title = title, Body = body, Preview = preview, SearchPreview = searchPreview, Background = background, Backdrop = backdrop, Width = width, Height = height, PositionX = positionX, PositionY = positionY, Bookmarked = bookmarked, Trashed = trashed };
     return noteDbDto;
+  }
+
+  private HashSet<string> GetNoteCreateFieldValue(NoteFields noteFields)
+  {
+    HashSet<string> fields = new();
+
+    if (noteFields == NoteFields.None)
+      return fields;
+    if (noteFields.HasFlag(NoteFields.Id))
+      fields.Add("id");
+    if (noteFields.HasFlag(NoteFields.Parent))
+      fields.Add("parent");
+    if (noteFields.HasFlag(NoteFields.Created))
+      fields.Add("created");
+    if (noteFields.HasFlag(NoteFields.Modified))
+      fields.Add("modified");
+    if (noteFields.HasFlag(NoteFields.Title))
+      fields.Add("title");
+    if (noteFields.HasFlag(NoteFields.Body))
+      fields.Add("body");
+    if (noteFields.HasFlag(NoteFields.Preview))
+      fields.Add("preview");
+    if (noteFields.HasFlag(NoteFields.Background))
+      fields.Add("background");
+    if (noteFields.HasFlag(NoteFields.Backdrop))
+      fields.Add("backdrop");
+    if (noteFields.HasFlag(NoteFields.Width))
+      fields.Add("width");
+    if (noteFields.HasFlag(NoteFields.Height))
+      fields.Add("height");
+    if (noteFields.HasFlag(NoteFields.PositionX))
+      fields.Add("position_x");
+    if (noteFields.HasFlag(NoteFields.PositionY))
+      fields.Add("position_y");
+    if (noteFields.HasFlag(NoteFields.Bookmarked))
+      fields.Add("bookmarked");
+    if (noteFields.HasFlag(NoteFields.Trashed))
+      fields.Add("trashed");
+    return fields;
   }
 
   private Dictionary<string, object> GetNoteUpdateFieldValue(UpdateNoteDto dto)
   {
     Dictionary<string, object> fields = new();
     var updateFields = dto.UpdateFields;
+
     if (updateFields == NoteUpdateFields.None)
       return fields;
-
     if (updateFields.HasFlag(NoteUpdateFields.Parent) && dto.Parent is not null)
       fields.Add("parent", dto.Parent);
     if (updateFields.HasFlag(NoteUpdateFields.Modified) && dto.Modified is not null)

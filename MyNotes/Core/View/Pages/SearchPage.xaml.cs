@@ -34,7 +34,6 @@ internal sealed partial class SearchPage : Page
     Navigation = (NavigationBoard)e.Parameter;
     ViewModel = App.Instance.GetService<BoardViewModelFactory>().Resolve(Navigation);
     InitializeSettings();
-    //this.DataContext = ViewModel;
 
     RegisterEvents();
   }
@@ -212,7 +211,9 @@ internal sealed partial class SearchPage : Page
     View_NotesGridView.ItemContainerStyle = (Style)((App)Application.Current).Resources[$"AppGridViewItemContainerStyle_{styleNameSuffix}"];
 
     if (Enum.TryParse<BoardViewStyle>(styleNameSuffix, out var viewStyle))
-      ViewModel.SetBoardSettings(AppSettingsKeys.BoardViewStyle, (int)viewStyle);
+      ViewModel.SetBoardSettings(AppSettingsKeys.BoardViewStyle, viewStyle);
+
+    ViewModel.RefreshSearchPreview();
   }
   #endregion
 

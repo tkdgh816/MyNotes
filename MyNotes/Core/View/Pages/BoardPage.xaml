@@ -411,11 +411,17 @@
       <!--#endregion-->
 
       <!--#region Title -->
-      <TextBlock Grid.Column="1"
-                 Text="{x:Bind Navigation.Name, Mode=OneWay}"
-                 Style="{StaticResource TitleTextBlockStyle}"
-                 TextWrapping="NoWrap"
-                 Margin="4,0" />
+      <StackPanel Grid.Column="1"
+                  Orientation="Horizontal"
+                  Spacing="6"
+                  Margin="4,0" >
+        <TextBlock Text="{x:Bind Navigation.Name, Mode=OneWay}"
+                   Style="{StaticResource TitleTextBlockStyle}"
+                   TextWrapping="NoWrap" />
+        <TextBlock Text="{x:Bind FormatCount(ViewModel.NoteCount), Mode=OneWay}"
+                   Style="{StaticResource TitleTextBlockStyle}"
+                   Visibility="{x:Bind ViewModel.DisplayNoteCount}"/>
+      </StackPanel>
 
       <!--#endregion -->
 

@@ -41,16 +41,6 @@ internal record GetNotesDto
   public SortDirection? SortDirection { get; init; }
 }
 
-[Flags]
-internal enum NoteGetFields
-{
-  None = 0,
-  Parent = 1 << 0,
-  Bookmarked = 1 << 1,
-  Trashed = 1 << 2,
-  All = int.MaxValue
-}
-
 internal record UpdateNoteDto
 {
   public required NoteUpdateFields UpdateFields { get; init; }
@@ -68,26 +58,6 @@ internal record UpdateNoteDto
   public int? PositionY { get; init; }
   public bool? Bookmarked { get; init; }
   public bool? Trashed { get; init; }
-}
-
-[Flags]
-internal enum NoteUpdateFields
-{
-  None = 0,
-  Parent = 1 << 0,
-  Modified = 1 << 1,
-  Title = 1 << 2,
-  Body = 1 << 3,
-  Preview = 1 << 4,
-  Background = 1 << 5,
-  Backdrop = 1 << 6,
-  Width = 1 << 7,
-  Height = 1 << 8,
-  PositionX = 1 << 9,
-  PositionY = 1 << 10,
-  Bookmarked = 1 << 11,
-  Trashed = 1 << 12,
-  All = int.MaxValue
 }
 
 internal record GetNoteTagsDto
@@ -110,4 +80,56 @@ internal record NoteSearchDto
   public required Guid Id { get; init; }
   public required string Title { get; init; }
   public required string Body { get; init; }
+}
+
+[Flags]
+internal enum NoteFields
+{
+  None = 0,
+  Id = 1 << 0,
+  Parent = 1 << 1,
+  Created = 1 << 2,
+  Modified = 1 << 3,
+  Title = 1 << 4,
+  Body = 1 << 5,
+  Preview = 1 << 6,
+  Background = 1 << 7,
+  Backdrop = 1 << 8,
+  Width = 1 << 9,
+  Height = 1 << 10,
+  PositionX = 1 << 11,
+  PositionY = 1 << 12,
+  Bookmarked = 1 << 13,
+  Trashed = 1 << 14,
+  All = int.MaxValue
+}
+
+[Flags]
+internal enum NoteUpdateFields
+{
+  None = 0,
+  Parent = 1 << 0,
+  Modified = 1 << 1,
+  Title = 1 << 2,
+  Body = 1 << 3,
+  Preview = 1 << 4,
+  Background = 1 << 5,
+  Backdrop = 1 << 6,
+  Width = 1 << 7,
+  Height = 1 << 8,
+  PositionX = 1 << 9,
+  PositionY = 1 << 10,
+  Bookmarked = 1 << 11,
+  Trashed = 1 << 12,
+  All = int.MaxValue
+}
+
+[Flags]
+internal enum NoteGetFields
+{
+  None = 0,
+  Parent = 1 << 0,
+  Bookmarked = 1 << 1,
+  Trashed = 1 << 2,
+  All = int.MaxValue
 }

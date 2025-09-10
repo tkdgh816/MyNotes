@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Text.RegularExpressions;
+using System.Threading;
 
 using Microsoft.UI.Xaml.Documents;
 
@@ -64,6 +65,13 @@ internal partial class BoardViewModel : ViewModelBase
   public SortedCollection<Note> Notes { get; private set; } = null!;
   public IncrementalObservableCollection<NoteViewModel> NoteViewModels { get; private set; } = null!;
 
+  private int _noteCount;
+  public int NoteCount
+  {
+    get => _noteCount;
+    set => SetProperty(ref _noteCount, value);
+  }
+
   private bool _isNotesLoading = true;
   public bool IsNotesLoading
   {
@@ -76,6 +84,7 @@ internal partial class BoardViewModel : ViewModelBase
     get => _isChecked;
     set => SetProperty(ref _isChecked, value);
   }
+  public bool DisplayNoteCount { get; private set; }
 
   private readonly CancellationTokenSource _cancellationTokenSource = new();
 
@@ -89,9 +98,16 @@ internal partial class BoardViewModel : ViewModelBase
     SortField = settings.SortField;
     SortDirection = settings.SortDirection;
     ViewStyle = settings.ViewStyle;
+    DisplayNoteCount = settings.DisplayNoteCount;
   }
 
-  public void SetBoardSettings(string key, object value) => _settingsService.SetBoardSettings(key, value);
+  public void SetBoardSettings(string key, BoardViewStyle viewStyle)
+  {
+    ViewStyle = viewStyle;
+    _settingsService.SetBoardSettings(key, (int)ViewStyle);
+  }
+
+  private string _fullSearchPreview = "";
 
   private async void GetNotes()
   {
@@ -106,22 +122,8 @@ internal partial class BoardViewModel : ViewModelBase
           case NavigationSearch search:
             await foreach (var note in _noteService.SearchNotesStreamAsync(search.SearchText, cancellationToken: _cancellationTokenSource.Token))
             {
-              int firstIndex = note.SearchPreview.IndexOf(search.SearchText, StringComparison.CurrentCultureIgnoreCase);
-              int maxLength = AppStyles.GetNoteViewMaxLength(ViewStyle);
-              int length = note.SearchPreview.Length;
-              if (firstIndex >= 0)
-              {
-                if (length <= maxLength)
-                  note.SearchPreview = note.SearchPreview[0..length];
-                else if (firstIndex + maxLength >= length)
-                  note.SearchPreview = "..." + note.SearchPreview[(length - maxLength)..length];
-                else
-                  note.SearchPreview = "..." + note.SearchPreview[firstIndex..(firstIndex + maxLength)];
-
-                foreach (int index in FindAllIndexes(note.SearchPreview, search.SearchText))
-                  note.HighlighterRanges.Add(new TextRange(index, search.SearchText.Length));
-              }
-
+              _fullSearchPreview = note.SearchPreview;
+              ChangeSearchPreview(note, search.SearchText);
               notes.Add(note);
             }
             break;
@@ -137,6 +139,7 @@ internal partial class BoardViewModel : ViewModelBase
       }
     }, _cancellationTokenSource.Token);
     IsNotesLoading = false;
+    NoteCount = Notes.Count;
   }
 
   private void GetNoteViewModels()
@@ -171,23 +174,33 @@ internal partial class BoardViewModel : ViewModelBase
     return vms;
   }
 
-  private static List<int> FindAllIndexes(string source, string keyword)
+  private void ChangeSearchPreview(Note note, string searchText)
   {
-    var result = new List<int>();
-
-    if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(keyword))
-      return result;
-
-    int index = 0;
-    while ((index = source.IndexOf(keyword, index, StringComparison.CurrentCultureIgnoreCase)) >= 0)
+    int firstIndex = _fullSearchPreview.IndexOf(searchText, StringComparison.CurrentCultureIgnoreCase);
+    int maxLength = AppStyles.GetNoteViewMaxLength(ViewStyle);
+    int length = _fullSearchPreview.Length;
+    if (firstIndex >= 0)
     {
-      result.Add(index);
-      index += keyword.Length;
-    }
+      if (length <= maxLength)
+        note.SearchPreview = _fullSearchPreview[0..length];
+      else if (firstIndex + maxLength >= length)
+        note.SearchPreview = "..." + _fullSearchPreview[(length - maxLength)..length];
+      else
+        note.SearchPreview = "..." + _fullSearchPreview[firstIndex..(firstIndex + maxLength)];
 
-    return result;
+      note.HighlighterRanges.Clear();
+
+      foreach (Match match in Regex.Matches(note.SearchPreview, searchText, RegexOptions.IgnoreCase))
+        note.HighlighterRanges.Add(new TextRange(match.Index, searchText.Length));
+    }
   }
 
+  public void RefreshSearchPreview()
+  {
+    if (_navigation is NavigationSearch search)
+      foreach (var note in Notes)
+        ChangeSearchPreview(note, search.SearchText);
+  }
 
   #region Sort
   private Comparer<Note> GetNoteComparer()
@@ -204,7 +217,7 @@ internal partial class BoardViewModel : ViewModelBase
 
   private void SortNoteViewModels()
   {
-    GetNotes();
+    Notes.Reset(GetNoteComparer());
     NoteViewModels.Clear();
   }
   #endregion

@@ -15,10 +15,12 @@ internal class SettingsViewModel : ViewModelBase
     _settingsService = settingsService;
     var globalSettings = _settingsService.GetGlobalSettings();
     var noteSettings = _settingsService.GetNoteSettings();
+    var boardSettings = _settingsService.GetBoardSettings();
     (_appTheme, _appLanguage) = (globalSettings.AppTheme, globalSettings.AppLanguage);
     InitialAppLanguage = _appLanguage;
     (_noteBackground, _noteBackdrop) = (noteSettings.Background, noteSettings.Backdrop);
     (_noteWidth, _noteHeight) = (noteSettings.Size.Width, noteSettings.Size.Height);
+    _displayNoteCount = boardSettings.DisplayNoteCount;
   }
 
   private AppTheme _appTheme;
@@ -104,6 +106,19 @@ internal class SettingsViewModel : ViewModelBase
         return;
       SetProperty(ref _noteHeight, value);
       _settingsService.SetNoteSettings(AppSettingsKeys.NoteSize, new Size(NoteWidth, value));
+    }
+  }
+
+  private bool _displayNoteCount;
+  public bool DisplayNoteCount
+  {
+    get => _displayNoteCount;
+    set 
+    {
+      if (_displayNoteCount == value)
+        return;
+      SetProperty(ref _displayNoteCount, value);
+      _settingsService.SetBoardSettings(AppSettingsKeys.BoardDisplayNoteCount, value);
     }
   }
 }

@@ -23,4 +23,5 @@ internal record GetBoardSettingsDto
   public required NoteSortField SortField { get; init; }
   public required SortDirection SortDirection { get; init; }
   public required BoardViewStyle ViewStyle { get; init; }
+  public required bool DisplayNoteCount { get; init; }
 }

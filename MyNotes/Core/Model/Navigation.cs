@@ -51,7 +51,7 @@ internal class NavigationSearch : NavigationBoard
 {
   public string SearchText { get; }
 
-  public NavigationSearch(string searchText) : base(typeof(SearchPage), $"Search results for \"{searchText}\"", IconManager.FindGlyph("\uE721"))
+  public NavigationSearch(string searchText) : base(typeof(BoardPage), $"Search results for \"{searchText}\"", IconManager.FindGlyph("\uE721"))
   {
     SearchText = searchText;
   }
