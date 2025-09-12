@@ -416,13 +416,13 @@
       <StackPanel Grid.Column="1"
                   Orientation="Horizontal"
                   Spacing="6"
-                  Margin="4,0" >
+                  Margin="4,0">
         <TextBlock Text="{x:Bind Navigation.Name, Mode=OneWay}"
                    Style="{StaticResource TitleTextBlockStyle}"
                    TextWrapping="NoWrap" />
         <TextBlock Text="{x:Bind FormatCount(ViewModel.NoteCount), Mode=OneWay}"
                    Style="{StaticResource TitleTextBlockStyle}"
-                   Visibility="{x:Bind ViewModel.DisplayNoteCount}"/>
+                   Visibility="{x:Bind ViewModel.DisplayNoteCount}" />
       </StackPanel>
 
       <!--#endregion -->
@@ -615,6 +615,20 @@
                               Icon="Delete"
                               Visibility="{x:Bind h:Converter.GetVisibleIfUserBoard(Navigation)}"
                               Command="{x:Bind ViewModel.ShowDeleteBoardDialogCommand}" />
+
+              <!--#region Debug Options -->
+              <MenuFlyoutSeparator Visibility="{x:Bind h:Converter.GetVisibleIfUserBoard(Navigation)}" />
+              <MenuFlyoutSubItem Text="Debug Options"
+                                 Icon="Setting"
+                                 Visibility="{x:Bind h:Converter.GetVisibleIfUserBoard(Navigation)}">
+                <MenuFlyoutItem Text="New Notes (English)"
+                                Command="{x:Bind ViewModel.Debug_AddNewNoteCommand}"
+                                CommandParameter="en" />
+                <MenuFlyoutItem Text="New Notes (Korean)"
+                                Command="{x:Bind ViewModel.Debug_AddNewNoteCommand}"
+                                CommandParameter="kr" />
+              </MenuFlyoutSubItem>
+              <!--#endregion -->
             </MenuFlyout>
           </Button.Flyout>
         </Button>

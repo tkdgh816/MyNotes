@@ -56,13 +56,6 @@ internal class Note : ObservableObject
     set => SetProperty(ref _preview, value);
   }
 
-  private string _searchPreview = "";
-  public string SearchPreview
-  {
-    get => _searchPreview;
-    set => SetProperty(ref _searchPreview, value);
-  }
-
   public List<TextRange> HighlighterRanges { get; } = new();
 
   private Color _background = Colors.LightGoldenrodYellow;

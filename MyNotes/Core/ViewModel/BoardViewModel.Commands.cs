@@ -6,6 +6,7 @@ using MyNotes.Common.Collections;
 using MyNotes.Common.Commands;
 using MyNotes.Core.Model;
 using MyNotes.Core.Shared;
+using MyNotes.Debugging;
 
 namespace MyNotes.Core.ViewModel;
 
@@ -19,29 +20,49 @@ internal partial class BoardViewModel : ViewModelBase
   public Command? ShowRenameBoardDialogCommand { get; private set; }
   public Command? ShowDeleteBoardDialogCommand { get; private set; }
   public Command<Icon>? ChangeIconCommand { get; private set; }
+  public Command<string>? Debug_AddNewNoteCommand { get; private set; }
 
   private void SetCommands()
   {
     AddNewNoteCommand = new(() =>
     {
-      for (int i = 0; i < 25; i++)
+      Note newNote = _noteService.CreateNote((NavigationUserBoard)_navigation);
+      NoteViewModel noteViewModel = _noteViewModelFactory.Resolve(newNote);
+
+      Notes.Add(newNote);
+      int index = Notes.IndexOf(newNote);
+      if (index <= NoteViewModels.Count)
+        NoteViewModels.Insert(index, noteViewModel);
+
+      noteViewModel.CreateWindow();
+    });
+
+    Debug_AddNewNoteCommand = new((language) =>
+    {
+      void Debug_CreateNote(int count, string language)
       {
-        Note newNote = _noteService.CreateNote((NavigationUserBoard)_navigation);
-        NoteViewModel noteViewModel = _noteViewModelFactory.Resolve(newNote);
+        for (int i = 0; i < count; i++)
+        {
+          Note newNote = _noteService.CreateNote((NavigationUserBoard)_navigation);
+          newNote.Title = TextGenerator.GenerateTitle(language);
+          newNote.Body = TextGenerator.GenerateTexts(1000, language);
+          NoteViewModel noteViewModel = _noteViewModelFactory.Resolve(newNote);
 
-        Notes.Add(newNote);
-        int index = Notes.IndexOf(newNote);
-        if (index <= NoteViewModels.Count)
-          NoteViewModels.Insert(index, noteViewModel);
+          Notes.Add(newNote);
+          int index = Notes.IndexOf(newNote);
+          if (index <= NoteViewModels.Count)
+            NoteViewModels.Insert(index, noteViewModel);
 
-        noteViewModel.CreateWindow();
+          noteViewModel.CreateWindow();
 
-      DispatcherQueue.GetForCurrentThread().EnqueueAsync(async () =>
-      {
-        await Task.Delay(5000);
-        noteViewModel.CloseWindowCommand?.Execute();
-      });
-    }
+          DispatcherQueue.GetForCurrentThread().EnqueueAsync(async () =>
+          {
+            await Task.Delay(5000);
+            noteViewModel.CloseWindowCommand?.Execute();
+          });
+        }
+      }
+      Debug_CreateNote(25, language);
     });
 
     RemoveNotesCommand = new(async (items) =>

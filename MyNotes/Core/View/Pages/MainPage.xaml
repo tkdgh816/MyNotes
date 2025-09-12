@@ -251,7 +251,7 @@
           <interactivity:Interaction.Behaviors>
             <interactivity:EventTriggerBehavior EventName="QuerySubmitted">
               <interactivity:InvokeCommandAction Command="{x:Bind ViewModel.SearchNavigationCommand}"
-                                                 CommandParameter="{x:Bind View_NavigationView_AutoSuggestBox.Text}" />
+                                                 CommandParameter="{x:Bind View_NavigationView_AutoSuggestBox.Text, Mode=OneWay}" />
             </interactivity:EventTriggerBehavior>
           </interactivity:Interaction.Behaviors>
         </AutoSuggestBox>

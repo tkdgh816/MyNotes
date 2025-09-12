@@ -180,6 +180,8 @@ internal sealed partial class BoardPage : Page
 
     if (Enum.TryParse<BoardViewStyle>(styleNameSuffix, out var viewStyle))
       ViewModel.SetBoardSettings(AppSettingsKeys.BoardViewStyle, viewStyle);
+
+    ViewModel.RefreshSearchPreview();
   }
   #endregion
 

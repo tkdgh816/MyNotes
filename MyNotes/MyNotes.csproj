@@ -13,6 +13,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Legacy\**" />
+    <EmbeddedResource Remove="Legacy\**" />
+    <None Remove="Legacy\**" />
+    <Page Remove="Legacy\**" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="Assets\Square44x44Logo.targetsize-16.png" />
     <None Remove="Assets\Square44x44Logo.targetsize-24_altform-lightunplated.png" />
     <None Remove="Core\View\Controls\UserControls\IconPicker.xaml" />
@@ -228,4 +234,8 @@
     <PackageIcon>AppIcon_128.png</PackageIcon>
     <AppxBundlePlatforms>x64</AppxBundlePlatforms>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PRIResource Remove="Legacy\**" />
+  </ItemGroup>
 </Project>

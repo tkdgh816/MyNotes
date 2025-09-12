@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using System.Threading;
 
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Documents;
 
 using MyNotes.Common.Collections;
@@ -107,7 +108,7 @@ internal partial class BoardViewModel : ViewModelBase
     _settingsService.SetBoardSettings(key, (int)ViewStyle);
   }
 
-  private string _fullSearchPreview = "";
+  private string _searchPreview = "";
 
   private async void GetNotes()
   {
@@ -122,7 +123,7 @@ internal partial class BoardViewModel : ViewModelBase
           case NavigationSearch search:
             await foreach (var note in _noteService.SearchNotesStreamAsync(search.SearchText, cancellationToken: _cancellationTokenSource.Token))
             {
-              _fullSearchPreview = note.SearchPreview;
+              _searchPreview = note.Preview;
               ChangeSearchPreview(note, search.SearchText);
               notes.Add(note);
             }
@@ -176,21 +177,21 @@ internal partial class BoardViewModel : ViewModelBase
 
   private void ChangeSearchPreview(Note note, string searchText)
   {
-    int firstIndex = _fullSearchPreview.IndexOf(searchText, StringComparison.CurrentCultureIgnoreCase);
+    int firstIndex = _searchPreview.IndexOf(searchText, StringComparison.CurrentCultureIgnoreCase);
     int maxLength = AppStyles.GetNoteViewMaxLength(ViewStyle);
-    int length = _fullSearchPreview.Length;
+    int length = _searchPreview.Length;
     if (firstIndex >= 0)
     {
       if (length <= maxLength)
-        note.SearchPreview = _fullSearchPreview[0..length];
+        note.Preview = _searchPreview[0..length];
       else if (firstIndex + maxLength >= length)
-        note.SearchPreview = "..." + _fullSearchPreview[(length - maxLength)..length];
+        note.Preview = "..." + _searchPreview[(length - maxLength)..length];
       else
-        note.SearchPreview = "..." + _fullSearchPreview[firstIndex..(firstIndex + maxLength)];
+        note.Preview = "..." + _searchPreview[firstIndex..(firstIndex + maxLength)];
 
       note.HighlighterRanges.Clear();
 
-      foreach (Match match in Regex.Matches(note.SearchPreview, searchText, RegexOptions.IgnoreCase))
+      foreach (Match match in Regex.Matches(note.Preview, searchText, RegexOptions.IgnoreCase))
         note.HighlighterRanges.Add(new TextRange(match.Index, searchText.Length));
     }
   }

@@ -254,11 +254,11 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     var bookmarked = GetReaderValue<bool>(reader, "bookmarked");
     var trashed = GetReaderValue<bool>(reader, "trashed");
 
-    NoteDto noteDbDto = new() { Id = id, Parent = parent, Created = created, Modified = modified, Title = title, Body = "", Preview = preview, SearchPreview = "", Background = background, Backdrop = backdrop, Width = width, Height = height, PositionX = positionX, PositionY = positionY, Bookmarked = bookmarked, Trashed = trashed };
+    NoteDto noteDbDto = new() { Id = id, Parent = parent, Created = created, Modified = modified, Title = title, Body = "", Preview = preview, Background = background, Backdrop = backdrop, Width = width, Height = height, PositionX = positionX, PositionY = positionY, Bookmarked = bookmarked, Trashed = trashed };
     return noteDbDto;
   }
 
-  private NoteDto CreateNoteDto(SqliteDataReader reader, string searchPreview = "")
+  private NoteDto CreateNoteDto(SqliteDataReader reader, string? searchPreview = null)
   {
     var id = new Guid(GetReaderValue<string>(reader, "id")!);
     var parent = new Guid(GetReaderValue<string>(reader, "parent")!);
@@ -266,7 +266,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     var modified = GetReaderValue<DateTimeOffset>(reader, "modified");
     var title = GetReaderValue<string>(reader, "title")!;
     var body = GetReaderValue<string>(reader, "body")!;
-    var preview = GetReaderValue<string>(reader, "preview")!;
+    var preview = searchPreview is null ? GetReaderValue<string>(reader, "preview")! : searchPreview;
     var background = GetReaderValue<string>(reader, "background")!;
     var backdrop = GetReaderValue<int>(reader, "backdrop");
     var width = GetReaderValue<int>(reader, "width");
@@ -276,7 +276,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
     var bookmarked = GetReaderValue<bool>(reader, "bookmarked");
     var trashed = GetReaderValue<bool>(reader, "trashed");
 
-    NoteDto noteDbDto = new() { Id = id, Parent = parent, Created = created, Modified = modified, Title = title, Body = body, Preview = preview, SearchPreview = searchPreview, Background = background, Backdrop = backdrop, Width = width, Height = height, PositionX = positionX, PositionY = positionY, Bookmarked = bookmarked, Trashed = trashed };
+    NoteDto noteDbDto = new() { Id = id, Parent = parent, Created = created, Modified = modified, Title = title, Body = body, Preview = preview, Background = background, Backdrop = backdrop, Width = width, Height = height, PositionX = positionX, PositionY = positionY, Bookmarked = bookmarked, Trashed = trashed };
     return noteDbDto;
   }
 

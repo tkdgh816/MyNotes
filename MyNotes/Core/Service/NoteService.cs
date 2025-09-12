@@ -2,6 +2,7 @@
 using System.Threading;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Dispatching;
 
 using MyNotes.Common.Collections;
 using MyNotes.Core.Dao;
@@ -20,6 +21,7 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
   private readonly NoteSearchDao _searchDao = noteSearchDao;
   private readonly TagService _tagService = tagService;
   private readonly SettingsService _settingsService = settingsService;
+  private readonly DispatcherQueue _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
   private readonly Dictionary<NoteId, Note> _cache = new();
   public IEnumerable<Note> Notes => _cache.Values;
@@ -27,42 +29,48 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
   public void AddToCache(Note note)
   {
     if (_cache.TryAdd(note.Id, note))
-    { 
+    {
       note.Initialize();
       ReferenceTracker.NoteReferences.Add(new(note.Title, note));
     }
   }
   public void RemoveFromCache(Note note) => _cache.Remove(note.Id);
-  private Note ToNote(NoteDto dto, bool overwriteSearchPreview = false)
+  private Note ToNote(NoteDto dto, bool overwrite = false)
   {
     NoteId noteId = new(dto.Id);
     if (_cache.TryGetValue(noteId, out Note? note))
     {
-      if (overwriteSearchPreview)
-        note.SearchPreview = dto.SearchPreview;
+      if (overwrite)
+        note = CreateNote(dto);
       return note;
     }
     else
     {
-      Note newNote = new(dto.Title, dto.Modified)
-      {
-        Id = noteId,
-        BoardId = new BoardId(dto.Parent),
-        Created = dto.Created,
-        Preview = dto.Preview,
-        SearchPreview = dto.SearchPreview,
-        Background = ToolkitColorHelper.ToColor(dto.Background),
-        Backdrop = (BackdropKind)dto.Backdrop,
-        Size = new SizeInt32(dto.Width, dto.Height),
-        Position = new PointInt32(dto.PositionX, dto.PositionY),
-        IsBookmarked = dto.Bookmarked,
-        IsTrashed = dto.Trashed,
-        Tags = new(_tagService.GetTags(noteId))
-      };
+      Note newNote = CreateNote(dto);
       AddToCache(newNote);
       return newNote;
     }
   }
+
+  private Note CreateNote(NoteDto dto)
+  {
+    NoteId noteId = new(dto.Id);
+    return new Note(dto.Title, dto.Modified)
+    {
+      Id = noteId,
+      BoardId = new BoardId(dto.Parent),
+      Created = dto.Created,
+      Preview = dto.Preview,
+      Background = ToolkitColorHelper.ToColor(dto.Background),
+      Backdrop = (BackdropKind)dto.Backdrop,
+      Size = new SizeInt32(dto.Width, dto.Height),
+      Position = new PointInt32(dto.PositionX, dto.PositionY),
+      IsBookmarked = dto.Bookmarked,
+      IsTrashed = dto.Trashed,
+      Tags = new(_tagService.GetTags(noteId))
+    };
+  }
+
   private NoteDto ToNoteDto(Note note) => new()
   {
     Id = note.Id.Value,
@@ -72,7 +80,6 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
     Title = note.Title,
     Body = note.Body,
     Preview = note.Preview,
-    SearchPreview = note.SearchPreview,
     Background = note.Background.ToString(),
     Backdrop = (int)note.Backdrop,
     Width = note.Size.Width,
@@ -94,10 +101,9 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
       Parent = navigation.Id.Value,
       Created = creationTime,
       Modified = creationTime,
-      Title = TextGenerator.GenerateTitle(),
+      Title = "",
       Preview = "",
       Body = "",
-      SearchPreview = "",
       Background = ColorGenerator.GenerateColor().ToString(),
       Backdrop = (int)settings.Backdrop,
       Width = settings.Size.Width,
@@ -161,7 +167,7 @@ internal class NoteService([FromKeyedServices("NoteDbDao")] DbDaoBase dbDaoBase,
   public async IAsyncEnumerable<Note> GetNotesStreamAsync(NavigationBoard navigation, int count = -1, int startIndex = -1, NoteSortField? sortField = null, SortDirection? sortDirection = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
   {
     GetNotesDto dto = GetNotesDto(navigation, count, startIndex, sortField, sortDirection);
-    
+
     await foreach (var noteDto in await _dbDao.GetNotesStreamAsync(dto, cancellationToken))
       yield return ToNote(noteDto);
   }

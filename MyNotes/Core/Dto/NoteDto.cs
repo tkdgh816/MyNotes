@@ -11,7 +11,6 @@ internal record NoteDto
   public required string Title { get; init; }
   public required string Body { get; init; }
   public required string Preview { get; init; }
-  public required string SearchPreview { get; init; }
   public required string Background { get; init; }
   public required int Backdrop { get; init; }
   public required int Width { get; init; }
