@@ -188,7 +188,7 @@ internal class NoteDbDao(DatabaseService databaseService) : DbDaoBase
         else if (startOffset + maxLength >= length)
           searchPreview = "..." + body[(length - maxLength)..length];
         else
-          searchPreview = "..." + body[startOffset..(startOffset + maxLength)];
+          searchPreview = "..." + body[Math.Max(0, startOffset - 20)..(startOffset + maxLength)];
       }
       yield return CreateNoteDto(reader, searchPreview);
     }

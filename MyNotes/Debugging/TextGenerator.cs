@@ -13,7 +13,7 @@ internal class TextGenerator
   static TextGenerator()
   {
     InitializeWordsList("words_en_10000.txt", WordsEn);
-    InitializeWordsList("word_kr_365647.txt", WordsKr);
+    InitializeWordsList("words_kr_2031.txt", WordsKr);
   }
 
   static void InitializeWordsList(string fileName, List<string> words)
@@ -28,16 +28,11 @@ internal class TextGenerator
   {
     Random random = new();
 
-    (List<string> Words, TextInfo textInfo) = language.ToLower() switch
-    {
-      "en" or "eng" or "english" => (WordsEn, new CultureInfo("en-US", false).TextInfo),
-      "kr" or "kor" or "korean" => (WordsKr, new CultureInfo("ko-KR", false).TextInfo),
-      _ => (WordsEn, new CultureInfo("en-US", false).TextInfo)
-    };
+    (List<string> Words, TextInfo textInfo) = GetWordsForLanguage(language);
 
     int WordsMaxIndex = Words.Count;
     StringBuilder sb = new();
-    
+
     for (int i = 0; i < num; i++)
     {
       string word = Words[random.Next(WordsMaxIndex)];
@@ -71,27 +66,29 @@ internal class TextGenerator
   {
     Random random = new();
 
-    List<string> Words= language.ToLower() switch
-    {
-      "en" or "eng" or "english" => WordsEn,
-      "kr" or "kor" or "korean" => WordsKr,
-      _ => WordsEn
-    };
+    (List<string> Words, TextInfo textInfo) = GetWordsForLanguage(language);
+
 
     int WordsMaxIndex = Words.Count;
     StringBuilder sb = new();
-    var ti = new CultureInfo("en-US", false).TextInfo;
 
     int num = random.Next(2, 8);
     for (int i = 0; i < num; i++)
     {
       string word = Words[random.Next(WordsMaxIndex)];
       if (i == 0)
-        sb.Append(ti.ToTitleCase(word));
+        sb.Append(textInfo.ToTitleCase(word));
       else
         sb.Append($" {word}");
     }
 
     return sb.ToString();
   }
+
+  private static (List<string> Words, TextInfo textInfo) GetWordsForLanguage(string language) => language.ToLower() switch
+  {
+    "en" or "eng" or "english" => (WordsEn, new CultureInfo("en-US", false).TextInfo),
+    "kr" or "kor" or "korean" => (WordsKr, new CultureInfo("ko-KR", false).TextInfo),
+    _ => (WordsEn, new CultureInfo("en-US", false).TextInfo)
+  };
 }

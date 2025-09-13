@@ -45,7 +45,7 @@ internal partial class BoardViewModel : ViewModelBase
         {
           Note newNote = _noteService.CreateNote((NavigationUserBoard)_navigation);
           newNote.Title = TextGenerator.GenerateTitle(language);
-          newNote.Body = TextGenerator.GenerateTexts(1000, language);
+          newNote.Body = TextGenerator.GenerateTexts(200, language);
           NoteViewModel noteViewModel = _noteViewModelFactory.Resolve(newNote);
 
           Notes.Add(newNote);

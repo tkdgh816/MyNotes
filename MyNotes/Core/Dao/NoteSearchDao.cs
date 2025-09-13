@@ -84,7 +84,7 @@ internal class NoteSearchDao
       {
         using DirectoryReader indexReader = _searchService.Writer.GetReader(true);
         IndexSearcher indexSearcher = new(indexReader);
-        QueryParser parser = new(_searchService.LuceneVersion, "body", new MaxGramAnalyzer(SearchSettings.MaxGram));
+        QueryParser parser = new(LuceneVersion.LUCENE_48, "body", new MaxGramAnalyzer(SearchSettings.MaxGram));
         var searchQuery = parser.Parse(searchText);
 
         List<string> tokens = GetTokens(searchText, SearchSettings.MaxGram);
@@ -134,7 +134,7 @@ internal class NoteSearchDao
       {
         using DirectoryReader indexReader = _searchService.Writer.GetReader(true);
         IndexSearcher indexSearcher = new(indexReader);
-        QueryParser parser = new(_searchService.LuceneVersion, "body", new MaxGramAnalyzer(SearchSettings.MaxGram));
+        QueryParser parser = new(LuceneVersion.LUCENE_48, "body", new MaxGramAnalyzer(SearchSettings.MaxGram));
         var searchQuery = parser.Parse(searchText);
 
         List<string> tokens = GetTokens(searchText, SearchSettings.MaxGram);
@@ -218,7 +218,7 @@ internal class NoteSearchDao
         while (docsEnum.NextDoc() != DocIdSetIterator.NO_MORE_DOCS)
         {
           for (int i = 0; i < docsEnum.Freq; i++)
-            currentMatches.Add(docsEnum.NextPosition(), new Range(docsEnum.StartOffset, docsEnum.EndOffset));
+            currentMatches.TryAdd(docsEnum.NextPosition(), new Range(docsEnum.StartOffset, docsEnum.EndOffset));
         }
 
         matches = matches is null

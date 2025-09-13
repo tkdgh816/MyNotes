@@ -187,7 +187,7 @@ internal partial class BoardViewModel : ViewModelBase
       else if (firstIndex + maxLength >= length)
         note.Preview = "..." + _searchPreview[(length - maxLength)..length];
       else
-        note.Preview = "..." + _searchPreview[firstIndex..(firstIndex + maxLength)];
+        note.Preview = "..." + _searchPreview[Math.Max(0, firstIndex - 20)..(firstIndex + maxLength)];
 
       note.HighlighterRanges.Clear();
 

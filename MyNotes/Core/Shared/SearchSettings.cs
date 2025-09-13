@@ -2,6 +2,6 @@
 
 internal static class SearchSettings
 {
-  public static readonly int MinGram = 3;
-  public static readonly int MaxGram = 6;
+  public static readonly int MinGram = 2;
+  public static readonly int MaxGram = 5;
 }
