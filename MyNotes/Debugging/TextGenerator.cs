@@ -41,17 +41,13 @@ internal class TextGenerator
       else
         sb.Append(word);
 
-      switch (random.Next(50) % 50)
+      switch (random.NextDouble())
       {
-        case 5:
-        case 15:
-        case 25:
-        case 35:
-          sb.Append(", ");
+        case < 0.01:
+          sb.Append('.').AppendLine();
           break;
-        case 7:
-          sb.Append('.');
-          sb.AppendLine();
+        case >= 0.01 and < 0.11:
+          sb.Append(", ");
           break;
         default:
           sb.Append(' ');

@@ -1,5 +1,9 @@
 ﻿using Microsoft.Data.Sqlite;
 
+using Col = MyNotes.Core.Shared.DatabaseSettings.Column;
+using Db = MyNotes.Core.Shared.DatabaseSettings;
+using Tbl = MyNotes.Core.Shared.DatabaseSettings.Table;
+
 namespace MyNotes.Core.Service;
 
 internal class DatabaseService
@@ -9,10 +13,10 @@ internal class DatabaseService
 
   public DatabaseService()
   {
-    var databaseFolder = _localFolder.CreateFolderAsync("data", CreationCollisionOption.OpenIfExists).GetAwaiter().GetResult();
+    var databaseFolder = _localFolder.CreateFolderAsync(Db.Repository.DirectoryName, CreationCollisionOption.OpenIfExists).GetAwaiter().GetResult();
     _connectionString = new SqliteConnectionStringBuilder()
     {
-      DataSource = Path.Combine(databaseFolder.Path, "data.sqlite"),
+      DataSource = Path.Combine(databaseFolder.Path, Db.Repository.FileName),
       ForeignKeys = true,
       DefaultTimeout = 60
     }.ToString();
@@ -45,16 +49,16 @@ internal class DatabaseService
 
   private void CreateBoardsTable(SqliteConnection connection, SqliteTransaction transaction)
   {
-    string createQuery = """
-      CREATE TABLE IF NOT EXISTS Boards      
+    string createQuery = $"""
+      CREATE TABLE IF NOT EXISTS {Tbl.Boards}      
       (
-      id              TEXT PRIMARY KEY NOT NULL,
-      grouped         INTEGER NOT NULL DEFAULT 0,
-      parent          TEXT NULL NOT NULL,
-      previous        TEXT NULL,
-      name            TEXT NOT NULL DEFAULT '',
-      icon_type       INTEGER NOT NULL,
-      icon_value      INTEGER NOT NULL
+      {Col.Id}         TEXT PRIMARY KEY NOT NULL,
+      {Col.Grouped}    INTEGER NOT NULL DEFAULT 0,
+      {Col.Parent}     TEXT NULL NOT NULL,
+      {Col.Previous}   TEXT NULL,
+      {Col.Name}       TEXT NOT NULL DEFAULT '',
+      {Col.IconType}   INTEGER NOT NULL,
+      {Col.IconValue}  INTEGER NOT NULL
       )
       """;
 
@@ -64,24 +68,24 @@ internal class DatabaseService
 
   private void CreateNotesTable(SqliteConnection connection, SqliteTransaction transaction)
   {
-    string createQuery = """
-      CREATE TABLE IF NOT EXISTS Notes
+    string createQuery = $"""
+      CREATE TABLE IF NOT EXISTS {Tbl.Notes}
       (
-      id              TEXT PRIMARY KEY NOT NULL,
-      parent          TEXT NOT NULL,
-      created         TEXT NOT NULL,
-      modified        TEXT NOT NULL,
-      title           TEXT NOT NULL DEFAULT '',
-      body            TEXT NOT NULL DEFAULT '',
-      preview         TEXT NOT NULL DEFAULT '',
-      background      TEXT NOT NULL,
-      backdrop        INTEGER NOT NULL,
-      width           INTEGER NOT NULL,
-      height          INTEGER NOT NULL,
-      position_x      INTEGER NOT NULL,
-      position_y      INTEGER NOT NULL,
-      bookmarked      INTEGER NOT NULL DEFAULT 0,
-      trashed         INTEGER NOT NULL DEFAULT 0
+      {Col.Id}         TEXT PRIMARY KEY NOT NULL,
+      {Col.Parent}     TEXT NOT NULL,
+      {Col.Created}    TEXT NOT NULL,
+      {Col.Modified}   TEXT NOT NULL,
+      {Col.Title}      TEXT NOT NULL DEFAULT '',
+      {Col.Body}       TEXT NOT NULL DEFAULT '',
+      {Col.Preview}    TEXT NOT NULL DEFAULT '',
+      {Col.Background} TEXT NOT NULL,
+      {Col.Backdrop}   INTEGER NOT NULL,
+      {Col.Width}      INTEGER NOT NULL,
+      {Col.Height}     INTEGER NOT NULL,
+      {Col.PositionX}  INTEGER NOT NULL,
+      {Col.PositionY}  INTEGER NOT NULL,
+      {Col.Bookmarked} INTEGER NOT NULL DEFAULT 0,
+      {Col.Trashed}    INTEGER NOT NULL DEFAULT 0
       )
       """;
 
@@ -91,12 +95,12 @@ internal class DatabaseService
 
   private void CreateTagsTable(SqliteConnection connection, SqliteTransaction transaction)
   {
-    string createQuery = """
-      CREATE TABLE IF NOT EXISTS Tags
+    string createQuery = $"""
+      CREATE TABLE IF NOT EXISTS {Tbl.Tags}
       (
-      id              TEXT PRIMARY KEY NOT NULL,
-      text            TEXT NOT NULL UNIQUE,
-      color           INTEGER NOT NULL
+      {Col.Id}       TEXT PRIMARY KEY NOT NULL,
+      {Col.Text}     TEXT NOT NULL UNIQUE,
+      {Col.Color}    INTEGER NOT NULL
       )
       """;
 
@@ -106,14 +110,14 @@ internal class DatabaseService
 
   private void CreateNotesTagsTable(SqliteConnection connection, SqliteTransaction transaction)
   {
-    string createQuery = """
-      CREATE TABLE IF NOT EXISTS NotesTags
+    string createQuery = $"""
+      CREATE TABLE IF NOT EXISTS {Tbl.NotesTags}
       (
-      note_id         TEXT NOT NULL,
-      tag_id          TEXT NOT NULL,
-      PRIMARY KEY (note_id, tag_id),
-      FOREIGN KEY (note_id) REFERENCES Notes(id) ON DELETE CASCADE ON UPDATE CASCADE,
-      FOREIGN KEY (tag_id) REFERENCES Tags(id) ON DELETE CASCADE ON UPDATE CASCADE
+      {Col.NoteId}   TEXT NOT NULL,
+      {Col.TagId}    TEXT NOT NULL,
+      PRIMARY KEY ({Col.NoteId}, {Col.TagId}),
+      FOREIGN KEY ({Col.NoteId}) REFERENCES {Tbl.Notes}({Col.Id}) ON DELETE CASCADE ON UPDATE CASCADE,
+      FOREIGN KEY ({Col.TagId}) REFERENCES {Tbl.Tags}({Col.Id}) ON DELETE CASCADE ON UPDATE CASCADE
       )
       """;
 

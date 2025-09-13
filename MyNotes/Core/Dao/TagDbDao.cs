@@ -3,6 +3,10 @@
 using MyNotes.Core.Dto;
 using MyNotes.Core.Service;
 
+using Col = MyNotes.Core.Shared.DatabaseSettings.Column;
+using Param = MyNotes.Core.Shared.DatabaseSettings.Parameter;
+using Tbl = MyNotes.Core.Shared.DatabaseSettings.Table;
+
 namespace MyNotes.Core.Dao;
 internal class TagDbDao(DatabaseService databaseService) : DbDaoBase
 {
@@ -15,22 +19,22 @@ internal class TagDbDao(DatabaseService databaseService) : DbDaoBase
       await using SqliteConnection connection = _databaseService.Connection;
       await connection.OpenAsync();
 
-      string query = """
-        SELECT * FROM Tags
-        INNER JOIN NotesTags ON Tags.id = NotesTags.tag_id
-        WHERE NotesTags.note_id = @note_id
+      string query = $"""
+        SELECT * FROM {Tbl.Tags}
+        INNER JOIN {Tbl.NotesTags} ON {Tbl.Tags}.id = {Tbl.NotesTags}.{Col.TagId}
+        WHERE {Tbl.NotesTags}.{Col.NoteId} = {Param.NoteId}
         """;
       await using SqliteCommand command = new(query, connection);
 
-      command.Parameters.AddWithValue("@note_id", dto.NoteId);
+      command.Parameters.AddWithValue(Param.NoteId, dto.NoteId);
 
       await using SqliteDataReader reader = await command.ExecuteReaderAsync();
       while (await reader.ReadAsync())
       {
-        var id = GetReaderValue<Guid>(reader, "id");
-        var tag = GetReaderValue<string>(reader, "text")!;
-        var color = GetReaderValue<int>(reader, "color");
-        tags.Add(new TagDto() { Id = id, Text = tag, Color = color });
+        var id = GetReaderValue<Guid>(reader, Col.Id);
+        var text = GetReaderValue<string>(reader, Col.Text)!;
+        var color = GetReaderValue<int>(reader, Col.Color);
+        tags.Add(new TagDto() { Id = id, Text = text, Color = color });
       }
 
       return (IEnumerable<TagDto>)tags;
@@ -42,16 +46,16 @@ internal class TagDbDao(DatabaseService databaseService) : DbDaoBase
       await using SqliteConnection connection = _databaseService.Connection;
       await connection.OpenAsync();
 
-      string query = "SELECT * FROM Tags";
+      string query = $"SELECT * FROM {Tbl.Tags}";
       await using SqliteCommand command = new(query, connection);
 
       List<TagDto> tagDbDtos = new();
       await using SqliteDataReader reader = await command.ExecuteReaderAsync();
       while (await reader.ReadAsync())
       {
-        Guid id = GetReaderValue<Guid>(reader, "id");
-        string text = GetReaderValue<string>(reader, "text")!;
-        int color = GetReaderValue<int>(reader, "color");
+        var id = GetReaderValue<Guid>(reader, Col.Id);
+        var text = GetReaderValue<string>(reader, Col.Text)!;
+        var color = GetReaderValue<int>(reader, Col.Color);
         tagDbDtos.Add(new() { Id = id, Text = text, Color = color });
       }
 
@@ -62,11 +66,17 @@ internal class TagDbDao(DatabaseService databaseService) : DbDaoBase
   {
     using SqliteConnection connection = _databaseService.Connection;
     connection.Open();
-    string query = "INSERT OR IGNORE INTO Tags (id, text, color) VALUES (@id, @text, @color)";
+    string query = $"""
+      INSERT OR IGNORE INTO {Tbl.Tags}
+      ({Col.Id}, {Col.Text}, {Col.Color})
+      VALUES
+      ({Param.Id}, {Param.Text}, {Param.Color})
+      """;
+      
     using SqliteCommand command = new(query, connection);
-    command.Parameters.AddWithValue("@id", dto.Id);
-    command.Parameters.AddWithValue("@text", dto.Text);
-    command.Parameters.AddWithValue("@color", dto.Color);
+    command.Parameters.AddWithValue(Param.Id, dto.Id);
+    command.Parameters.AddWithValue(Param.Text, dto.Text);
+    command.Parameters.AddWithValue(Param.Color, dto.Color);
     return command.ExecuteNonQuery() > 0;
   }
 
@@ -74,10 +84,15 @@ internal class TagDbDao(DatabaseService databaseService) : DbDaoBase
   {
     using SqliteConnection connection = _databaseService.Connection;
     connection.Open();
-    string query = "INSERT OR IGNORE INTO NotesTags (note_id, tag_id) VALUES (@note_id, @tag_id);";
+    string query = $"""
+      INSERT OR IGNORE INTO {Tbl.NotesTags}
+      ({Col.NoteId}, {Col.TagId}) 
+      VALUES 
+      ({Param.NoteId}, {Param.TagId});
+      """;
     using SqliteCommand command = new(query, connection);
-    command.Parameters.AddWithValue("@note_id", dto.NoteId);
-    command.Parameters.AddWithValue("@tag_id", dto.TagId);
+    command.Parameters.AddWithValue(Param.NoteId, dto.NoteId);
+    command.Parameters.AddWithValue(Param.TagId, dto.TagId);
     return command.ExecuteNonQuery() > 0;
   }
 
@@ -85,9 +100,9 @@ internal class TagDbDao(DatabaseService databaseService) : DbDaoBase
   {
     using SqliteConnection connection = _databaseService.Connection;
     connection.Open();
-    string query = "DELETE FROM Tags WHERE id = @id";
+    string query = $"DELETE FROM {Tbl.Tags} WHERE {Col.Id} = {Param.Id}";
     using SqliteCommand command = new(query, connection);
-    command.Parameters.AddWithValue("@id", dto.Id);
+    command.Parameters.AddWithValue(Param.Id, dto.Id);
     return command.ExecuteNonQuery() > 0;
   }
 
@@ -95,10 +110,10 @@ internal class TagDbDao(DatabaseService databaseService) : DbDaoBase
   {
     using SqliteConnection connection = _databaseService.Connection;
     connection.Open();
-    string query = "DELETE FROM NotesTags WHERE note_id = @note_id AND tag_id = @tag_id";
+    string query = $"DELETE FROM {Tbl.NotesTags} WHERE {Col.NoteId} = {Param.NoteId} AND {Col.TagId} = {Param.TagId}";
     using SqliteCommand command = new(query, connection);
-    command.Parameters.AddWithValue("@note_id", dto.NoteId);
-    command.Parameters.AddWithValue("@tag_id", dto.TagId);
+    command.Parameters.AddWithValue(Param.NoteId, dto.NoteId);
+    command.Parameters.AddWithValue(Param.TagId, dto.TagId);
     return command.ExecuteNonQuery() > 0;
   }
 }
