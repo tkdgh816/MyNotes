@@ -72,7 +72,7 @@ internal class TagDbDao(DatabaseService databaseService) : DbDaoBase
       VALUES
       ({Param.Id}, {Param.Text}, {Param.Color})
       """;
-      
+
     using SqliteCommand command = new(query, connection);
     command.Parameters.AddWithValue(Param.Id, dto.Id);
     command.Parameters.AddWithValue(Param.Text, dto.Text);

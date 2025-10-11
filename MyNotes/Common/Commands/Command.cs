@@ -24,6 +24,9 @@ internal class Command : ICommand
 
   public event EventHandler? CanExecuteChanged;
 
+  protected virtual void OnCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+  public void NotifyCanExecuteChanged() => OnCanExecuteChanged();
+
   public bool CanExecute(object? parameter = null)
     => parameter is null
       ? _canExecute is null || _canExecute()
@@ -59,6 +62,9 @@ internal class Command<T> : ICommand
   }
 
   public event EventHandler? CanExecuteChanged;
+
+  protected virtual void OnCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+  public void NotifyCanExecuteChanged() => OnCanExecuteChanged();
 
   public bool CanExecute(object? parameter) 
     => parameter is null || _canExecute is null ? true : _canExecute((T)parameter);

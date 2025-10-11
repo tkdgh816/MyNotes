@@ -121,7 +121,7 @@ internal class NoteSearchDao
       {
         Debug.WriteLine(ex.Message);
       }
-      
+
       return (IEnumerable<GetNoteSearchDto>)dtos;
     }, cancellationToken);
 
