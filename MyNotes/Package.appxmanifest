@@ -4,18 +4,19 @@
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="MyNotes"
-    Publisher="CN=ZeroFinchNeil"
+    Name="ZeroFinchNeil.MyNotesbyZeroFinchNeil"
+    Publisher="CN=ACFE7180-3770-466E-A22B-9BCEFA69DEDA"
     Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="237a9d24-bc05-4b3a-bd18-d26b33216af8" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>MyNotes</DisplayName>
+    <DisplayName>MyNotes by ZeroFinchNeil</DisplayName>
     <PublisherDisplayName>ZeroFinchNeil</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -43,6 +44,15 @@
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"  Square71x71Logo="Assets\SmallTile.png" Square310x310Logo="Assets\LargeTile.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
+
+      <Extensions>
+        <uap5:Extension Category="windows.startupTask">
+          <uap5:StartupTask
+            TaskId="MyNotesStartupId"
+            Enabled="false"
+            DisplayName="MyNotes by ZeroFinchNeil" />
+        </uap5:Extension>
+      </Extensions>
     </Application>
   </Applications>
 

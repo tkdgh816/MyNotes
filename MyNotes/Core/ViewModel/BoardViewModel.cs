@@ -66,25 +66,24 @@ internal partial class BoardViewModel : ViewModelBase
   public SortedCollection<Note> Notes { get; private set; } = null!;
   public IncrementalObservableCollection<NoteViewModel> NoteViewModels { get; private set; } = null!;
 
-  private int _noteCount;
   public int NoteCount
   {
-    get => _noteCount;
-    set => SetProperty(ref _noteCount, value);
+    get => field;
+    set => SetProperty(ref field, value);
   }
 
-  private bool _isNotesLoading = true;
   public bool IsNotesLoading
   {
-    get => _isNotesLoading;
-    set => SetProperty(ref _isNotesLoading, value);
-  }
-  private bool _isChecked = false;
+    get;
+    set => SetProperty(ref field, value);
+  } = true;
+
   public bool IsChecked
   {
-    get => _isChecked;
-    set => SetProperty(ref _isChecked, value);
-  }
+    get => field;
+    set => SetProperty(ref field, value);
+  } = false;
+
   public bool DisplayNoteCount { get; private set; }
 
   private readonly CancellationTokenSource _cancellationTokenSource = new();

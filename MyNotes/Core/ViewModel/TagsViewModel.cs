@@ -42,12 +42,11 @@ internal partial class TagsViewModel : ViewModelBase
       _tagService.DeleteTag(tag);
   }
 
-  private bool _isInclusionModeIntersect = true;
   public bool IsIntersectSelection
   {
-    get => _isInclusionModeIntersect;
-    set => SetProperty(ref _isInclusionModeIntersect, value);
-  }
+    get;
+    set => SetProperty(ref field, value);
+  } = true;
 
   private bool _isSearchingState = false;
 

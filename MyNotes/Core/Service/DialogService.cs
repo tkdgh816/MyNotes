@@ -109,38 +109,29 @@ internal class DialogService
     return result;
   }
 
-  public class NavigationDialogViewModel : ViewModelBase
+  public class NavigationDialogViewModel(Icon icon, string name) : ViewModelBase
   {
-    private Icon _icon;
     public Icon Icon
     {
-      get => _icon;
-      set => SetProperty(ref _icon, value);
-    }
+      get => field;
+      set => SetProperty(ref field, value);
+    } = icon;
 
-    private string _name;
     public string Name
     {
-      get => _name;
-      set => SetProperty(ref _name, value);
-    }
-
-    public NavigationDialogViewModel(Icon icon, string name)
-    {
-      _icon = icon;
-      _name = name;
-    }
+      get => field;
+      set => SetProperty(ref field, value);
+    } = name;
   }
 
   public class NavigationTreeDialogViewModel : ViewModelBase
   {
     public IReadOnlyList<NavigationUserBoard> Navigations { get; }
 
-    private NavigationUserBoard? _selectedNavigation = null;
     public NavigationUserBoard? SelectedNavigation
     {
-      get => _selectedNavigation;
-      set => SetProperty(ref _selectedNavigation, value);
+      get;
+      set => SetProperty(ref field, value);
     }
 
     public NavigationTreeDialogViewModel(NavigationUserRootGroup rootNavigation)

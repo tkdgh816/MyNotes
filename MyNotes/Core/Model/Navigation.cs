@@ -5,12 +5,11 @@ namespace MyNotes.Core.Model;
 
 internal abstract class Navigation : ObservableObject
 {
-  private bool _isEditable = false;
   public bool IsEditable
   {
-    get => _isEditable;
-    set => SetProperty(ref _isEditable, value);
-  }
+    get;
+    set => SetProperty(ref field, value);
+  } = false;
 }
 
 internal class NavigationSeparator : Navigation
@@ -27,19 +26,17 @@ internal abstract class NavigationItem : Navigation
 
   public Type PageType { get; protected set; }
 
-  private string _name = null!;
   public string Name
   {
-    get => _name;
-    set => SetProperty(ref _name, value);
-  }
+    get;
+    set => SetProperty(ref field, value);
+  } = null!;
 
-  private Icon _icon = null!;
   public Icon Icon
   {
-    get => _icon;
-    set => SetProperty(ref _icon, value);
-  }
+    get;
+    set => SetProperty(ref field, value);
+  } = null!;
 }
 
 internal abstract class NavigationBoard : NavigationItem

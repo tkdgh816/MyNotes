@@ -2,30 +2,21 @@
 
 namespace MyNotes.Core.Model;
 
-internal class Tag : ObservableObject, IEquatable<Tag>, IComparable<Tag>
+internal class Tag(TagId id, string text, TagColor color) : ObservableObject, IEquatable<Tag>, IComparable<Tag>
 {
-  public TagId Id { get; }
+  public TagId Id { get; } = id;
 
-  private string _text;
   public string Text
   {
-    get => _text;
-    set => SetProperty(ref _text, value);
-  }
+    get => field;
+    set => SetProperty(ref field, value);
+  } = text;
 
-  private TagColor _color;
   public TagColor Color
   {
-    get => _color;
-    set => SetProperty(ref _color, value);
-  }
-
-  public Tag(TagId id, string text, TagColor color)
-  {
-    Id = id;
-    _text = text;
-    _color = color;
-  }
+    get => field;
+    set => SetProperty(ref field, value);
+  } = color;
 
   public bool Equals(Tag? other) => other is not null && other.Text == Text;
   public int CompareTo(Tag? other) => other is null ? 1 : Text.CompareTo(other.Text);

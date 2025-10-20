@@ -16,36 +16,34 @@ internal class SettingsViewModel : ViewModelBase
     var globalSettings = _settingsService.GetGlobalSettings();
     var noteSettings = _settingsService.GetNoteSettings();
     var boardSettings = _settingsService.GetBoardSettings();
-    (_appTheme, _appLanguage) = (globalSettings.AppTheme, globalSettings.AppLanguage);
-    InitialAppLanguage = _appLanguage;
-    (_noteBackground, _noteBackdrop) = (noteSettings.Background, noteSettings.Backdrop);
-    (_noteWidth, _noteHeight) = (noteSettings.Size.Width, noteSettings.Size.Height);
-    _displayNoteCount = boardSettings.DisplayNoteCount;
+    (AppTheme, AppLanguage) = (globalSettings.AppTheme, globalSettings.AppLanguage);
+    InitialAppLanguage = AppLanguage;
+    (NoteBackground, NoteBackdrop) = (noteSettings.Background, noteSettings.Backdrop);
+    (NoteWidth, NoteHeight) = (noteSettings.Size.Width, noteSettings.Size.Height);
+    DisplayNoteCount = boardSettings.DisplayNoteCount;
   }
 
-  private AppTheme _appTheme;
   public AppTheme AppTheme
   {
-    get => _appTheme;
+    get => field;
     set
     {
-      if (_appTheme == value)
+      if (field == value)
         return;
-      SetProperty(ref _appTheme, value);
+      SetProperty(ref field, value);
       _settingsService.SetGlobalSettings(AppSettingsKeys.AppTheme, (int)value);
       WeakReferenceMessenger.Default.Send(new Message<AppTheme>(value), Tokens.ChangeTheme);
     }
   }
 
-  private AppLanguage _appLanguage;
   public AppLanguage AppLanguage
   {
-    get => _appLanguage;
+    get => field;
     set
     {
-      if (_appLanguage == value)
+      if (field == value)
         return;
-      SetProperty(ref _appLanguage, value);
+      SetProperty(ref field, value);
       _settingsService.SetGlobalSettings(AppSettingsKeys.AppLanguage, (int)value);
       ApplicationLanguages.PrimaryLanguageOverride = value switch
       {
@@ -57,67 +55,62 @@ internal class SettingsViewModel : ViewModelBase
   }
   public AppLanguage InitialAppLanguage { get; }
 
-  private Color _noteBackground;
   public Color NoteBackground
   {
-    get => _noteBackground;
+    get => field;
     set
     {
-      if (_noteBackground == value)
+      if (field == value)
         return;
-      SetProperty(ref _noteBackground, value);
+      SetProperty(ref field, value);
       _settingsService.SetNoteSettings(AppSettingsKeys.NoteBackground, value.ToString());
     }
   }
 
-  private BackdropKind _noteBackdrop;
   public BackdropKind NoteBackdrop
   {
-    get => _noteBackdrop;
+    get => field;
     set 
     {
-      if (_noteBackdrop == value)
+      if (field == value)
         return;
-      SetProperty(ref _noteBackdrop, value);
+      SetProperty(ref field, value);
       _settingsService.SetNoteSettings(AppSettingsKeys.NoteBackdrop, (int)value);
     }
   }
 
-  private int _noteWidth;
   public int NoteWidth
   {
-    get => _noteWidth;
+    get => field;
     set
     {
-      if (_noteWidth == value)
+      if (field == value)
         return;
-      SetProperty(ref _noteWidth, value);
+      SetProperty(ref field, value);
       _settingsService.SetNoteSettings(AppSettingsKeys.NoteSize, new Size(value, NoteHeight));
     }
   }
 
-  private int _noteHeight;
   public int NoteHeight
   {
-    get => _noteHeight;
+    get => field;
     set
     {
-      if (_noteHeight == value)
+      if (field == value)
         return;
-      SetProperty(ref _noteHeight, value);
+      SetProperty(ref field, value);
       _settingsService.SetNoteSettings(AppSettingsKeys.NoteSize, new Size(NoteWidth, value));
     }
   }
 
-  private bool _displayNoteCount;
   public bool DisplayNoteCount
   {
-    get => _displayNoteCount;
+    get => field;
     set 
     {
-      if (_displayNoteCount == value)
+      if (field == value)
         return;
-      SetProperty(ref _displayNoteCount, value);
+      SetProperty(ref field, value);
       _settingsService.SetBoardSettings(AppSettingsKeys.BoardDisplayNoteCount, value);
     }
   }

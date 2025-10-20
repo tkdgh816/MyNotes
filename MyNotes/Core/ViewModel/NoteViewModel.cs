@@ -66,20 +66,20 @@ internal partial class NoteViewModel : ViewModelBase
   public void GetMainWindow() => _windowService.GetMainWindow().Activate();
   public void CreateWindow() => _windowService.GetNoteWindow(Note).Activate();
   public void SetWindowTitlebar(UIElement titleBar) => _windowService.SetNoteWindowTitleBar(Note, titleBar);
-  private bool _isWindowAlwaysOnTop = false;
+
   public bool IsWindowAlwaysOnTop
   {
-    get => _isWindowAlwaysOnTop;
-    set => SetProperty(ref _isWindowAlwaysOnTop, value);
-  }
+    get;
+    set => SetProperty(ref field, value);
+  } = false;
 
   public void SetWindowRegionRects(RectInt32[]? rects) => _windowService.SetNoteWindowRegionRects(Note, rects);
   #endregion
 
   #region Timers
-  private DispatcherTimer _noteDebounceTimer = new() { Interval = TimeSpan.FromMilliseconds(500) };
+  private readonly DispatcherTimer _noteDebounceTimer = new() { Interval = TimeSpan.FromMilliseconds(500) };
 
-  private HashSet<string> _changedNoteProperties = new();
+  private readonly HashSet<string> _changedNoteProperties = new();
   private NoteUpdateFields _noteUpdateFields = NoteUpdateFields.None;
   private static readonly Dictionary<string, NoteUpdateFields> _notePropertyUpdateFieldMapInBoard = new()
     {

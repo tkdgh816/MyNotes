@@ -136,12 +136,11 @@ internal partial class MainViewModel : ViewModelBase
   }
   #endregion
 
-  private bool _isEditMode = false;
   public bool IsEditMode
   {
-    get => _isEditMode;
-    set => SetProperty(ref _isEditMode, value);
-  }
+    get;
+    set => SetProperty(ref field, value);
+  } = false;
 
   // 루트 노드 내에 내비게이션이 있는지 확인하는 메서드
   public bool ContainsUserNavigation(NavigationUserBoard navigation, NavigationUserGroup? rootGroup = null)
