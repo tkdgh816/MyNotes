@@ -5,7 +5,7 @@ using Microsoft.UI.Dispatching;
 using Microsoft.Windows.AppLifecycle;
 
 namespace MyNotes;
-internal class Program
+internal partial class Program
 {
   [STAThread]
   private static int Main(string[] args)
@@ -52,21 +52,23 @@ internal class Program
     ExtendedActivationKind kind = args.Kind;
   }
 
-  [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-  private static extern IntPtr CreateEvent(
-    IntPtr lpEventAttributes, bool bManualReset,
-    bool bInitialState, string? lpName);
+  [LibraryImport("kernel32.dll", EntryPoint = "CreateEventW", StringMarshalling = StringMarshalling.Utf16)]
+  private static partial IntPtr CreateEvent(
+     IntPtr lpEventAttributes, [MarshalAs(UnmanagedType.Bool)] bool bManualReset,
+     [MarshalAs(UnmanagedType.Bool)] bool bInitialState, string? lpName);
 
-  [DllImport("kernel32.dll")]
-  private static extern bool SetEvent(IntPtr hEvent);
+  [LibraryImport("kernel32.dll")]
+  [return: MarshalAs(UnmanagedType.Bool)]
+  private static partial bool SetEvent(IntPtr hEvent);
 
-  [DllImport("ole32.dll")]
-  private static extern uint CoWaitForMultipleObjects(
+  [LibraryImport("ole32.dll")]
+  private static partial uint CoWaitForMultipleObjects(
       uint dwFlags, uint dwMilliseconds, ulong nHandles,
       IntPtr[] pHandles, out uint dwIndex);
 
-  [DllImport("user32.dll")]
-  private static extern bool SetForegroundWindow(IntPtr hWnd);
+  [LibraryImport("user32.dll")]
+  [return: MarshalAs(UnmanagedType.Bool)]
+  private static partial bool SetForegroundWindow(IntPtr hWnd);
 
   private static IntPtr redirectEventHandle = IntPtr.Zero;
 
