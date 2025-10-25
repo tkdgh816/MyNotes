@@ -1,10 +1,12 @@
-﻿using System.Runtime.InteropServices;
-using System.Threading;
+﻿using System.Threading;
 
 using Microsoft.UI.Dispatching;
 using Microsoft.Windows.AppLifecycle;
 
+using MyNotes.Common.Interop;
+
 namespace MyNotes;
+
 internal partial class Program
 {
   [STAThread]
@@ -17,8 +19,7 @@ internal partial class Program
     {
       Application.Start((p) =>
       {
-        var context = new DispatcherQueueSynchronizationContext(
-            DispatcherQueue.GetForCurrentThread());
+        var context = new DispatcherQueueSynchronizationContext(DispatcherQueue.GetForCurrentThread());
         SynchronizationContext.SetSynchronizationContext(context);
         _ = new App();
       });
@@ -32,7 +33,7 @@ internal partial class Program
     bool isRedirect = false;
     AppActivationArguments args = AppInstance.GetCurrent().GetActivatedEventArgs();
     ExtendedActivationKind kind = args.Kind;
-    AppInstance keyInstance = AppInstance.FindOrRegisterForKey("MySingleInstanceApp");
+    AppInstance keyInstance = AppInstance.FindOrRegisterForKey("MyNotes");
 
     if (keyInstance.IsCurrent)
     {
@@ -52,46 +53,25 @@ internal partial class Program
     ExtendedActivationKind kind = args.Kind;
   }
 
-  [LibraryImport("kernel32.dll", EntryPoint = "CreateEventW", StringMarshalling = StringMarshalling.Utf16)]
-  private static partial IntPtr CreateEvent(
-     IntPtr lpEventAttributes, [MarshalAs(UnmanagedType.Bool)] bool bManualReset,
-     [MarshalAs(UnmanagedType.Bool)] bool bInitialState, string? lpName);
-
-  [LibraryImport("kernel32.dll")]
-  [return: MarshalAs(UnmanagedType.Bool)]
-  private static partial bool SetEvent(IntPtr hEvent);
-
-  [LibraryImport("ole32.dll")]
-  private static partial uint CoWaitForMultipleObjects(
-      uint dwFlags, uint dwMilliseconds, ulong nHandles,
-      IntPtr[] pHandles, out uint dwIndex);
-
-  [LibraryImport("user32.dll")]
-  [return: MarshalAs(UnmanagedType.Bool)]
-  private static partial bool SetForegroundWindow(IntPtr hWnd);
-
-  private static IntPtr redirectEventHandle = IntPtr.Zero;
+  public static IntPtr redirectEventHandle = IntPtr.Zero;
 
   // Do the redirection on another thread, and use a non-blocking
   // wait method to wait for the redirection to complete.
-  public static void RedirectActivationTo(AppActivationArguments args,
-                                          AppInstance keyInstance)
+  public static void RedirectActivationTo(AppActivationArguments args, AppInstance keyInstance)
   {
-    redirectEventHandle = CreateEvent(IntPtr.Zero, true, false, null);
+    redirectEventHandle = NativeMethods.CreateEvent(IntPtr.Zero, true, false, null);
     Task.Run(() =>
     {
       keyInstance.RedirectActivationToAsync(args).AsTask().Wait();
-      SetEvent(redirectEventHandle);
+      NativeMethods.SetEvent(redirectEventHandle);
     });
 
     uint CWMO_DEFAULT = 0;
     uint INFINITE = 0xFFFFFFFF;
-    _ = CoWaitForMultipleObjects(
-       CWMO_DEFAULT, INFINITE, 1,
-       [redirectEventHandle], out uint handleIndex);
+    _ = NativeMethods.CoWaitForMultipleObjects(CWMO_DEFAULT, INFINITE, 1, [redirectEventHandle], out uint handleIndex);
 
     // Bring the window to the foreground
     Process process = Process.GetProcessById((int)keyInstance.ProcessId);
-    SetForegroundWindow(process.MainWindowHandle);
+    NativeMethods.SetForegroundWindow(process.MainWindowHandle);
   }
 }

@@ -1,5 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 
+using Microsoft.Windows.AppLifecycle;
+
 using WinRT.Interop;
 
 namespace MyNotes.Common.Interop;
@@ -40,7 +42,7 @@ internal static partial class NativeMethods
 
   enum MonitorDefaultFlags : uint
   {
-    DefaultToNull    = 0x00000000,  // MONITOR_DEFAULTTONULL
+    DefaultToNull = 0x00000000,  // MONITOR_DEFAULTTONULL
     DefaultToPrimary = 0x00000001,  // MONITOR_DEFAULTTOPRIMARY
     DefaultToNearest = 0x00000002   // MONITOR_DEFAULTTONEAREST
   }
@@ -59,4 +61,19 @@ internal static partial class NativeMethods
     MONITORINFO monitorInfo = new() { cbSize = Marshal.SizeOf<MONITORINFO>() };
     return !GetMonitorInfo(hMonitor, ref monitorInfo) ? null : monitorInfo;
   }
+
+  // For single AppInstance
+  [LibraryImport("kernel32.dll", EntryPoint = "CreateEventW", StringMarshalling = StringMarshalling.Utf16)]
+  public static partial IntPtr CreateEvent(IntPtr lpEventAttributes, [MarshalAs(UnmanagedType.Bool)] bool bManualReset, [MarshalAs(UnmanagedType.Bool)] bool bInitialState, string? lpName);
+
+  [LibraryImport("kernel32.dll")]
+  [return: MarshalAs(UnmanagedType.Bool)]
+  public static partial bool SetEvent(IntPtr hEvent);
+
+  [LibraryImport("ole32.dll")]
+  public static partial uint CoWaitForMultipleObjects(uint dwFlags, uint dwMilliseconds, ulong nHandles, IntPtr[] pHandles, out uint dwIndex);
+
+  [LibraryImport("user32.dll")]
+  [return: MarshalAs(UnmanagedType.Bool)]
+  public static partial bool SetForegroundWindow(IntPtr hWnd);
 }
