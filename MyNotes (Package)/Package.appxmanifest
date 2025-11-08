@@ -8,15 +8,15 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="05ebc385-6a8b-407c-8315-b46b9bffb2c6"
-    Publisher="CN=tkdgh"
-    Version="1.0.0.0" />
+    Name="ZeroFinchNeil.MyNotesbyZeroFinchNeil"
+    Publisher="CN=ACFE7180-3770-466E-A22B-9BCEFA69DEDA"
+    Version="0.0.1.0" />
 
   <mp:PhoneIdentity PhoneProductId="05ebc385-6a8b-407c-8315-b46b9bffb2c6" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>MyNotes (Package)</DisplayName>
-    <PublisherDisplayName>tkdgh</PublisherDisplayName>
+    <DisplayName>MyNotes by ZeroFinchNeil</DisplayName>
+    <PublisherDisplayName>ZeroFinchNeil</PublisherDisplayName>
     <Logo>Images\StoreLogo.png</Logo>
   </Properties>
 
@@ -34,12 +34,12 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="MyNotes (Package)"
-        Description="MyNotes (Package)"
+        DisplayName="MyNotes"
+        Description="MyNotes by ZeroFinchNeil"
         BackgroundColor="transparent"
         Square150x150Logo="Images\Square150x150Logo.png"
         Square44x44Logo="Images\Square44x44Logo.png">
-        <uap:DefaultTile Wide310x150Logo="Images\Wide310x150Logo.png" />
+        <uap:DefaultTile Wide310x150Logo="Images\Wide310x150Logo.png"  Square71x71Logo="Images\SmallTile.png" Square310x310Logo="Images\LargeTile.png"/>
         <uap:SplashScreen Image="Images\SplashScreen.png" />
       </uap:VisualElements>
     </Application>
