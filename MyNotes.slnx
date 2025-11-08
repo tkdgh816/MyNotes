@@ -4,10 +4,25 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="MyNotes/MyNotes (Package)/MyNotes (Package).wapproj" Type="c7167f0d-bc9f-4e6e-afe1-012c56b48db5">
+  <Project Path="MyNotes (Package)/MyNotes (Package).wapproj" Type="c7167f0d-bc9f-4e6e-afe1-012c56b48db5">
     <Deploy />
   </Project>
-  <Project Path="MyNotes/MyNotes/MyNotes.csproj">
+  <Project Path="MyNotes.Common/MyNotes.Common.csproj" Id="5f737b78-0cad-4b54-b0eb-1644412a4eb0">
+    <Platform Solution="*|ARM64" Project="ARM64" />
+    <Platform Solution="*|x64" Project="x64" />
+    <Platform Solution="*|x86" Project="x86" />
+  </Project>
+  <Project Path="MyNotes.CustomControls/MyNotes.CustomControls.csproj" Id="59aedc38-2119-454f-aff4-6575d6759e33">
+    <Platform Solution="*|ARM64" Project="ARM64" />
+    <Platform Solution="*|x64" Project="x64" />
+    <Platform Solution="*|x86" Project="x86" />
+  </Project>
+  <Project Path="MyNotes.Services/MyNotes.Services.csproj" Id="f5d73251-7ad9-4a35-bbfb-69125ec74fff">
+    <Platform Solution="*|ARM64" Project="ARM64" />
+    <Platform Solution="*|x64" Project="x64" />
+    <Platform Solution="*|x86" Project="x86" />
+  </Project>
+  <Project Path="MyNotes/MyNotes.csproj">
     <Platform Solution="*|ARM64" Project="ARM64" />
     <Platform Solution="*|x64" Project="x64" />
     <Platform Solution="*|x86" Project="x86" />
