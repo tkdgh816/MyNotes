@@ -178,4 +178,13 @@ public static partial class NativeMethods
     Marshal.FreeHGlobal(pInfo);
   }
 
+  // COM OLE
+  [DllImport("ole32.dll")]
+  public static extern int CoRegisterClassObject([MarshalAs(UnmanagedType.LPStruct)] Guid rclsid, [MarshalAs(UnmanagedType.IUnknown)] object pUnk, uint dwClsContext, uint flags, out uint lpdwRegister);
+
+  [DllImport("ole32.dll")]
+  public static extern int CoGetClassObject([MarshalAs(UnmanagedType.LPStruct)] Guid rclsid, uint dwClsContext, IntPtr pvReserved, [MarshalAs(UnmanagedType.LPStruct)] Guid riid, out IntPtr ppv);
+
+  [LibraryImport("ole32.dll")]
+  public static partial int CoRevokeClassObject(uint dwRegister);
 }

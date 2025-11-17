@@ -45,6 +45,7 @@
   <ItemGroup>
     <ProjectReference Include="..\MyNotes.Common\MyNotes.Common.csproj" />
     <ProjectReference Include="..\MyNotes.CustomControls\MyNotes.CustomControls.csproj" />
+    <ProjectReference Include="..\MyNotes.Widget\MyNotes.Widget.csproj" />
   </ItemGroup>
 
   <ItemGroup>
