@@ -1,0 +1,9 @@
+namespace MyNotes.Views.Navigations;
+
+public sealed partial class HomePage : Page
+{
+  public HomePage()
+  {
+    InitializeComponent();
+  }
+}

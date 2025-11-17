@@ -21,6 +21,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Views\MainWindow.xaml" />
+    <None Remove="Views\Navigations\HomePage.xaml" />
     <None Remove="Views\Windows\NoteWindow.xaml" />
   </ItemGroup>
 
@@ -29,20 +30,27 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.251003001" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.251106002" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Assets\" />
     <Folder Include="Models\" />
     <Folder Include="ViewModels\" />
-    <Folder Include="Strings\" />
-    <Folder Include="Views\Navigations\" />
     <Folder Include="Views\Notes\" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MyNotes.Common\MyNotes.Common.csproj" />
+    <ProjectReference Include="..\MyNotes.CustomControls\MyNotes.CustomControls.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Views\Navigations\HomePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <ItemGroup>

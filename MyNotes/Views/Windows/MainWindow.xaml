@@ -3,13 +3,130 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="using:MyNotes.Views.Windows"
-        Title="MainWindow">
+        xmlns:animatedvisuals="using:Microsoft.UI.Xaml.Controls.AnimatedVisuals"
+        xmlns:buttons="using:MyNotes.CustomControls.Buttons"
+        Title="MyNotes">
 
   <Window.SystemBackdrop>
     <MicaBackdrop />
   </Window.SystemBackdrop>
 
-  <Grid>
+  <UserControl x:Name="MainWindow_RootControl">
+    <Grid>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition />
+      </Grid.RowDefinitions>
 
-  </Grid>
+      <Grid x:Name="MainWindow_TitleBarGrid"
+            Height="48">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition x:Name="LeftPaddingColumn"
+                            Width="0" />
+          <ColumnDefinition x:Name="BackButtonColumn"
+                            Width="Auto" />
+          <ColumnDefinition x:Name="PaneToggleButtonColumn"
+                            Width="Auto" />
+          <ColumnDefinition x:Name="IconColumn"
+                            Width="Auto" />
+          <ColumnDefinition x:Name="TitleColumn"
+                            Width="Auto" />
+          <ColumnDefinition x:Name="LeftDragColumn"
+                            Width="*" />
+          <ColumnDefinition x:Name="SearchColumn"
+                            Width="4*"
+                            MinWidth="220" />
+          <ColumnDefinition x:Name="RightDragColumn"
+                            Width="*" />
+          <ColumnDefinition x:Name="RightPaddingColumn"
+                            Width="0" />
+        </Grid.ColumnDefinitions>
+
+        <buttons:AnimatedIconButton x:Name="MainWindow_BackButton"
+                                    x:Uid="MainWindow_BackButton"
+                                    Grid.Column="1"
+                                    Content="&#xE72B;"
+                                    Visibility="{x:Bind MainWindow_NavigationFrame.CanGoBack, Mode=OneWay}"
+                                    Click="MainWindow_BackButton_Click">
+          <buttons:AnimatedIconButton.AnimatedIconSource>
+            <animatedvisuals:AnimatedBackVisualSource />
+          </buttons:AnimatedIconButton.AnimatedIconSource>
+        </buttons:AnimatedIconButton>
+
+        <buttons:AnimatedIconButton x:Name="MainWindow_PaneToggleButton"
+                                    x:Uid="MainWindow_PaneToggleButton"
+                                    Grid.Column="2"
+                                    Content="&#xE700;"
+                                    Click="MainWindow_PaneToggleButton_Click">
+          <buttons:AnimatedIconButton.AnimatedIconSource>
+            <animatedvisuals:AnimatedGlobalNavigationButtonVisualSource />
+          </buttons:AnimatedIconButton.AnimatedIconSource>
+        </buttons:AnimatedIconButton>
+
+        <ImageIcon Grid.Column="3"
+                   Source="/Assets/AppIcon_128.ico"
+                   Width="16"
+                   Height="16"
+                   Margin="8,0" />
+
+        <TextBlock x:Name="MainWindow_TitleTextBlock"
+                   Grid.Column="4"
+                   Text="MyNotes"
+                   Padding="8,0"
+                   VerticalAlignment="Center"
+                   Foreground="{ThemeResource WindowCaptionForeground}" />
+
+        <AutoSuggestBox x:Name="MainWindow_SearchAutoSuggestBox"
+                        x:Uid="MainWindow_SearchAutoSuggestBox"
+                        Grid.Column="6"
+                        QueryIcon="Find"
+                        VerticalAlignment="Center"
+                        MaxWidth="330" />
+      </Grid>
+
+      <NavigationView x:Name="MainWindow_NavigationView"
+                      Grid.Row="1"
+                      IsBackButtonVisible="Collapsed"
+                      IsPaneToggleButtonVisible="False">
+        <NavigationView.Resources>
+          <SolidColorBrush x:Key="NavigationViewContentBackground"
+                           Color="{ThemeResource ControlFillColorTransparent}" />
+        </NavigationView.Resources>
+
+        <NavigationView.MenuItems>
+          <NavigationViewItem Icon="Home"
+                              Content="Home" />
+          <NavigationViewItem Icon="Favorite"
+                              Content="Bookmarks" />
+          <NavigationViewItemSeparator />
+          <NavigationViewItem Icon="List"
+                              Content="Notes" />
+        </NavigationView.MenuItems>
+
+        <NavigationView.FooterMenuItems>
+          <NavigationViewItem Icon="Delete"
+                              Content="Trash" />
+        </NavigationView.FooterMenuItems>
+        <Frame x:Name="MainWindow_NavigationFrame" />
+      </NavigationView>
+
+      <VisualStateManager.VisualStateGroups>
+        <VisualStateGroup x:Name="WindowActivationStates">
+          <VisualState x:Name="WindowActivated" />
+          <VisualState x:Name="WindowDeactivated">
+            <VisualState.Setters>
+              <Setter Target="MainWindow_BackButton.IsEnabled"
+                      Value="False" />
+              <Setter Target="MainWindow_PaneToggleButton.IsEnabled"
+                      Value="False" />
+              <Setter Target="MainWindow_TitleTextBlock.Foreground"
+                      Value="{ThemeResource WindowCaptionForegroundDisabled}" />
+              <Setter Target="MainWindow_SearchAutoSuggestBox.IsEnabled"
+                      Value="False" />
+            </VisualState.Setters>
+          </VisualState>
+        </VisualStateGroup>
+      </VisualStateManager.VisualStateGroups>
+    </Grid>
+  </UserControl>
 </Window>
