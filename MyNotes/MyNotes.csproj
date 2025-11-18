@@ -22,6 +22,7 @@
   <ItemGroup>
     <None Remove="Views\MainWindow.xaml" />
     <None Remove="Views\Navigations\HomePage.xaml" />
+    <None Remove="Views\Navigations\SettingsPage.xaml" />
     <None Remove="Views\Windows\NoteWindow.xaml" />
   </ItemGroup>
 
@@ -37,8 +38,6 @@
 
   <ItemGroup>
     <Folder Include="Assets\" />
-    <Folder Include="Models\" />
-    <Folder Include="ViewModels\" />
     <Folder Include="Views\Notes\" />
   </ItemGroup>
 
@@ -46,6 +45,12 @@
     <ProjectReference Include="..\MyNotes.Common\MyNotes.Common.csproj" />
     <ProjectReference Include="..\MyNotes.CustomControls\MyNotes.CustomControls.csproj" />
     <ProjectReference Include="..\MyNotes.Widget\MyNotes.Widget.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Views\Navigations\SettingsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <ItemGroup>

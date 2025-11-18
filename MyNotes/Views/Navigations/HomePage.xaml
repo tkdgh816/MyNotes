@@ -6,16 +6,6 @@
       xmlns:animatedvisuals="using:Microsoft.UI.Xaml.Controls.AnimatedVisuals">
 
   <Grid>
-    <!--<Button x:Name="MainWindow_PaneToggleButton"
-            Grid.Column="2">
-      <AnimatedIcon x:Name="BackAnimatedIcon">
-        <AnimatedIcon.Source>
-          <animatedvisuals:AnimatedBackVisualSource />
-        </AnimatedIcon.Source>
-        <AnimatedIcon.FallbackIconSource>
-          <SymbolIconSource Symbol="Back" />
-        </AnimatedIcon.FallbackIconSource>
-      </AnimatedIcon>
-    </Button>-->
+    <TextBlock Text="Home Page" />
   </Grid>
 </Page>

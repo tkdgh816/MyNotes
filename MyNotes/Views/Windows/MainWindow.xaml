@@ -3,6 +3,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="using:MyNotes.Views.Windows"
+        xmlns:models="using:MyNotes.Models"
         xmlns:animatedvisuals="using:Microsoft.UI.Xaml.Controls.AnimatedVisuals"
         xmlns:buttons="using:MyNotes.CustomControls.Buttons"
         Title="MyNotes">
@@ -87,26 +88,36 @@
       <NavigationView x:Name="MainWindow_NavigationView"
                       Grid.Row="1"
                       IsBackButtonVisible="Collapsed"
-                      IsPaneToggleButtonVisible="False">
+                      IsPaneToggleButtonVisible="False"
+                      IsSettingsVisible="False"
+                      MenuItemsSource="{x:Bind ViewModel.MenuItems}"
+                      FooterMenuItemsSource="{x:Bind ViewModel.FooterMenuItems}"
+                      SelectedItem="{x:Bind ViewModel.MenuItems[0]}"
+                      SelectionChanged="MainWindow_NavigationView_SelectionChanged" >
         <NavigationView.Resources>
           <SolidColorBrush x:Key="NavigationViewContentBackground"
                            Color="{ThemeResource ControlFillColorTransparent}" />
         </NavigationView.Resources>
 
-        <NavigationView.MenuItems>
-          <NavigationViewItem Icon="Home"
-                              Content="Home" />
-          <NavigationViewItem Icon="Favorite"
-                              Content="Bookmarks" />
-          <NavigationViewItemSeparator />
-          <NavigationViewItem Icon="List"
-                              Content="Notes" />
-        </NavigationView.MenuItems>
+        <NavigationView.MenuItemTemplateSelector>
+          <local:MainWindowNavigationViewDataTemplateSelector>
+            <local:MainWindowNavigationViewDataTemplateSelector.NavigationCoreNodeTemplate>
+              <DataTemplate x:DataType="models:NavigationCoreNode">
+                <NavigationViewItem Content="{x:Bind Title}"
+                                    Icon="{x:Bind Icon}" />
+              </DataTemplate>
+            </local:MainWindowNavigationViewDataTemplateSelector.NavigationCoreNodeTemplate>
 
-        <NavigationView.FooterMenuItems>
-          <NavigationViewItem Icon="Delete"
-                              Content="Trash" />
-        </NavigationView.FooterMenuItems>
+            <local:MainWindowNavigationViewDataTemplateSelector.NavigationSeparatorTemplate>
+              <DataTemplate x:DataType="models:NavigationSeparator">
+                <NavigationViewItemSeparator />
+              </DataTemplate>
+            </local:MainWindowNavigationViewDataTemplateSelector.NavigationSeparatorTemplate>
+          </local:MainWindowNavigationViewDataTemplateSelector>
+          
+          
+        </NavigationView.MenuItemTemplateSelector>
+        
         <Frame x:Name="MainWindow_NavigationFrame" />
       </NavigationView>
 

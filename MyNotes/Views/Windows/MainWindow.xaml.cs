@@ -1,13 +1,22 @@
+using Microsoft.Extensions.DependencyInjection;
+
+using MyNotes.Models;
+using MyNotes.ViewModels;
+
 namespace MyNotes.Views.Windows;
 
 public sealed partial class MainWindow : Window
 {
+  private readonly MainViewModel ViewModel;
   private readonly IntPtr _hWnd;
   private readonly OverlappedPresenter? _presenter;
 
   public MainWindow()
   {
     InitializeComponent();
+
+    ViewModel = App.Instance.Services.GetRequiredService<MainViewModel>();
+
     this.ExtendsContentIntoTitleBar = true;
     this.SetTitleBar(MainWindow_TitleBarGrid);
 
@@ -93,12 +102,56 @@ public sealed partial class MainWindow : Window
 
   private void MainWindow_BackButton_Click(object sender, RoutedEventArgs e)
   {
-    if (MainWindow_NavigationFrame.CanGoBack)
+    if (MainWindow_NavigationFrame.CanGoBack && _navigationBackStack.Count > 0)
+    {
+      _preventNavigation = true;
       MainWindow_NavigationFrame.GoBack();
+      MainWindow_NavigationView.SelectedItem = _navigationBackStack.Pop();
+      _preventNavigation = false;
+    }
   }
 
   private void MainWindow_PaneToggleButton_Click(object sender, RoutedEventArgs e)
   {
     MainWindow_NavigationView.IsPaneOpen = !MainWindow_NavigationView.IsPaneOpen;
+  }
+
+  private INavigation? _currentNavigation;
+  private readonly Stack<INavigation> _navigationBackStack = new();
+
+  private bool _preventNavigation = false;
+
+  private void MainWindow_NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+  {
+    if (_preventNavigation)
+      return;
+
+    if (args.SelectedItem is NavigationCoreNode coreNode)
+    {
+      MainWindow_NavigationFrame.Navigate(coreNode.PageType);
+      if (_currentNavigation is not null)
+        _navigationBackStack.Push(_currentNavigation);
+      _currentNavigation = coreNode;
+    }
+  }
+}
+
+public class MainWindowNavigationViewDataTemplateSelector : DataTemplateSelector
+{
+  public DataTemplate? NavigationCoreNodeTemplate { get; set; }
+  public DataTemplate? NavigationSeparatorTemplate { get; set; }
+  public DataTemplate? NavigationUserCompositeNodeTemplate { get; set; }
+  public DataTemplate? NavigationUserLeafNodeTemplate { get; set; }
+
+  protected override DataTemplate? SelectTemplateCore(object item)
+  {
+    return item switch
+    {
+      NavigationCoreNode => NavigationCoreNodeTemplate,
+      NavigationSeparator => NavigationSeparatorTemplate,
+      NavigationUserCompositeNode => NavigationUserCompositeNodeTemplate,
+      NavigationUserLeafNode => NavigationUserLeafNodeTemplate,
+      _ => null
+    };
   }
 }

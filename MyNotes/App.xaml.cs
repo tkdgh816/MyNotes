@@ -1,9 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
+using MyNotes.ViewModels;
+
 namespace MyNotes;
 
 public partial class App : Application
 {
+  public static App Instance => (App)Current;
+
   private Window? _window;
 
   public App()
@@ -22,6 +26,11 @@ public partial class App : Application
   private static ServiceProvider ConfigureServices()
   {
     ServiceCollection services = new();
+
+    // ViewModels
+    services.AddSingleton<MainViewModel>();
+
+    // Services
 
     return services.BuildServiceProvider();
   }
